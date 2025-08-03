@@ -50,31 +50,16 @@ def check_user_login(login, password):
     login = login.strip()
     password = password.strip()
     
-    # Отладочная информация
-    st.write(f"Попытка входа: логин='{login}', пароль='{password}'")
-    st.write(f"Всего пользователей в базе: {len(df)}")
-    
     if not df.empty:
         # Очищаем данные из базы от лишних пробелов
         df['Логин'] = df['Логин'].astype(str).str.strip()
         df['Пароль'] = df['Пароль'].astype(str).str.strip()
-        
-        st.write("Пользователи в базе (после очистки):")
-        st.write(df[['Логин', 'Пароль']].to_string())
         
         # Проверяем точное совпадение
         user = df[(df['Логин'] == login) & (df['Пароль'] == password)]
         
         if not user.empty:
             return user.iloc[0]['ФИО']
-        else:
-            st.write("Совпадений не найдено!")
-            # Дополнительная отладка
-            st.write(f"Длина логина из формы: {len(login)}")
-            st.write(f"Длина пароля из формы: {len(password)}")
-            if not df.empty:
-                st.write(f"Длина логина из базы: {len(df.iloc[0]['Логин'])}")
-                st.write(f"Длина пароля из базы: {len(df.iloc[0]['Пароль'])}")
     
     return None
 
