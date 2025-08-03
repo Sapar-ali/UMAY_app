@@ -30,6 +30,8 @@ def load_registrations():
         return pd.DataFrame(columns=['ФИО', 'Должность', 'Медицинское учреждение'])
 
 def save_registration(data):
+    # Создаем папку data, если её нет
+    os.makedirs('data', exist_ok=True)
     df = load_registrations()
     new_row = pd.DataFrame([data], columns=['ФИО', 'Должность', 'Медицинское учреждение'])
     df = pd.concat([df, new_row], ignore_index=True)
@@ -49,6 +51,8 @@ def load_patients_data():
         ])
 
 def save_patient_data(data):
+    # Создаем папку data, если её нет
+    os.makedirs('data', exist_ok=True)
     df = load_patients_data()
     new_row = pd.DataFrame([data], columns=[
         'Дата', 'ФИО роженицы', 'Возраст', 'Срок беременности', 
