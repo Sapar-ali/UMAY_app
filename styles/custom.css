@@ -19,6 +19,25 @@
     min-height: 100vh;
 }
 
+/* Улучшенная видимость текста */
+p, div, span, label {
+    color: #2c3e50 !important;
+    font-weight: 500;
+}
+
+.stMarkdown {
+    color: #2c3e50 !important;
+}
+
+/* Улучшенная видимость для полей ввода */
+.stTextInput > div > div > div > label,
+.stSelectbox > div > div > div > label,
+.stNumberInput > div > div > div > label,
+.stTextArea > div > div > div > label {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}
+
 /* Заголовки */
 h1, h2, h3 {
     color: var(--primary-color);
@@ -173,7 +192,8 @@ h1 {
 
 .metric-container .metric-label {
     font-size: 1rem;
-    color: var(--text-color);
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
     margin-top: 0.5rem;
 }
 
@@ -267,8 +287,14 @@ h1 {
 }
 
 .stRadio > div > label {
-    color: var(--text-color);
-    font-weight: 500;
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}
+
+/* Стили для чекбоксов */
+.stCheckbox > div > label {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
 }
 
 /* Стили для селектбокса */
