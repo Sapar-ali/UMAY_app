@@ -45,6 +45,13 @@ def save_user(user_data):
 
 def check_user_login(login, password):
     df = load_users()
+    # Отладочная информация
+    st.write(f"Попытка входа: логин='{login}', пароль='{password}'")
+    st.write(f"Всего пользователей в базе: {len(df)}")
+    if not df.empty:
+        st.write("Пользователи в базе:")
+        st.write(df[['Логин', 'Пароль']].to_string())
+    
     user = df[(df['Логин'] == login) & (df['Пароль'] == password)]
     if not user.empty:
         return user.iloc[0]['ФИО']
