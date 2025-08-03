@@ -27,7 +27,28 @@ def load_registrations():
     if os.path.exists('data/registrations.csv'):
         return pd.read_csv('data/registrations.csv')
     else:
-        return pd.DataFrame(columns=['ФИО', 'Должность', 'Медицинское учреждение'])
+        return pd.DataFrame(columns=['ФИО', 'Должность', 'Медицинское учреждение', 'Логин', 'Пароль'])
+
+def load_users():
+    if os.path.exists('data/users.csv'):
+        return pd.read_csv('data/users.csv')
+    else:
+        return pd.DataFrame(columns=['ФИО', 'Логин', 'Пароль', 'Должность', 'Медицинское учреждение'])
+
+def save_user(user_data):
+    # Создаем папку data, если её нет
+    os.makedirs('data', exist_ok=True)
+    df = load_users()
+    new_row = pd.DataFrame([user_data], columns=['ФИО', 'Логин', 'Пароль', 'Должность', 'Медицинское учреждение'])
+    df = pd.concat([df, new_row], ignore_index=True)
+    df.to_csv('data/users.csv', index=False)
+
+def check_user_login(login, password):
+    df = load_users()
+    user = df[(df['Логин'] == login) & (df['Пароль'] == password)]
+    if not user.empty:
+        return user.iloc[0]['ФИО']
+    return None
 
 def save_registration(data):
     # Создаем папку data, если её нет
@@ -126,43 +147,84 @@ with st.sidebar:
     st.header("📋 Навигация")
     page = st.radio(
         "Выберите страницу:",
-        ["🏥 Регистрация", "📝 Ввод данных роженицы", "🔍 Поиск и фильтрация", "📊 Просмотр отчетов", "📈 Дашборд"]
+        ["🔐 Вход/Регистрация", "📝 Ввод данных роженицы", "🔍 Поиск и фильтрация", "📊 Просмотр отчетов", "📈 Дашборд"]
     )
-
-# Страница регистрации
-if page == "🏥 Регистрация":
-    st.header("🏥 Регистрация акушерки")
     
-    with st.form("registration_form"):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            full_name = st.text_input("ФИО", placeholder="Введите полное имя")
-            position = st.selectbox(
-                "Должность",
-                ["Акушерка", "Старшая акушерка", "Заведующая отделением", "Врач-акушер-гинеколог"]
-            )
-        
-        with col2:
-            medical_institution = st.text_input(
-                "Медицинское учреждение", 
-                placeholder="Название больницы/клиники"
-            )
-        
-        submitted = st.form_submit_button("Зарегистрироваться", type="primary")
-        
-        if submitted:
-            if full_name and medical_institution:
-                registration_data = {
-                    'ФИО': full_name,
-                    'Должность': position,
-                    'Медицинское учреждение': medical_institution
-                }
-                save_registration(registration_data)
-                st.success("✅ Регистрация успешно завершена!")
-                st.session_state.current_user = full_name
-            else:
-                st.error("❌ Пожалуйста, заполните все обязательные поля!")
+    # Информация о текущем пользователе
+    if st.session_state.current_user:
+        st.markdown("---")
+        st.success(f"👤 Текущий пользователь: {st.session_state.current_user}")
+        if st.button("🚪 Выйти", type="secondary"):
+            st.session_state.current_user = None
+            st.rerun()
+
+# Страница входа/регистрации
+if page == "🔐 Вход/Регистрация":
+    st.header("🔐 Вход и регистрация")
+    
+    tab1, tab2 = st.tabs(["🔐 Войти", "📝 Зарегистрироваться"])
+    
+    with tab1:
+        st.subheader("🔐 Вход в систему")
+        with st.form("login_form"):
+            login = st.text_input("Логин", placeholder="Введите ваш логин")
+            password = st.text_input("Пароль", type="password", placeholder="Введите ваш пароль")
+            
+            login_submitted = st.form_submit_button("Войти", type="primary")
+            
+            if login_submitted:
+                if login and password:
+                    user_name = check_user_login(login, password)
+                    if user_name:
+                        st.session_state.current_user = user_name
+                        st.success(f"✅ Добро пожаловать, {user_name}!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Неверный логин или пароль!")
+                else:
+                    st.error("❌ Пожалуйста, заполните все поля!")
+    
+    with tab2:
+        st.subheader("📝 Регистрация нового пользователя")
+        with st.form("registration_form"):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                full_name = st.text_input("ФИО", placeholder="Введите ваше полное имя")
+                position = st.selectbox(
+                    "Должность",
+                    ["Акушерка", "Старшая акушерка", "Заведующая отделением", "Врач-акушер-гинеколог"]
+                )
+                user_login = st.text_input("Логин", placeholder="Придумайте логин")
+            
+            with col2:
+                medical_institution = st.text_input("Медицинское учреждение", placeholder="Название больницы/клиники")
+                user_password = st.text_input("Пароль", type="password", placeholder="Придумайте пароль")
+                confirm_password = st.text_input("Подтвердите пароль", type="password", placeholder="Повторите пароль")
+            
+            submitted = st.form_submit_button("Зарегистрироваться", type="primary")
+            
+            if submitted:
+                if full_name and medical_institution and user_login and user_password:
+                    if user_password == confirm_password:
+                        # Проверяем, не занят ли логин
+                        users_df = load_users()
+                        if not users_df.empty and user_login in users_df['Логин'].values:
+                            st.error("❌ Этот логин уже занят! Выберите другой.")
+                        else:
+                            user_data = {
+                                'ФИО': full_name,
+                                'Логин': user_login,
+                                'Пароль': user_password,
+                                'Должность': position,
+                                'Медицинское учреждение': medical_institution
+                            }
+                            save_user(user_data)
+                            st.success("✅ Регистрация успешно завершена! Теперь вы можете войти в систему.")
+                    else:
+                        st.error("❌ Пароли не совпадают!")
+                else:
+                    st.error("❌ Пожалуйста, заполните все обязательные поля!")
 
 # Страница ввода данных роженицы
 elif page == "📝 Ввод данных роженицы":
