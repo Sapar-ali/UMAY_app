@@ -13,7 +13,11 @@ from reportlab.lib import colors
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sapargali/Desktop/UMAY_stat/data/umay.db'
+# Для локальной разработки используем абсолютный путь, для Render - относительный
+if os.environ.get('RENDER'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sapargali/Desktop/UMAY_stat/data/umay.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -348,4 +352,6 @@ def export_csv():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5001) 
+    # Для локальной разработки используем порт 5001, для Render - переменную окружения
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=True, host='0.0.0.0', port=port) 
