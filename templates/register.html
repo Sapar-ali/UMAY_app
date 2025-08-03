@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY - Регистрация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Регистрация нового пользователя
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="full_name" class="form-label">
+                                <i class="fas fa-user me-1"></i>ФИО
+                            </label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="position" class="form-label">
+                                <i class="fas fa-user-md me-1"></i>Должность
+                            </label>
+                            <select class="form-select" id="position" name="position" required>
+                                <option value="">Выберите должность</option>
+                                <option value="Акушер-гинеколог">Акушер-гинеколог</option>
+                                <option value="Акушерка">Акушерка</option>
+                                <option value="Медсестра">Медсестра</option>
+                                <option value="Врач">Врач</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="login" class="form-label">
+                                <i class="fas fa-user-circle me-1"></i>Логин
+                            </label>
+                            <input type="text" class="form-control" id="login" name="login" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="medical_institution" class="form-label">
+                                <i class="fas fa-hospital me-1"></i>Медицинское учреждение
+                            </label>
+                            <input type="text" class="form-control" id="medical_institution" name="medical_institution" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Пароль
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="confirm_password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Подтвердите пароль
+                            </label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p class="text-muted mb-0">
+                        Уже есть аккаунт? 
+                        <a href="{{ url_for('login') }}" class="text-decoration-none">
+                            Войти
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

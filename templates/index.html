@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY - Главная{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-primary mb-4">
+            <i class="fas fa-hospital-user me-3"></i>UMAY
+        </h1>
+        <p class="lead text-muted mb-5">
+            Профессиональная система управления данными рожениц для медицинских учреждений
+        </p>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg w-100">
+                    <i class="fas fa-user-plus me-2"></i>Регистрация
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Регистрация пользователей</h5>
+                    <p class="card-text text-muted">
+                        Безопасная регистрация медицинского персонала с разграничением доступа
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-notes-medical fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Ввод данных</h5>
+                    <p class="card-text text-muted">
+                        Удобный ввод и редактирование данных рожениц с полной медицинской информацией
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Анализ и отчеты</h5>
+                    <p class="card-text text-muted">
+                        Детальная статистика и экспорт данных в различных форматах
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>Безопасность данных
+                    </h5>
+                    <p class="card-text text-muted">
+                        Все данные хранятся в защищенной базе данных с шифрованием паролей и контролем доступа
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-download text-primary me-2"></i>Экспорт данных
+                    </h5>
+                    <p class="card-text text-muted">
+                        Экспорт отчетов в Excel, PDF и другие форматы для дальнейшего анализа
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

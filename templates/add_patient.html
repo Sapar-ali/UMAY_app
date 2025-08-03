@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить пациента - UMAY{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>Добавить данные роженицы
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Основная информация
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="patient_name" class="form-label">ФИО роженицы *</label>
+                                <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+                                <div class="invalid-feedback">
+                                    Пожалуйста, введите ФИО роженицы.
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="age" class="form-label">Возраст *</label>
+                                <input type="number" class="form-control" id="age" name="age" min="14" max="60" value="25" required>
+                                <div class="invalid-feedback">
+                                    Введите возраст от 14 до 60 лет.
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="pregnancy_weeks" class="form-label">Срок беременности (недель) *</label>
+                                <input type="number" class="form-control" id="pregnancy_weeks" name="pregnancy_weeks" min="20" max="42" value="38" required>
+                                <div class="invalid-feedback">
+                                    Введите срок беременности от 20 до 42 недель.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Вес -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label for="weight_before" class="form-label">Вес до родов (кг) *</label>
+                                <input type="number" class="form-control" id="weight_before" name="weight_before" min="40" max="150" step="0.1" value="70.0" required>
+                                <div class="invalid-feedback">
+                                    Введите вес от 40 до 150 кг.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="weight_after" class="form-label">Вес после родов (кг) *</label>
+                                <input type="number" class="form-control" id="weight_after" name="weight_after" min="40" max="150" step="0.1" value="65.0" required>
+                                <div class="invalid-feedback">
+                                    Введите вес от 40 до 150 кг.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Сопутствующие заболевания -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-heartbeat me-2"></i>Сопутствующие заболевания
+                                </h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="gestosis" name="gestosis">
+                                    <label class="form-check-label" for="gestosis">
+                                        Гестоз
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="diabetes" name="diabetes">
+                                    <label class="form-check-label" for="diabetes">
+                                        Сахарный диабет
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="hypertension" name="hypertension">
+                                    <label class="form-check-label" for="hypertension">
+                                        Гипертония
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="anemia" name="anemia">
+                                    <label class="form-check-label" for="anemia">
+                                        Анемия
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="infections" name="infections">
+                                    <label class="form-check-label" for="infections">
+                                        Инфекции
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="placenta_pathology" name="placenta_pathology">
+                                    <label class="form-check-label" for="placenta_pathology">
+                                        Патология плаценты
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="polyhydramnios" name="polyhydramnios">
+                                    <label class="form-check-label" for="polyhydramnios">
+                                        Многоводие
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="oligohydramnios" name="oligohydramnios">
+                                    <label class="form-check-label" for="oligohydramnios">
+                                        Маловодие
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="other_diseases" class="form-label">Другие сопутствующие заболевания</label>
+                            <textarea class="form-control" id="other_diseases" name="other_diseases" rows="2" placeholder="Укажите другие заболевания, если были..."></textarea>
+                        </div>
+
+                        <!-- Информация о родах -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-baby me-2"></i>Информация о родах
+                                </h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="birth_date" class="form-label">Дата родов *</label>
+                                <input type="date" class="form-control" id="birth_date" name="birth_date" required>
+                                <div class="invalid-feedback">
+                                    Выберите дату родов.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="birth_time" class="form-label">Время родов *</label>
+                                <input type="time" class="form-control" id="birth_time" name="birth_time" required>
+                                <div class="invalid-feedback">
+                                    Выберите время родов.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="child_gender" class="form-label">Пол ребенка *</label>
+                                <select class="form-select" id="child_gender" name="child_gender" required>
+                                    <option value="">Выберите пол</option>
+                                    <option value="Мальчик">Мальчик</option>
+                                    <option value="Девочка">Девочка</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Выберите пол ребенка.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3">
+                                <label for="child_weight" class="form-label">Вес ребенка (г) *</label>
+                                <input type="number" class="form-control" id="child_weight" name="child_weight" min="500" max="6000" value="3500" step="50" required>
+                                <div class="invalid-feedback">
+                                    Введите вес ребенка от 500 до 6000 г.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="delivery_method" class="form-label">Способ родоразрешения *</label>
+                                <select class="form-select" id="delivery_method" name="delivery_method" required>
+                                    <option value="">Выберите способ</option>
+                                    <option value="Естественные роды">Естественные роды</option>
+                                    <option value="Кесарево сечение">Кесарево сечение</option>
+                                    <option value="Вакуум-экстракция">Вакуум-экстракция</option>
+                                    <option value="Акушерские щипцы">Акушерские щипцы</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Выберите способ родоразрешения.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="anesthesia" class="form-label">Анестезия *</label>
+                                <select class="form-select" id="anesthesia" name="anesthesia" required>
+                                    <option value="">Выберите тип анестезии</option>
+                                    <option value="Нет">Нет</option>
+                                    <option value="Эпидуральная">Эпидуральная</option>
+                                    <option value="Спинальная">Спинальная</option>
+                                    <option value="Общая">Общая</option>
+                                    <option value="Местная">Местная</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Выберите тип анестезии.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3">
+                                <label for="blood_loss" class="form-label">Кровопотеря (мл) *</label>
+                                <input type="number" class="form-control" id="blood_loss" name="blood_loss" min="0" max="2000" value="300" step="50" required>
+                                <div class="invalid-feedback">
+                                    Введите кровопотерю от 0 до 2000 мл.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="labor_duration" class="form-label">Продолжительность родов (часов) *</label>
+                                <input type="number" class="form-control" id="labor_duration" name="labor_duration" min="0.5" max="24" value="8.0" step="0.5" required>
+                                <div class="invalid-feedback">
+                                    Введите продолжительность от 0.5 до 24 часов.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Дополнительная информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-notes-medical me-2"></i>Дополнительная информация
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="complications" class="form-label">Осложнения в родах</label>
+                                <textarea class="form-control" id="complications" name="complications" rows="3" placeholder="Опишите осложнения во время родов, если были..."></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="notes" class="form-label">Примечания</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Дополнительные заметки..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Сохранить данные
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Валидация формы
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Установка текущей даты по умолчанию
+document.addEventListener('DOMContentLoaded', function() {
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('birth_date').value = today;
+});
+</script>
+{% endblock %} 
