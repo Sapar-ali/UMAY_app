@@ -2,6 +2,12 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime, time, timedelta
+import io
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
 # Настройка страницы
 st.set_page_config(
@@ -150,6 +156,131 @@ def filter_patients_data(df, search_term, date_from, date_to, selected_midwives,
         ]
     
     return filtered_df
+
+# Функции экспорта
+def export_to_excel(df, filename):
+    """Экспорт данных в Excel файл"""
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Данные', index=False)
+    output.seek(0)
+    return output
+
+def create_pdf_report(df, title, filename):
+    """Создание PDF отчета"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    
+    # Стили
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        alignment=1  # Центрирование
+    )
+    
+    # Заголовок
+    elements.append(Paragraph(title, title_style))
+    elements.append(Spacer(1, 20))
+    
+    # Создание таблицы
+    if not df.empty:
+        # Подготовка данных для таблицы
+        data = [df.columns.tolist()] + df.values.tolist()
+        
+        # Создание таблицы
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        elements.append(table)
+    
+    # Сборка документа
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+def export_patients_report(df, current_user):
+    """Экспорт отчета по роженицам"""
+    if df.empty:
+        return None
+    
+    # Создание отчета
+    report_data = df.copy()
+    report_data['Дата создания отчета'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    report_data['Акушерка'] = current_user
+    
+    # Статистика
+    total_patients = len(df)
+    avg_age = df['Возраст'].mean()
+    natural_births = len(df[df['Способ родоразрешения'] == 'Естественные роды'])
+    cesarean = len(df[df['Способ родоразрешения'] == 'Кесарево сечение'])
+    
+    # Создание PDF
+    title = f"Отчет по роженицам\nСоздан: {datetime.now().strftime('%d.%m.%Y %H:%M')}\nАкушерка: {current_user}"
+    
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=14,
+        spaceAfter=20,
+        alignment=1
+    )
+    
+    # Заголовок
+    elements.append(Paragraph(title, title_style))
+    elements.append(Spacer(1, 20))
+    
+    # Статистика
+    stats_text = f"""
+    <b>Статистика:</b><br/>
+    • Всего рожениц: {total_patients}<br/>
+    • Средний возраст: {avg_age:.1f} лет<br/>
+    • Естественные роды: {natural_births}<br/>
+    • Кесарево сечение: {cesarean}<br/>
+    """
+    elements.append(Paragraph(stats_text, styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Таблица данных
+    if not df.empty:
+        # Ограничиваем количество колонок для PDF
+        important_cols = ['ФИО роженицы', 'Возраст', 'Дата родов', 'Пол ребенка', 'Вес ребенка', 'Способ родоразрешения']
+        df_display = df[important_cols].head(20)  # Первые 20 записей
+        
+        data = [df_display.columns.tolist()] + df_display.values.tolist()
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ]))
+        elements.append(table)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
 # Главная навигация
 st.title("👶 UMAY - Система отчетов для акушерок")
@@ -445,6 +576,42 @@ elif page == "🔍 Поиск и фильтрация":
             # Отображение данных
             st.dataframe(filtered_df, use_container_width=True)
             
+            # Экспорт отфильтрованных данных
+            if len(filtered_df) > 0:
+                st.subheader("📤 Экспорт отфильтрованных данных")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    if st.button("📊 Экспорт в Excel", key="excel_filtered"):
+                        excel_data = export_to_excel(filtered_df, f"umay_filtered_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx")
+                        st.download_button(
+                            label="💾 Скачать Excel",
+                            data=excel_data.getvalue(),
+                            file_name=f"umay_filtered_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        )
+                
+                with col2:
+                    if st.button("📄 Создать PDF отчет", key="pdf_filtered"):
+                        pdf_data = export_patients_report(filtered_df, st.session_state.current_user)
+                        if pdf_data:
+                            st.download_button(
+                                label="💾 Скачать PDF",
+                                data=pdf_data.getvalue(),
+                                file_name=f"umay_filtered_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                                mime="application/pdf"
+                            )
+                
+                with col3:
+                    if st.button("📋 Экспорт в CSV", key="csv_filtered"):
+                        csv_data = filtered_df.to_csv(index=False)
+                        st.download_button(
+                            label="💾 Скачать CSV",
+                            data=csv_data,
+                            file_name=f"umay_filtered_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                            mime="text/csv"
+                        )
+            
             # Быстрая статистика
             if len(filtered_df) > 0:
                 st.subheader("📊 Быстрая статистика")
@@ -486,6 +653,41 @@ elif page == "📊 Просмотр отчетов":
         patients_df = load_patients_data()
         if not patients_df.empty:
             st.dataframe(patients_df, use_container_width=True)
+            
+            # Кнопки экспорта
+            st.subheader("📤 Экспорт данных")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                if st.button("📊 Экспорт в Excel", type="secondary"):
+                    excel_data = export_to_excel(patients_df, f"umay_patients_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx")
+                    st.download_button(
+                        label="💾 Скачать Excel",
+                        data=excel_data.getvalue(),
+                        file_name=f"umay_patients_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+            
+            with col2:
+                if st.button("📄 Создать PDF отчет", type="secondary"):
+                    pdf_data = export_patients_report(patients_df, st.session_state.current_user)
+                    if pdf_data:
+                        st.download_button(
+                            label="💾 Скачать PDF",
+                            data=pdf_data.getvalue(),
+                            file_name=f"umay_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                            mime="application/pdf"
+                        )
+            
+            with col3:
+                if st.button("📋 Экспорт в CSV", type="secondary"):
+                    csv_data = patients_df.to_csv(index=False)
+                    st.download_button(
+                        label="💾 Скачать CSV",
+                        data=csv_data,
+                        file_name=f"umay_patients_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                        mime="text/csv"
+                    )
             
             # Статистика
             st.subheader("📈 Статистика")
