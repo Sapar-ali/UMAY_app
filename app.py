@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import sqlite3
 from datetime import datetime, time, timedelta
 import io
 from reportlab.lib.pagesizes import letter, A4
@@ -16,6 +17,183 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Функции для работы с базой данных
+def init_database():
+    """Инициализация базы данных"""
+    conn = sqlite3.connect('data/umay.db')
+    cursor = conn.cursor()
+    
+    # Создание таблицы пользователей
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            login TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            position TEXT NOT NULL,
+            medical_institution TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Создание таблицы рожениц
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS patients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            patient_name TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            pregnancy_weeks INTEGER NOT NULL,
+            weight_before REAL NOT NULL,
+            weight_after REAL NOT NULL,
+            complications TEXT,
+            notes TEXT,
+            midwife TEXT NOT NULL,
+            birth_date TEXT NOT NULL,
+            birth_time TEXT NOT NULL,
+            child_gender TEXT NOT NULL,
+            child_weight INTEGER NOT NULL,
+            delivery_method TEXT NOT NULL,
+            anesthesia TEXT NOT NULL,
+            blood_loss INTEGER NOT NULL,
+            labor_duration REAL NOT NULL,
+            other_diseases TEXT,
+            gestosis TEXT NOT NULL,
+            diabetes TEXT NOT NULL,
+            hypertension TEXT NOT NULL,
+            anemia TEXT NOT NULL,
+            infections TEXT NOT NULL,
+            placenta_pathology TEXT NOT NULL,
+            polyhydramnios TEXT NOT NULL,
+            oligohydramnios TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+def save_user_to_db(user_data):
+    """Сохранение пользователя в базу данных"""
+    conn = sqlite3.connect('data/umay.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO users (full_name, login, password, position, medical_institution)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (
+        user_data['ФИО'],
+        user_data['Логин'],
+        user_data['Пароль'],
+        user_data['Должность'],
+        user_data['Медицинское учреждение']
+    ))
+    
+    conn.commit()
+    conn.close()
+
+def check_user_login_db(login, password):
+    """Проверка логина пользователя в базе данных"""
+    conn = sqlite3.connect('data/umay.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT full_name FROM users WHERE login = ? AND password = ?
+    ''', (login.strip(), password.strip()))
+    
+    result = cursor.fetchone()
+    conn.close()
+    
+    return result[0] if result else None
+
+def save_patient_to_db(patient_data):
+    """Сохранение данных роженицы в базу данных"""
+    conn = sqlite3.connect('data/umay.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO patients (
+            date, patient_name, age, pregnancy_weeks, weight_before, weight_after,
+            complications, notes, midwife, birth_date, birth_time, child_gender,
+            child_weight, delivery_method, anesthesia, blood_loss, labor_duration,
+            other_diseases, gestosis, diabetes, hypertension, anemia, infections,
+            placenta_pathology, polyhydramnios, oligohydramnios
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        patient_data['Дата'],
+        patient_data['ФИО роженицы'],
+        patient_data['Возраст'],
+        patient_data['Срок беременности'],
+        patient_data['Вес до родов'],
+        patient_data['Вес после родов'],
+        patient_data['Осложнения'],
+        patient_data['Примечания'],
+        patient_data['Акушерка'],
+        patient_data['Дата родов'],
+        patient_data['Время родов'],
+        patient_data['Пол ребенка'],
+        patient_data['Вес ребенка'],
+        patient_data['Способ родоразрешения'],
+        patient_data['Анестезия'],
+        patient_data['Кровопотеря'],
+        patient_data['Продолжительность родов'],
+        patient_data['Сопутствующие заболевания'],
+        patient_data['Гестоз'],
+        patient_data['Сахарный диабет'],
+        patient_data['Гипертония'],
+        patient_data['Анемия'],
+        patient_data['Инфекции'],
+        patient_data['Патология плаценты'],
+        patient_data['Многоводие'],
+        patient_data['Маловодие']
+    ))
+    
+    conn.commit()
+    conn.close()
+
+def load_patients_from_db():
+    """Загрузка данных рожениц из базы данных"""
+    conn = sqlite3.connect('data/umay.db')
+    
+    query = '''
+        SELECT 
+            date as 'Дата',
+            patient_name as 'ФИО роженицы',
+            age as 'Возраст',
+            pregnancy_weeks as 'Срок беременности',
+            weight_before as 'Вес до родов',
+            weight_after as 'Вес после родов',
+            complications as 'Осложнения',
+            notes as 'Примечания',
+            midwife as 'Акушерка',
+            birth_date as 'Дата родов',
+            birth_time as 'Время родов',
+            child_gender as 'Пол ребенка',
+            child_weight as 'Вес ребенка',
+            delivery_method as 'Способ родоразрешения',
+            anesthesia as 'Анестезия',
+            blood_loss as 'Кровопотеря',
+            labor_duration as 'Продолжительность родов',
+            other_diseases as 'Сопутствующие заболевания',
+            gestosis as 'Гестоз',
+            diabetes as 'Сахарный диабет',
+            hypertension as 'Гипертония',
+            anemia as 'Анемия',
+            infections as 'Инфекции',
+            placenta_pathology as 'Патология плаценты',
+            polyhydramnios as 'Многоводие',
+            oligohydramnios as 'Маловодие'
+        FROM patients
+        ORDER BY created_at DESC
+    '''
+    
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    return df
+
+# Инициализация базы данных при запуске
+init_database()
 
 # Загрузка кастомных стилей
 def load_css():
@@ -36,38 +214,27 @@ def load_registrations():
         return pd.DataFrame(columns=['ФИО', 'Должность', 'Медицинское учреждение', 'Логин', 'Пароль'])
 
 def load_users():
-    if os.path.exists('data/users.csv'):
-        return pd.read_csv('data/users.csv')
+    """Загрузка пользователей из базы данных"""
+    conn = sqlite3.connect('data/umay.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT full_name, login, password, position, medical_institution FROM users')
+    results = cursor.fetchall()
+    conn.close()
+    
+    if results:
+        df = pd.DataFrame(results, columns=['ФИО', 'Логин', 'Пароль', 'Должность', 'Медицинское учреждение'])
+        return df
     else:
         return pd.DataFrame(columns=['ФИО', 'Логин', 'Пароль', 'Должность', 'Медицинское учреждение'])
 
 def save_user(user_data):
     # Создаем папку data, если её нет
     os.makedirs('data', exist_ok=True)
-    df = load_users()
-    new_row = pd.DataFrame([user_data], columns=['ФИО', 'Логин', 'Пароль', 'Должность', 'Медицинское учреждение'])
-    df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv('data/users.csv', index=False)
+    save_user_to_db(user_data)
 
 def check_user_login(login, password):
-    df = load_users()
-    
-    # Очищаем входные данные от лишних пробелов
-    login = login.strip()
-    password = password.strip()
-    
-    if not df.empty:
-        # Очищаем данные из базы от лишних пробелов
-        df['Логин'] = df['Логин'].astype(str).str.strip()
-        df['Пароль'] = df['Пароль'].astype(str).str.strip()
-        
-        # Проверяем точное совпадение
-        user = df[(df['Логин'] == login) & (df['Пароль'] == password)]
-        
-        if not user.empty:
-            return user.iloc[0]['ФИО']
-    
-    return None
+    return check_user_login_db(login, password)
 
 def save_registration(data):
     # Создаем папку data, если её нет
@@ -78,32 +245,12 @@ def save_registration(data):
     df.to_csv('data/registrations.csv', index=False)
 
 def load_patients_data():
-    if os.path.exists('data/patients.csv'):
-        return pd.read_csv('data/patients.csv')
-    else:
-        return pd.DataFrame(columns=[
-            'Дата', 'ФИО роженицы', 'Возраст', 'Срок беременности', 
-            'Вес до родов', 'Вес после родов', 'Осложнения', 'Примечания',
-            'Акушерка', 'Дата родов', 'Время родов', 'Пол ребенка', 'Вес ребенка',
-            'Способ родоразрешения', 'Анестезия', 'Кровопотеря', 'Продолжительность родов',
-            'Сопутствующие заболевания', 'Гестоз', 'Сахарный диабет', 'Гипертония',
-            'Анемия', 'Инфекции', 'Патология плаценты', 'Многоводие', 'Маловодие'
-        ])
+    return load_patients_from_db()
 
 def save_patient_data(data):
     # Создаем папку data, если её нет
     os.makedirs('data', exist_ok=True)
-    df = load_patients_data()
-    new_row = pd.DataFrame([data], columns=[
-        'Дата', 'ФИО роженицы', 'Возраст', 'Срок беременности', 
-        'Вес до родов', 'Вес после родов', 'Осложнения', 'Примечания',
-        'Акушерка', 'Дата родов', 'Время родов', 'Пол ребенка', 'Вес ребенка',
-        'Способ родоразрешения', 'Анестезия', 'Кровопотеря', 'Продолжительность родов',
-        'Сопутствующие заболевания', 'Гестоз', 'Сахарный диабет', 'Гипертония',
-        'Анемия', 'Инфекции', 'Патология плаценты', 'Многоводие', 'Маловодие'
-    ])
-    df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv('data/patients.csv', index=False)
+    save_patient_to_db(data)
 
 # Функция фильтрации данных
 def filter_patients_data(df, search_term, date_from, date_to, selected_midwives, 
