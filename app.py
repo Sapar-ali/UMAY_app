@@ -32,8 +32,16 @@ os.makedirs('data', exist_ok=True)
 logger.info("Data directory created/verified")
 
 # ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - ТОЛЬКО SQLITE
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
-logger.info("✅ Using simple SQLite database")
+# Используем абсолютный путь для Render
+if os.environ.get('RENDER'):
+    # На Render используем /tmp для записи
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
+    logger.info("✅ Using Render SQLite database in /tmp")
+else:
+    # Локально используем папку data
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
+    logger.info("✅ Using local SQLite database in data/")
+
 logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
