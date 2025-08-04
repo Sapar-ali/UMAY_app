@@ -31,6 +31,37 @@ body {
     color: var(--light-color) !important;
 }
 
+/* Логотип */
+.navbar-brand img {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.hero-logo {
+    animation: logoFadeIn 1.5s ease-out;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.hero-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+}
+
+@keyframes logoFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Карточки */
 .card {
     border-radius: 10px;
@@ -201,6 +232,14 @@ footer {
     border-top: 1px solid #dee2e6;
 }
 
+footer img {
+    transition: transform 0.3s ease;
+}
+
+footer img:hover {
+    transform: scale(1.1);
+}
+
 /* Анимации */
 @keyframes fadeIn {
     from {
@@ -229,6 +268,14 @@ footer {
     
     .table-responsive {
         font-size: 0.9rem;
+    }
+    
+    .hero-logo {
+        height: 80px !important;
+    }
+    
+    .navbar-brand img {
+        height: 25px !important;
     }
 }
 

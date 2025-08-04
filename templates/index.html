@@ -5,9 +5,10 @@
 {% block content %}
 <div class="hero-section text-center py-5">
     <div class="container">
-        <h1 class="display-4 fw-bold text-primary mb-4">
-            <i class="fas fa-hospital-user me-3"></i>UMAY
-        </h1>
+        <div class="logo-container mb-4">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="UMAY" class="hero-logo mb-3" style="height: 120px; width: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+            <h1 class="display-4 fw-bold text-primary mb-4">UMAY</h1>
+        </div>
         <p class="lead text-muted mb-5">
             Профессиональная система управления данными рожениц для медицинских учреждений
         </p>
