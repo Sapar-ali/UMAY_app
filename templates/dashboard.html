@@ -41,11 +41,50 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 bg-info text-white">
+        <div class="card border-0 bg-info text-white clickable-card" onclick="window.location.href='{{ url_for('search', genders=['Мальчик']) }}'">
             <div class="card-body text-center">
                 <i class="fas fa-mars fa-2x mb-2"></i>
                 <h4 class="card-title">{{ boys }}</h4>
                 <p class="card-text">Мальчики</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-danger text-white clickable-card" onclick="window.location.href='{{ url_for('search', genders=['Девочка']) }}'">
+            <div class="card-body text-center">
+                <i class="fas fa-venus fa-2x mb-2"></i>
+                <h4 class="card-title">{{ girls }}</h4>
+                <p class="card-text">Девочки</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-secondary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <h4 class="card-title">{{ "%.1f"|format(avg_age) }}</h4>
+                <p class="card-text">Средний возраст</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-dark text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-weight fa-2x mb-2"></i>
+                <h4 class="card-title">{{ "%.0f"|format(avg_child_weight) }}</h4>
+                <p class="card-text">Средний вес ребенка (г)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-percentage fa-2x mb-2"></i>
+                <h4 class="card-title">{{ "%.1f"|format((boys + girls) / total_patients * 100 if total_patients > 0 else 0) }}%</h4>
+                <p class="card-text">Детей от общего числа</p>
             </div>
         </div>
     </div>

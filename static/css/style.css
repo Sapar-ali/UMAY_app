@@ -47,6 +47,21 @@ body {
     font-weight: 600;
 }
 
+/* Кликабельные карточки */
+.clickable-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2) !important;
+}
+
+.clickable-card:active {
+    transform: translateY(-2px) !important;
+}
+
 /* Кнопки */
 .btn {
     border-radius: 8px;
