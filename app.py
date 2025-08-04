@@ -24,13 +24,23 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 os.makedirs('data', exist_ok=True)
 logger.info("Data directory created/verified")
 
-# Для локальной разработки используем абсолютный путь, для Render - относительный
+# Для локальной разработки используем абсолютный путь, для Render - PostgreSQL
 if os.environ.get('RENDER'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
-    logger.info("Using Render database configuration")
+    # Используем PostgreSQL на Render
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        # Render предоставляет PostgreSQL URL
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+        logger.info("Using PostgreSQL database on Render")
+    else:
+        # Fallback к SQLite если нет PostgreSQL
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
+        logger.info("Using SQLite fallback on Render")
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sapargali/Desktop/UMAY_stat/data/umay.db'
-    logger.info("Using local database configuration")
+    logger.info("Using local SQLite database configuration")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
