@@ -6,22 +6,32 @@ from datetime import datetime, timedelta
 import pandas as pd
 import io
 import os
+import sys
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+
+# Добавляем логирование для отладки
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
 # Создаем папку data если её нет
 os.makedirs('data', exist_ok=True)
+logger.info("Data directory created/verified")
 
 # Для локальной разработки используем абсолютный путь, для Render - относительный
 if os.environ.get('RENDER'):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
+    logger.info("Using Render database configuration")
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sapargali/Desktop/UMAY_stat/data/umay.db'
+    logger.info("Using local database configuration")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -357,9 +367,22 @@ if __name__ == '__main__':
     with app.app_context():
         try:
             db.create_all()
-            print("База данных успешно создана")
+            logger.info("База данных успешно создана")
         except Exception as e:
+            logger.error(f"Ошибка при создании базы данных: {e}")
             print(f"Ошибка при создании базы данных: {e}")
     # Для локальной разработки используем порт 5001, для Render - переменную окружения
     port = int(os.environ.get('PORT', 5001))
-    app.run(debug=True, host='0.0.0.0', port=port) 
+    logger.info(f"Starting application on port {port}")
+    app.run(debug=True, host='0.0.0.0', port=port)
+
+# Обработчик ошибок для отладки
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal Server Error: {error}")
+    return "Internal Server Error", 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.error(f"Not Found Error: {error}")
+    return "Not Found", 404 
