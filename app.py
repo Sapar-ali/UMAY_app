@@ -185,16 +185,16 @@ def dashboard():
     else:
         avg_age = avg_weight = children_percentage = 0
     
-    stats = {
-        'total_patients': total_patients,
-        'boys_count': boys_count,
-        'girls_count': girls_count,
-        'avg_age': round(avg_age, 1),
-        'avg_weight': round(avg_weight, 1),
-        'children_percentage': round(children_percentage, 1)
-    }
+    # Получаем последние пациентов для таблицы
+    patients = Patient.query.order_by(Patient.created_at.desc()).limit(10).all()
     
-    return render_template('dashboard.html', stats=stats)
+    return render_template('dashboard.html', 
+                         total_patients=total_patients,
+                         boys=boys_count,
+                         girls=girls_count,
+                         avg_age=round(avg_age, 1),
+                         avg_child_weight=round(avg_weight, 1),
+                         patients=patients)
 
 @app.route('/add_patient', methods=['GET', 'POST'])
 @login_required
