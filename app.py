@@ -93,46 +93,71 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        login = request.form.get('login')
-        password = request.form.get('password')
-        
-        user = User.query.filter_by(login=login).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            flash('Успешный вход в систему!', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Неверный логин или пароль!', 'error')
+        try:
+            logger.info("Starting login process...")
+            
+            login = request.form.get('login')
+            password = request.form.get('password')
+            
+            logger.info(f"Login attempt for user: {login}")
+            
+            user = User.query.filter_by(login=login).first()
+            if user and check_password_hash(user.password, password):
+                login_user(user)
+                logger.info(f"User {login} successfully logged in")
+                flash('Успешный вход в систему!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                logger.warning(f"Failed login attempt for user: {login}")
+                flash('Неверный логин или пароль!', 'error')
+                
+        except Exception as e:
+            logger.error(f"Error during login: {e}")
+            flash(f'Ошибка при входе: {str(e)}', 'error')
     
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        full_name = request.form.get('full_name')
-        login = request.form.get('login')
-        password = request.form.get('password')
-        position = request.form.get('position')
-        medical_institution = request.form.get('medical_institution')
-        
-        if User.query.filter_by(login=login).first():
-            flash('Этот логин уже занят!', 'error')
+        try:
+            logger.info("Starting registration process...")
+            
+            full_name = request.form.get('full_name')
+            login = request.form.get('login')
+            password = request.form.get('password')
+            position = request.form.get('position')
+            medical_institution = request.form.get('medical_institution')
+            
+            logger.info(f"Registration data received: {full_name}, {login}, {position}, {medical_institution}")
+            
+            if User.query.filter_by(login=login).first():
+                logger.warning(f"Login {login} already exists")
+                flash('Этот логин уже занят!', 'error')
+                return render_template('register.html')
+            
+            hashed_password = generate_password_hash(password)
+            new_user = User(
+                full_name=full_name,
+                login=login,
+                password=hashed_password,
+                position=position,
+                medical_institution=medical_institution
+            )
+            
+            logger.info("Adding new user to database...")
+            db.session.add(new_user)
+            db.session.commit()
+            logger.info("User successfully registered")
+            
+            flash('Регистрация успешно завершена!', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            logger.error(f"Error during registration: {e}")
+            db.session.rollback()
+            flash(f'Ошибка при регистрации: {str(e)}', 'error')
             return render_template('register.html')
-        
-        hashed_password = generate_password_hash(password)
-        new_user = User(
-            full_name=full_name,
-            login=login,
-            password=hashed_password,
-            position=position,
-            medical_institution=medical_institution
-        )
-        
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash('Регистрация успешно завершена!', 'success')
-        return redirect(url_for('login'))
     
     return render_template('register.html')
 
