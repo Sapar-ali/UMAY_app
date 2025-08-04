@@ -13,6 +13,10 @@ from reportlab.lib import colors
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# Создаем папку data если её нет
+os.makedirs('data', exist_ok=True)
+
 # Для локальной разработки используем абсолютный путь, для Render - относительный
 if os.environ.get('RENDER'):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
@@ -351,7 +355,11 @@ def export_csv():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+            print("База данных успешно создана")
+        except Exception as e:
+            print(f"Ошибка при создании базы данных: {e}")
     # Для локальной разработки используем порт 5001, для Render - переменную окружения
     port = int(os.environ.get('PORT', 5001))
     app.run(debug=True, host='0.0.0.0', port=port) 
