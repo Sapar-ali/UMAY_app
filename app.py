@@ -12,10 +12,19 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
+# ============================================================================
+# ВАЖНО: ЭТО ПРИНУДИТЕЛЬНЫЙ ПЕРЕСБОР ДЛЯ RENDER
+# Проблема: приложение все еще использует SQLite вместо PostgreSQL
+# Решение: принудительно пересобрать с новым кодом
+# ============================================================================
+
 # Добавляем логирование для отладки
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Принудительный пересбор для Render
+logger.info("=== UMAY APP STARTING - FORCED REBUILD ===")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
@@ -26,20 +35,29 @@ logger.info("Data directory created/verified")
 
 # Для локальной разработки используем абсолютный путь, для Render - PostgreSQL
 database_url = os.environ.get('DATABASE_URL')
+logger.info("=" * 50)
+logger.info("ПРОВЕРКА DATABASE_URL:")
 logger.info(f"DATABASE_URL from environment: {database_url}")
+logger.info(f"Type of DATABASE_URL: {type(database_url)}")
+logger.info(f"Length of DATABASE_URL: {len(database_url) if database_url else 0}")
+logger.info("=" * 50)
 
 if database_url and (database_url.startswith('postgresql://') or database_url.startswith('postgres://')):
     # Используем PostgreSQL если есть DATABASE_URL
+    logger.info("✅ НАЙДЕН DATABASE_URL - ИСПОЛЬЗУЕМ POSTGRESQL")
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        logger.info("✅ КОНВЕРТИРОВАН postgres:// в postgresql://")
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-    logger.info("Using PostgreSQL database")
+    logger.info("✅ Using PostgreSQL database")
 else:
     # Fallback к SQLite для локальной разработки
+    logger.info("❌ DATABASE_URL НЕ НАЙДЕН - ИСПОЛЬЗУЕМ SQLITE")
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sapargali/Desktop/UMAY_stat/data/umay.db'
-    logger.info("Using local SQLite database configuration")
+    logger.info("❌ Using local SQLite database configuration")
 
 logger.info(f"Final database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+logger.info("=" * 50)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
