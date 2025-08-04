@@ -66,6 +66,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Создаем таблицы при запуске приложения
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("✅ Таблицы базы данных успешно созданы")
+    except Exception as e:
+        logger.error(f"❌ Ошибка при создании таблиц: {e}")
+        print(f"❌ Ошибка при создании таблиц: {e}")
+
 # Модели базы данных
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
