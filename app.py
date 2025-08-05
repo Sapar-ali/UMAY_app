@@ -40,12 +40,13 @@ except Exception as e:
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL and (DATABASE_URL.startswith('postgres://') or DATABASE_URL.startswith('postgresql://')):
-    # PostgreSQL на Render
+    # PostgreSQL на Render - попробуем без специальных библиотек
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     logger.info("✅ Using Render PostgreSQL database")
     logger.info(f"PostgreSQL URL: {DATABASE_URL[:50]}...")  # Показываем только начало URL
+    logger.info("⚠️ Попытка подключения без psycopg2")
 elif os.environ.get('RENDER'):
     # SQLite на Render (fallback)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
