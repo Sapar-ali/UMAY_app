@@ -28,8 +28,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
 # Создаем папку data если её нет
-os.makedirs('data', exist_ok=True)
-logger.info("Data directory created/verified")
+try:
+    os.makedirs('data', exist_ok=True)
+    logger.info("Data directory created/verified")
+except Exception as e:
+    logger.error(f"Ошибка при создании папки data: {e}")
+    print(f"Ошибка при создании папки data: {e}")
 
 # ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - ТОЛЬКО SQLITE
 # Используем абсолютный путь для Render
@@ -38,9 +42,11 @@ if os.environ.get('RENDER'):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
     logger.info("✅ Using Render SQLite database in /tmp")
 else:
-    # Локально используем папку data
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/umay.db'
-    logger.info("✅ Using local SQLite database in data/")
+    # Локально используем абсолютный путь
+    current_dir = os.getcwd()
+    db_path = os.path.join(current_dir, 'data', 'umay.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    logger.info("✅ Using local SQLite database with absolute path")
 
 logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
@@ -99,10 +105,15 @@ def load_user(user_id):
 with app.app_context():
     try:
         logger.info("🔄 Создание таблиц базы данных...")
+        logger.info(f"Текущая директория: {os.getcwd()}")
+        logger.info(f"Путь к базе данных: {app.config['SQLALCHEMY_DATABASE_URI']}")
         db.create_all()
         logger.info("✅ Таблицы успешно созданы")
     except Exception as e:
         logger.error(f"❌ Ошибка при создании таблиц: {e}")
+        print(f"❌ Ошибка при создании таблиц: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Маршруты
 @app.route('/')
@@ -357,8 +368,21 @@ if __name__ == '__main__':
     
     # Для локальной разработки используем порт 5001, для Render - переменную окружения
     port = int(os.environ.get('PORT', 5001))
-    logger.info(f"🚀 Starting application on port {port}")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    
+    # Пробуем разные порты если занят
+    ports_to_try = [port, 5002, 5003, 5004, 5005]
+    
+    for try_port in ports_to_try:
+        try:
+            logger.info(f"🚀 Starting application on port {try_port}")
+            app.run(debug=True, host='0.0.0.0', port=try_port)
+            break  # Если успешно запустился, выходим из цикла
+        except OSError as e:
+            if "Address already in use" in str(e):
+                logger.warning(f"Порт {try_port} занят, пробуем следующий...")
+                continue
+            else:
+                raise e
 
 # Обработчик ошибок для отладки
 @app.errorhandler(500)
