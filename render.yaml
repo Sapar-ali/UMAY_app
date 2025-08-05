@@ -2,7 +2,9 @@ services:
   - type: web
     name: umay-app
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      apt-get update && apt-get install -y libpq-dev
+      pip install -r requirements.txt
     startCommand: chmod +x start.sh && ./start.sh
     envVars:
       - key: PYTHON_VERSION
