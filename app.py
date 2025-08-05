@@ -57,6 +57,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Инициализация базы данных
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("✅ База данных успешно инициализирована")
+    except Exception as e:
+        logger.error(f"❌ Ошибка при инициализации базы данных: {e}")
+        print(f"❌ Ошибка при инициализации базы данных: {e}")
+
 # Модели базы данных
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -212,16 +221,43 @@ def dashboard():
 def add_patient():
     if request.method == 'POST':
         try:
+            # Обработка чекбоксов - если не отмечен, то "Нет"
+            gestosis = "Да" if 'gestosis' in request.form else "Нет"
+            diabetes = "Да" if 'diabetes' in request.form else "Нет"
+            hypertension = "Да" if 'hypertension' in request.form else "Нет"
+            anemia = "Да" if 'anemia' in request.form else "Нет"
+            infections = "Да" if 'infections' in request.form else "Нет"
+            placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
+            polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
+            oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
+            
+            # Валидация обязательных полей
+            if not request.form['patient_name'] or request.form['patient_name'].strip() == "":
+                flash('ФИО роженицы обязательно для заполнения', 'error')
+                return render_template('add_patient.html')
+            
+            if not request.form['child_gender'] or request.form['child_gender'] == "":
+                flash('Необходимо выбрать пол ребенка', 'error')
+                return render_template('add_patient.html')
+            
+            if not request.form['delivery_method'] or request.form['delivery_method'] == "":
+                flash('Необходимо выбрать способ родоразрешения', 'error')
+                return render_template('add_patient.html')
+            
+            if not request.form['anesthesia'] or request.form['anesthesia'] == "":
+                flash('Необходимо выбрать тип анестезии', 'error')
+                return render_template('add_patient.html')
+            
             new_patient = Patient(
-                date=request.form['date'],
-                patient_name=request.form['patient_name'],
+                date=datetime.now().strftime("%Y-%m-%d %H:%M"),
+                patient_name=request.form['patient_name'].strip(),
                 age=int(request.form['age']),
                 pregnancy_weeks=int(request.form['pregnancy_weeks']),
                 weight_before=float(request.form['weight_before']),
                 weight_after=float(request.form['weight_after']),
-                complications=request.form['complications'],
-                notes=request.form['notes'],
-                midwife=request.form['midwife'],
+                complications=request.form['complications'] or "",
+                notes=request.form['notes'] or "",
+                midwife=current_user.full_name,
                 birth_date=request.form['birth_date'],
                 birth_time=request.form['birth_time'],
                 child_gender=request.form['child_gender'],
@@ -230,15 +266,15 @@ def add_patient():
                 anesthesia=request.form['anesthesia'],
                 blood_loss=int(request.form['blood_loss']),
                 labor_duration=float(request.form['labor_duration']),
-                other_diseases=request.form['other_diseases'],
-                gestosis=request.form['gestosis'],
-                diabetes=request.form['diabetes'],
-                hypertension=request.form['hypertension'],
-                anemia=request.form['anemia'],
-                infections=request.form['infections'],
-                placenta_pathology=request.form['placenta_pathology'],
-                polyhydramnios=request.form['polyhydramnios'],
-                oligohydramnios=request.form['oligohydramnios']
+                other_diseases=request.form['other_diseases'] or "",
+                gestosis=gestosis,
+                diabetes=diabetes,
+                hypertension=hypertension,
+                anemia=anemia,
+                infections=infections,
+                placenta_pathology=placenta_pathology,
+                polyhydramnios=polyhydramnios,
+                oligohydramnios=oligohydramnios
             )
             
             db.session.add(new_patient)
