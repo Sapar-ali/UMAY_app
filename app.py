@@ -35,10 +35,18 @@ except Exception as e:
     logger.error(f"Ошибка при создании папки data: {e}")
     print(f"Ошибка при создании папки data: {e}")
 
-# ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - ТОЛЬКО SQLITE
-# Используем абсолютный путь для Render
-if os.environ.get('RENDER'):
-    # На Render используем /tmp для записи
+# ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - SQLITE И POSTGRESQL
+# Проверяем наличие PostgreSQL URL от Render
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL and (DATABASE_URL.startswith('postgres://') or DATABASE_URL.startswith('postgresql://')):
+    # PostgreSQL на Render
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    logger.info("✅ Using Render PostgreSQL database")
+elif os.environ.get('RENDER'):
+    # SQLite на Render (fallback)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
     logger.info("✅ Using Render SQLite database in /tmp")
 else:
