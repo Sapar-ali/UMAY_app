@@ -21,6 +21,9 @@ st.set_page_config(
 # Функции для работы с базой данных
 def init_database():
     """Инициализация базы данных"""
+    # Создаем папку data, если её нет
+    os.makedirs('data', exist_ok=True)
+    
     conn = sqlite3.connect('data/umay.db')
     cursor = conn.cursor()
     
@@ -32,6 +35,7 @@ def init_database():
             login TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             position TEXT NOT NULL,
+            city TEXT NOT NULL,
             medical_institution TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -80,13 +84,14 @@ def save_user_to_db(user_data):
     cursor = conn.cursor()
     
     cursor.execute('''
-        INSERT INTO users (full_name, login, password, position, medical_institution)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO users (full_name, login, password, position, city, medical_institution)
+        VALUES (?, ?, ?, ?, ?, ?)
     ''', (
         user_data['ФИО'],
         user_data['Логин'],
         user_data['Пароль'],
         user_data['Должность'],
+        user_data.get('Город', ''),
         user_data['Медицинское учреждение']
     ))
     
@@ -109,48 +114,65 @@ def check_user_login_db(login, password):
 
 def save_patient_to_db(patient_data):
     """Сохранение данных роженицы в базу данных"""
-    conn = sqlite3.connect('data/umay.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO patients (
-            date, patient_name, age, pregnancy_weeks, weight_before, weight_after,
-            complications, notes, midwife, birth_date, birth_time, child_gender,
-            child_weight, delivery_method, anesthesia, blood_loss, labor_duration,
-            other_diseases, gestosis, diabetes, hypertension, anemia, infections,
-            placenta_pathology, polyhydramnios, oligohydramnios
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        patient_data['Дата'],
-        patient_data['ФИО роженицы'],
-        patient_data['Возраст'],
-        patient_data['Срок беременности'],
-        patient_data['Вес до родов'],
-        patient_data['Вес после родов'],
-        patient_data['Осложнения'],
-        patient_data['Примечания'],
-        patient_data['Акушерка'],
-        patient_data['Дата родов'],
-        patient_data['Время родов'],
-        patient_data['Пол ребенка'],
-        patient_data['Вес ребенка'],
-        patient_data['Способ родоразрешения'],
-        patient_data['Анестезия'],
-        patient_data['Кровопотеря'],
-        patient_data['Продолжительность родов'],
-        patient_data['Сопутствующие заболевания'],
-        patient_data['Гестоз'],
-        patient_data['Сахарный диабет'],
-        patient_data['Гипертония'],
-        patient_data['Анемия'],
-        patient_data['Инфекции'],
-        patient_data['Патология плаценты'],
-        patient_data['Многоводие'],
-        patient_data['Маловодие']
-    ))
-    
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        # Проверяем, что все обязательные поля заполнены
+        required_fields = ['ФИО роженицы', 'Возраст', 'Срок беременности', 'Вес до родов', 
+                         'Вес после родов', 'Дата родов', 'Время родов', 'Пол ребенка', 
+                         'Вес ребенка', 'Способ родоразрешения', 'Анестезия', 'Кровопотеря', 
+                         'Продолжительность родов', 'Акушерка']
+        
+        for field in required_fields:
+            if field not in patient_data or patient_data[field] is None or patient_data[field] == "":
+                return False, f"Поле '{field}' обязательно для заполнения"
+        
+        conn = sqlite3.connect('data/umay.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO patients (
+                date, patient_name, age, pregnancy_weeks, weight_before, weight_after,
+                complications, notes, midwife, birth_date, birth_time, child_gender,
+                child_weight, delivery_method, anesthesia, blood_loss, labor_duration,
+                other_diseases, gestosis, diabetes, hypertension, anemia, infections,
+                placenta_pathology, polyhydramnios, oligohydramnios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            patient_data['Дата'],
+            patient_data['ФИО роженицы'],
+            patient_data['Возраст'],
+            patient_data['Срок беременности'],
+            patient_data['Вес до родов'],
+            patient_data['Вес после родов'],
+            patient_data['Осложнения'],
+            patient_data['Примечания'],
+            patient_data['Акушерка'],
+            patient_data['Дата родов'],
+            patient_data['Время родов'],
+            patient_data['Пол ребенка'],
+            patient_data['Вес ребенка'],
+            patient_data['Способ родоразрешения'],
+            patient_data['Анестезия'],
+            patient_data['Кровопотеря'],
+            patient_data['Продолжительность родов'],
+            patient_data['Сопутствующие заболевания'],
+            patient_data['Гестоз'],
+            patient_data['Сахарный диабет'],
+            patient_data['Гипертония'],
+            patient_data['Анемия'],
+            patient_data['Инфекции'],
+            patient_data['Патология плаценты'],
+            patient_data['Многоводие'],
+            patient_data['Маловодие']
+        ))
+        
+        conn.commit()
+        conn.close()
+        return True, "Данные успешно сохранены"
+    except Exception as e:
+        if conn:
+            conn.close()
+        return False, f"Ошибка при сохранении: {str(e)}"
 
 def load_patients_from_db():
     """Загрузка данных рожениц из базы данных"""
@@ -191,6 +213,22 @@ def load_patients_from_db():
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
+
+# Данные о городах и медицинских учреждениях
+CITIES_DATA = {
+    "Шымкент": [
+        "Городской перинатальный центр",
+        "ГКП на ПХВ Городской родильный дом",
+        "Городская больница - 2",
+        "Городская больница - 3"
+    ],
+    "ЮКО": [
+        "Скоро добавим..."
+    ],
+    "Астана": [
+        "Скоро добавим..."
+    ]
+}
 
 # Инициализация базы данных при запуске
 init_database()
@@ -250,7 +288,7 @@ def load_patients_data():
 def save_patient_data(data):
     # Создаем папку data, если её нет
     os.makedirs('data', exist_ok=True)
-    save_patient_to_db(data)
+    return save_patient_to_db(data)
 
 # Функция фильтрации данных
 def filter_patients_data(df, search_term, date_from, date_to, selected_midwives, 
@@ -489,14 +527,23 @@ if page == "🔐 Вход/Регистрация":
                 user_login = st.text_input("Логин", placeholder="Придумайте логин")
             
             with col2:
-                medical_institution = st.text_input("Медицинское учреждение", placeholder="Название больницы/клиники")
+                # Выбор города
+                city = st.selectbox("Город", ["Выберите город"] + list(CITIES_DATA.keys()))
+                
+                # Выбор учреждения в зависимости от города
+                if city and city != "Выберите город":
+                    institutions = CITIES_DATA[city]
+                    medical_institution = st.selectbox("Медицинское учреждение", ["Выберите учреждение"] + institutions)
+                else:
+                    medical_institution = "Выберите учреждение"
+                
                 user_password = st.text_input("Пароль", type="password", placeholder="Придумайте пароль")
                 confirm_password = st.text_input("Подтвердите пароль", type="password", placeholder="Повторите пароль")
             
             submitted = st.form_submit_button("Зарегистрироваться", type="primary")
             
             if submitted:
-                if full_name and medical_institution and user_login and user_password:
+                if full_name and city and city != "Выберите город" and medical_institution and medical_institution != "Выберите учреждение" and user_login and user_password:
                     if user_password == confirm_password:
                         # Проверяем, не занят ли логин
                         users_df = load_users()
@@ -508,6 +555,7 @@ if page == "🔐 Вход/Регистрация":
                                 'Логин': user_login,
                                 'Пароль': user_password,
                                 'Должность': position,
+                                'Город': city,
                                 'Медицинское учреждение': medical_institution
                             }
                             save_user(user_data)
@@ -601,16 +649,35 @@ elif page == "📝 Ввод данных роженицы":
         submitted = st.form_submit_button("Сохранить данные", type="primary")
         
         if submitted:
-            if patient_name:
+            # Валидация обязательных полей
+            errors = []
+            
+            if not patient_name or patient_name.strip() == "":
+                errors.append("ФИО роженицы обязательно для заполнения")
+            
+            if not child_gender or child_gender == "Выберите пол":
+                errors.append("Необходимо выбрать пол ребенка")
+            
+            if not delivery_method or delivery_method == "Выберите способ":
+                errors.append("Необходимо выбрать способ родоразрешения")
+            
+            if not anesthesia or anesthesia == "Выберите тип анестезии":
+                errors.append("Необходимо выбрать тип анестезии")
+            
+            if errors:
+                st.error("❌ Ошибка при добавлении пациента. Проверьте данные:")
+                for error in errors:
+                    st.error(f"• {error}")
+            else:
                 patient_data = {
                     'Дата': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    'ФИО роженицы': patient_name,
+                    'ФИО роженицы': patient_name.strip(),
                     'Возраст': age,
                     'Срок беременности': pregnancy_weeks,
                     'Вес до родов': weight_before,
                     'Вес после родов': weight_after,
-                    'Осложнения': complications,
-                    'Примечания': notes,
+                    'Осложнения': complications or "",
+                    'Примечания': notes or "",
                     'Акушерка': st.session_state.current_user,
                     'Дата родов': birth_date.strftime("%Y-%m-%d"),
                     'Время родов': birth_time.strftime("%H:%M"),
@@ -620,7 +687,7 @@ elif page == "📝 Ввод данных роженицы":
                     'Анестезия': anesthesia,
                     'Кровопотеря': blood_loss,
                     'Продолжительность родов': labor_duration,
-                    'Сопутствующие заболевания': other_diseases,
+                    'Сопутствующие заболевания': other_diseases or "",
                     'Гестоз': "Да" if gestosis else "Нет",
                     'Сахарный диабет': "Да" if diabetes else "Нет",
                     'Гипертония': "Да" if hypertension else "Нет",
@@ -630,10 +697,11 @@ elif page == "📝 Ввод данных роженицы":
                     'Многоводие': "Да" if polyhydramnios else "Нет",
                     'Маловодие': "Да" if oligohydramnios else "Нет"
                 }
-                save_patient_data(patient_data)
-                st.success("✅ Данные роженицы успешно сохранены!")
-            else:
-                st.error("❌ Пожалуйста, введите ФИО роженицы!")
+                success, message = save_patient_data(patient_data)
+                if success:
+                    st.success(f"✅ {message}")
+                else:
+                    st.error(f"❌ {message}")
 
 # Страница поиска и фильтрации
 elif page == "🔍 Поиск и фильтрация":

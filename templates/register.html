@@ -41,10 +41,22 @@
                             <input type="text" class="form-control" id="login" name="login" required>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">
+                                <i class="fas fa-city me-1"></i>Город
+                            </label>
+                            <select class="form-select" id="city" name="city" required>
+                                <option value="">Выберите город</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label for="medical_institution" class="form-label">
                                 <i class="fas fa-hospital me-1"></i>Медицинское учреждение
                             </label>
-                            <input type="text" class="form-control" id="medical_institution" name="medical_institution" required>
+                            <select class="form-select" id="medical_institution" name="medical_institution" required disabled>
+                                <option value="">Сначала выберите город</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">
@@ -79,4 +91,55 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const citySelect = document.getElementById('city');
+    const institutionSelect = document.getElementById('medical_institution');
+    
+    // Загружаем список городов
+    fetch('/api/cities')
+        .then(response => response.json())
+        .then(cities => {
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке городов:', error);
+        });
+    
+    // Обработчик изменения города
+    citySelect.addEventListener('change', function() {
+        const selectedCity = this.value;
+        institutionSelect.innerHTML = '<option value="">Загрузка...</option>';
+        institutionSelect.disabled = true;
+        
+        if (selectedCity) {
+            fetch(`/api/institutions/${encodeURIComponent(selectedCity)}`)
+                .then(response => response.json())
+                .then(institutions => {
+                    institutionSelect.innerHTML = '<option value="">Выберите учреждение</option>';
+                    institutions.forEach(institution => {
+                        const option = document.createElement('option');
+                        option.value = institution;
+                        option.textContent = institution;
+                        institutionSelect.appendChild(option);
+                    });
+                    institutionSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке учреждений:', error);
+                    institutionSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                });
+        } else {
+            institutionSelect.innerHTML = '<option value="">Сначала выберите город</option>';
+            institutionSelect.disabled = true;
+        }
+    });
+});
+</script>
 {% endblock %} 

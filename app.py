@@ -57,6 +57,22 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Данные о городах и медицинских учреждениях
+CITIES_DATA = {
+    "Шымкент": [
+        "Городской перинатальный центр",
+        "ГКП на ПХВ Городской родильный дом",
+        "Городская больница - 2",
+        "Городская больница - 3"
+    ],
+    "ЮКО": [
+        "Скоро добавим..."
+    ],
+    "Астана": [
+        "Скоро добавим..."
+    ]
+}
+
 # Инициализация базы данных
 with app.app_context():
     try:
@@ -73,6 +89,7 @@ class User(UserMixin, db.Model):
     login = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     position = db.Column(db.String(50), nullable=False)
+    city = db.Column(db.String(50), nullable=False)
     medical_institution = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -129,6 +146,18 @@ with app.app_context():
 def index():
     return render_template('index.html')
 
+@app.route('/api/cities')
+def get_cities():
+    """API для получения списка городов"""
+    return jsonify(list(CITIES_DATA.keys()))
+
+@app.route('/api/institutions/<city>')
+def get_institutions(city):
+    """API для получения списка учреждений по городу"""
+    if city in CITIES_DATA:
+        return jsonify(CITIES_DATA[city])
+    return jsonify([])
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -152,6 +181,7 @@ def register():
         login = request.form['login']
         password = request.form['password']
         position = request.form['position']
+        city = request.form['city']
         medical_institution = request.form['medical_institution']
         
         # Проверяем, существует ли пользователь
@@ -167,6 +197,7 @@ def register():
             login=login,
             password=hashed_password,
             position=position,
+            city=city,
             medical_institution=medical_institution
         )
         
@@ -205,6 +236,12 @@ def dashboard():
     else:
         avg_age = avg_weight = children_percentage = 0
     
+    # Статистика по учреждениям
+    institution_stats = db.session.query(
+        Patient.midwife,
+        db.func.count(Patient.id).label('count')
+    ).group_by(Patient.midwife).all()
+    
     # Получаем последние пациентов для таблицы
     patients = Patient.query.order_by(Patient.created_at.desc()).limit(10).all()
     
@@ -214,6 +251,7 @@ def dashboard():
                          girls=girls_count,
                          avg_age=round(avg_age, 1),
                          avg_child_weight=round(avg_weight, 1),
+                         institution_stats=institution_stats,
                          patients=patients)
 
 @app.route('/add_patient', methods=['GET', 'POST'])
