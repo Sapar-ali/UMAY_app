@@ -30,10 +30,10 @@ python3 -c "from app import app, db; app.app_context().push(); db.create_all()"
 
 5. **Запустите приложение:**
 ```bash
-python3 app.py
+python3 run_local.py
 ```
 
-Приложение будет доступно по адресу: http://localhost:8000
+Приложение будет доступно по адресу: http://localhost:5000
 
 ## 🌐 Деплой на Render
 
