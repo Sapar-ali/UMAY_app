@@ -39,6 +39,18 @@ except Exception as e:
 # Проверяем наличие PostgreSQL URL от Render или Railway
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+# Проверяем Railway PostgreSQL переменные
+if not DATABASE_URL and os.environ.get('RAILWAY'):
+    # Railway автоматически предоставляет эти переменные
+    pg_user = os.environ.get('PGUSER')
+    pg_password = os.environ.get('POSTGRES_PASSWORD')
+    pg_host = os.environ.get('RAILWAY_PRIVATE_DOMAIN')
+    pg_database = os.environ.get('PGDATABASE')
+    
+    if all([pg_user, pg_password, pg_host, pg_database]):
+        DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_host}:5432/{pg_database}"
+        logger.info("✅ Constructed Railway PostgreSQL URL from environment variables")
+
 if DATABASE_URL and (DATABASE_URL.startswith('postgres://') or DATABASE_URL.startswith('postgresql://')):
     # PostgreSQL на Render или Railway - попробуем без специальных библиотек
     if DATABASE_URL.startswith('postgres://'):
