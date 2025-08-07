@@ -187,6 +187,22 @@ with app.app_context():
         logger.info(f"Путь к базе данных: {app.config['SQLALCHEMY_DATABASE_URI']}")
         db.create_all()
         logger.info("✅ Таблицы успешно созданы")
+        
+        # Создание супер-админа если его нет
+        admin_user = User.query.filter_by(login='Joker').first()
+        if not admin_user:
+            admin_user = User(
+                full_name='Супер Администратор',
+                login='Joker',
+                password=generate_password_hash('19341934'),
+                user_type='midwife',
+                position='Главный администратор',
+                city='Алматы',
+                medical_institution='UMAY System'
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            logger.info("✅ Супер-админ создан: login=Joker, password=19341934")
     except Exception as e:
         logger.error(f"❌ Ошибка при создании таблиц: {e}")
         print(f"❌ Ошибка при создании таблиц: {e}")
@@ -196,7 +212,9 @@ with app.app_context():
 # Маршруты
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Получаем последние 6 опубликованных новостей
+    latest_news = News.query.filter_by(is_published=True).order_by(News.published_at.desc()).limit(6).all()
+    return render_template('index.html', news=latest_news)
 
 @app.route('/api/cities')
 def get_cities():
@@ -483,7 +501,7 @@ def profile():
 @login_required
 def admin_panel():
     """Главная страница админ-панели"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен. Требуются права администратора.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -503,7 +521,7 @@ def admin_panel():
 @login_required
 def admin_news():
     """Управление новостями"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -514,7 +532,7 @@ def admin_news():
 @login_required
 def admin_news_add():
     """Добавление новости"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -542,11 +560,53 @@ def admin_news_add():
     
     return render_template('admin/news_form.html')
 
+@app.route('/admin/news/edit/<int:news_id>', methods=['GET', 'POST'])
+@login_required
+def admin_news_edit(news_id):
+    """Редактирование новости"""
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    news = News.query.get_or_404(news_id)
+    
+    if request.method == 'POST':
+        news.title = request.form.get('title')
+        news.short_description = request.form.get('short_description')
+        news.full_content = request.form.get('full_content')
+        news.category = request.form.get('category', 'general')
+        news.image_url = request.form.get('image_url')
+        news.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        flash('Новость успешно обновлена!', 'success')
+        return redirect(url_for('admin_news'))
+    
+    return render_template('admin/news_form.html', news=news)
+
+@app.route('/admin/news/delete/<int:news_id>', methods=['POST'])
+@login_required
+def admin_news_delete(news_id):
+    """Удаление новости"""
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+        return jsonify({'error': 'Доступ запрещен.'}), 403
+    
+    news = News.query.get_or_404(news_id)
+    
+    try:
+        db.session.delete(news)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Новость успешно удалена!'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Ошибка при удалении новости.'}), 500
+
 @app.route('/admin/mama-content')
 @login_required
 def admin_mama_content():
     """Управление контентом для беременных"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -557,7 +617,7 @@ def admin_mama_content():
 @login_required
 def admin_mama_content_add():
     """Добавление контента для беременных"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -595,7 +655,7 @@ def admin_mama_content_add():
 @login_required
 def admin_media():
     """Управление медиафайлами"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -606,7 +666,7 @@ def admin_media():
 @login_required
 def admin_media_upload():
     """Загрузка медиафайлов"""
-    if not current_user.user_type == 'midwife':
+    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
         return jsonify({'error': 'Доступ запрещен.'}), 403
     
     if 'file' not in request.files:

@@ -76,7 +76,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for item in news %}
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors" data-news-id="{{ item.id }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 {% if item.image_url %}
@@ -128,7 +128,7 @@
                                    title="Просмотреть">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="#" 
+                                <a href="{{ url_for('admin_news_edit', news_id=item.id) }}" 
                                    class="text-green-600 hover:text-green-900" 
                                    title="Редактировать">
                                     <i class="fas fa-edit"></i>
@@ -232,10 +232,46 @@ function filterNews() {
 // Удаление новости
 function deleteNews(newsId) {
     if (confirm('Вы уверены, что хотите удалить эту новость?')) {
-        // Здесь будет AJAX запрос для удаления
-        console.log('Удаление новости:', newsId);
-        alert('Функция удаления будет добавлена позже');
+        fetch(`/admin/news/delete/${newsId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем строку из таблицы
+                const row = document.querySelector(`tr[data-news-id="${newsId}"]`);
+                if (row) {
+                    row.remove();
+                }
+                // Показываем уведомление
+                showNotification(data.message, 'success');
+            } else {
+                showNotification(data.error || 'Ошибка при удалении', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при удалении новости', 'error');
+        });
     }
+}
+
+// Функция для показа уведомлений
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-600' : 'bg-red-600'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
 // Экспорт в CSV

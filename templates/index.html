@@ -229,89 +229,64 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- News Card 1 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 2 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-1.jpg') }}" alt="Новые методы диагностики" class="w-full h-full object-cover">
+            {% if news %}
+                {% for article in news %}
+                <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                    <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
+                        {% if article.image_url %}
+                            <img src="{{ article.image_url }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='assets/news-' + loop.index|string + '.jpg') }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <h3 class="text-xl font-bold text-bmw-dark mb-3">{{ article.title }}</h3>
+                    <p class="text-gray-600 mb-4">{{ article.short_description }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-bmw-blue font-medium">{{ article.published_at.strftime('%d.%m.%Y') }}</span>
+                        <a href="{{ url_for('news_detail', news_id=article.id) }}" class="text-bmw-blue hover:text-bmw-accent transition-colors">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Новые методы диагностики</h3>
-                <p class="text-gray-600 mb-4">Инновационные подходы в акушерстве и современные технологии диагностики беременности</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">2 часа назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback cards when no news are available -->
+                <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                    <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
+                        <img src="{{ url_for('static', filename='assets/news-1.jpg') }}" alt="Новые методы диагностики" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-bmw-dark mb-3">Новые методы диагностики</h3>
+                    <p class="text-gray-600 mb-4">Инновационные подходы в акушерстве и современные технологии диагностики беременности</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-bmw-blue font-medium">2 часа назад</span>
+                        <i class="fas fa-arrow-right text-bmw-blue"></i>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- News Card 2 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 3 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-2.jpg') }}" alt="Конференция акушеров" class="w-full h-full object-cover">
+                
+                <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                    <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
+                        <img src="{{ url_for('static', filename='assets/news-2.jpg') }}" alt="Конференция акушеров" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-bmw-dark mb-3">Конференция акушеров</h3>
+                    <p class="text-gray-600 mb-4">Международная встреча специалистов по акушерству и гинекологии</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-bmw-blue font-medium">1 день назад</span>
+                        <i class="fas fa-arrow-right text-bmw-blue"></i>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Конференция акушеров</h3>
-                <p class="text-gray-600 mb-4">Международная встреча специалистов по акушерству и гинекологии</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">1 день назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                
+                <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                    <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
+                        <img src="{{ url_for('static', filename='assets/news-3.jpg') }}" alt="Обновление протоколов" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-bmw-dark mb-3">Обновление протоколов</h3>
+                    <p class="text-gray-600 mb-4">Новые стандарты ведения родов и современные медицинские протоколы</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-bmw-blue font-medium">3 дня назад</span>
+                        <i class="fas fa-arrow-right text-bmw-blue"></i>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- News Card 3 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 4 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-3.jpg') }}" alt="Обновление протоколов" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Обновление протоколов</h3>
-                <p class="text-gray-600 mb-4">Новые стандарты ведения родов и современные медицинские протоколы</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">3 дня назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
-                </div>
-            </div>
-            
-            <!-- News Card 4 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 5 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-4.jpg') }}" alt="Цифровые технологии" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Цифровые технологии</h3>
-                <p class="text-gray-600 mb-4">Внедрение искусственного интеллекта в акушерскую практику</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">5 дней назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
-                </div>
-            </div>
-            
-            <!-- News Card 5 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 6 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-5.jpg') }}" alt="Здоровье матери и ребенка" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Здоровье матери и ребенка</h3>
-                <p class="text-gray-600 mb-4">Современные подходы к сохранению здоровья беременных женщин</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">1 неделя назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
-                </div>
-            </div>
-            
-            <!-- News Card 6 -->
-            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
-                <!-- IMAGE PLACEHOLDER 7 -->
-                <div class="w-full h-48 rounded-xl mb-6 overflow-hidden">
-                    <img src="{{ url_for('static', filename='assets/news-6.jpg') }}" alt="Медицинское образование" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold text-bmw-dark mb-3">Медицинское образование</h3>
-                <p class="text-gray-600 mb-4">Новые программы обучения для акушерок и медицинского персонала</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-bmw-blue font-medium">2 недели назад</span>
-                    <i class="fas fa-arrow-right text-bmw-blue"></i>
-                </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
