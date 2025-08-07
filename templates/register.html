@@ -3,250 +3,312 @@
 {% block title %}UMAY - Регистрация{% endblock %}
 
 {% block content %}
-<!-- SECTION START: Registration Page -->
-<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-bmw-gradient-light">
-    <div class="max-w-2xl mx-auto">
-        <div class="text-center mb-8 animate-fade-in">
-            <!-- IMAGE PLACEHOLDER 11 -->
-            <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center shadow-2xl animate-glow overflow-hidden">
-                <img src="{{ url_for('static', filename='assets/Image-1.jpg') }}" alt="UMAY" class="w-full h-full object-cover">
-            </div>
-            <h2 class="text-4xl font-bold text-bmw-dark mb-3">Регистрация</h2>
-            <p class="text-gray-600 text-lg font-medium">Создайте новую учетную запись</p>
-        </div>
-        
-        <!-- Registration Type Toggle -->
-        <div class="bg-bmw-white rounded-2xl p-6 mb-6 animate-scale-in">
-            <div class="flex items-center justify-center space-x-4">
-                <button id="userToggle" onclick="switchToUser()" class="px-6 py-3 rounded-xl font-semibold transition-all duration-300 bg-bmw-blue text-white">
-                    <i class="fas fa-user mr-2"></i>Обычный пользователь
-                </button>
-                <button id="midwifeToggle" onclick="switchToMidwife()" class="px-6 py-3 rounded-xl font-semibold transition-all duration-300 bg-gray-200 text-gray-600 hover:bg-bmw-blue hover:text-white">
-                    <i class="fas fa-user-md mr-2"></i>Акушерка
-                </button>
-            </div>
-        </div>
-        
-        <!-- User Registration Form (Simplified) -->
-        <div id="userForm" class="bg-bmw-white rounded-3xl shadow-2xl p-8 animate-scale-in">
-            <div class="text-center mb-6">
-                <h3 class="text-2xl font-bold text-bmw-dark mb-2">Регистрация пользователя</h3>
-                <p class="text-gray-600">Быстрая регистрация для доступа к UMAY Mama</p>
-            </div>
-            
-            <form method="POST" class="space-y-6">
-                <input type="hidden" name="user_type" value="user">
-                
-                <div>
-                    <label for="full_name_user" class="block text-sm font-semibold text-bmw-dark mb-3">
-                        <i class="fas fa-user mr-2 text-bmw-blue"></i>ФИО
-                    </label>
-                    <input type="text" 
-                           id="full_name_user" 
-                           name="full_name" 
-                           required 
-                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                           placeholder="Введите полное имя">
+<!-- Full Screen Registration Page -->
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute top-40 left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+            <!-- Header -->
+            <div class="text-center mb-12 animate-fade-in">
+                <div class="w-32 h-32 rounded-full mx-auto mb-8 flex items-center justify-center bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl">
+                    <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="UMAY" class="w-20 h-20 object-contain">
                 </div>
-                
-                <div>
-                    <label for="login_user" class="block text-sm font-semibold text-bmw-dark mb-3">
-                        <i class="fas fa-user-circle mr-2 text-bmw-blue"></i>Логин
-                    </label>
-                    <input type="text" 
-                           id="login_user" 
-                           name="login" 
-                           required 
-                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                           placeholder="Введите логин">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="password_user" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-lock mr-2 text-bmw-blue"></i>Пароль
-                        </label>
-                        <input type="password" 
-                               id="password_user" 
-                               name="password" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Введите пароль">
-                    </div>
-                    
-                    <div>
-                        <label for="confirm_password_user" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-lock mr-2 text-bmw-blue"></i>Подтвердите пароль
-                        </label>
-                        <input type="password" 
-                               id="confirm_password_user" 
-                               name="confirm_password" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Повторите пароль">
-                    </div>
-                </div>
-                
-                <div>
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3 text-lg">
-                        <i class="fas fa-heart"></i>
-                        <span>Присоединиться к UMAY Mama</span>
+                <h1 class="text-6xl font-bold text-white mb-4 tracking-tight">
+                    Присоединяйтесь к <span class="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">UMAY</span>
+                </h1>
+                <p class="text-xl text-gray-300 font-light">Создайте аккаунт и откройте мир возможностей</p>
+            </div>
+
+            <!-- Registration Type Selector -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-2 mb-8 border border-white/20">
+                <div class="flex bg-white/5 rounded-2xl p-1">
+                    <button id="userToggle" onclick="switchToUser()" 
+                            class="flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-500 text-white bg-gradient-to-r from-pink-500 to-purple-500 shadow-lg">
+                        <i class="fas fa-user mr-3"></i>Пользователь
+                    </button>
+                    <button id="midwifeToggle" onclick="switchToMidwife()" 
+                            class="flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-500 text-gray-300 hover:text-white">
+                        <i class="fas fa-user-md mr-3"></i>Акушерка
                     </button>
                 </div>
-            </form>
-        </div>
-        
-        <!-- Midwife Registration Form (Full) -->
-        <div id="midwifeForm" class="bg-bmw-white rounded-3xl shadow-2xl p-8 animate-scale-in hidden">
-            <div class="text-center mb-6">
-                <h3 class="text-2xl font-bold text-bmw-dark mb-2">Регистрация акушерки</h3>
-                <p class="text-gray-600">Полная регистрация для медицинских специалистов</p>
+            </div>
+
+            <!-- User Registration Form -->
+            <div id="userForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация пользователя</h2>
+                    <p class="text-gray-300">Быстрый доступ к UMAY Mama</p>
+                </div>
+                
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="user_type" value="user">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-user mr-2"></i>Полное имя
+                            </label>
+                            <input type="text" 
+                                   name="full_name" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Введите ваше имя">
+                        </div>
+                        
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-user-circle mr-2"></i>Логин
+                            </label>
+                            <input type="text" 
+                                   name="login" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Создайте логин">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-lock mr-2"></i>Пароль
+                            </label>
+                            <input type="password" 
+                                   name="password" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Минимум 8 символов">
+                        </div>
+                        
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-lock mr-2"></i>Подтвердите пароль
+                            </label>
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Повторите пароль">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
+                        <i class="fas fa-heart group-hover:animate-pulse"></i>
+                        <span>Создать аккаунт</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
             </div>
             
-            <form method="POST" class="space-y-6">
-                <input type="hidden" name="user_type" value="midwife">
+            <!-- Midwife Registration Form -->
+            <div id="midwifeForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация акушерки</h2>
+                    <p class="text-gray-300">Полный доступ для медицинских специалистов</p>
+                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="full_name_midwife" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-user mr-2 text-bmw-blue"></i>ФИО
-                        </label>
-                        <input type="text" 
-                               id="full_name_midwife" 
-                               name="full_name" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Введите полное имя">
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="user_type" value="midwife">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-user mr-2"></i>ФИО
+                            </label>
+                            <input type="text" 
+                                   name="full_name" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Введите полное имя">
+                        </div>
+                        
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-user-md mr-2"></i>Должность
+                            </label>
+                            <select name="position" 
+                                    required 
+                                    class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
+                                <option value="" class="bg-slate-800">Выберите должность</option>
+                                <option value="Акушер-гинеколог" class="bg-slate-800">Акушер-гинеколог</option>
+                                <option value="Акушерка" class="bg-slate-800">Акушерка</option>
+                                <option value="Медсестра" class="bg-slate-800">Медсестра</option>
+                                <option value="Врач" class="bg-slate-800">Врач</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="position" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-user-md mr-2 text-bmw-blue"></i>Должность
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-user-circle mr-2"></i>Логин
+                            </label>
+                            <input type="text" 
+                                   name="login" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Создайте логин">
+                        </div>
+                        
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-city mr-2"></i>Город
+                            </label>
+                            <select id="city" 
+                                    name="city" 
+                                    required 
+                                    class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
+                                <option value="" class="bg-slate-800">Выберите город</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <i class="fas fa-hospital mr-2"></i>Медицинское учреждение
                         </label>
-                        <select id="position" 
-                                name="position" 
+                        <select id="medical_institution" 
+                                name="medical_institution" 
                                 required 
-                                class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg">
-                            <option value="">Выберите должность</option>
-                            <option value="Акушер-гинеколог">Акушер-гинеколог</option>
-                            <option value="Акушерка">Акушерка</option>
-                            <option value="Медсестра">Медсестра</option>
-                            <option value="Врач">Врач</option>
+                                disabled 
+                                class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
+                            <option value="" class="bg-slate-800">Сначала выберите город</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="login_midwife" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-user-circle mr-2 text-bmw-blue"></i>Логин
-                        </label>
-                        <input type="text" 
-                               id="login_midwife" 
-                               name="login" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Введите логин">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-lock mr-2"></i>Пароль
+                            </label>
+                            <input type="password" 
+                                   name="password" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Минимум 8 символов">
+                        </div>
+                        
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-lock mr-2"></i>Подтвердите пароль
+                            </label>
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   required 
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   placeholder="Повторите пароль">
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="city" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-city mr-2 text-bmw-blue"></i>Город
-                        </label>
-                        <select id="city" 
-                                name="city" 
-                                required 
-                                class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg">
-                            <option value="">Выберите город</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="medical_institution" class="block text-sm font-semibold text-bmw-dark mb-3">
-                        <i class="fas fa-hospital mr-2 text-bmw-blue"></i>Медицинское учреждение
-                    </label>
-                    <select id="medical_institution" 
-                            name="medical_institution" 
-                            required 
-                            disabled 
-                            class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg">
-                        <option value="">Сначала выберите город</option>
-                    </select>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="password_midwife" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-lock mr-2 text-bmw-blue"></i>Пароль
-                        </label>
-                        <input type="password" 
-                               id="password_midwife" 
-                               name="password" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Введите пароль">
-                    </div>
-                    
-                    <div>
-                        <label for="confirm_password_midwife" class="block text-sm font-semibold text-bmw-dark mb-3">
-                            <i class="fas fa-lock mr-2 text-bmw-blue"></i>Подтвердите пароль
-                        </label>
-                        <input type="password" 
-                               id="confirm_password_midwife" 
-                               name="confirm_password" 
-                               required 
-                               class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
-                               placeholder="Повторите пароль">
-                    </div>
-                </div>
-                
-                <div>
                     <button type="submit" 
-                            class="w-full bg-bmw-blue hover:bg-bmw-accent text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3 text-lg">
-                        <i class="fas fa-user-md"></i>
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
+                        <i class="fas fa-user-md group-hover:animate-pulse"></i>
                         <span>Зарегистрироваться как акушерка</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="mt-8 text-center">
-            <p class="text-gray-600 text-lg">
-                Уже есть аккаунт? 
-                <a href="{{ url_for('login') }}" class="text-bmw-blue hover:text-bmw-accent font-semibold transition-colors duration-300">
-                    Войти
+                </form>
+            </div>
+            
+            <!-- Footer -->
+            <div class="text-center mt-8 space-y-4">
+                <p class="text-gray-300 text-lg">
+                    Уже есть аккаунт? 
+                    <a href="{{ url_for('login') }}" class="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300 underline">
+                        Войти в систему
+                    </a>
+                </p>
+                
+                <a href="{{ url_for('index') }}" class="inline-flex items-center text-gray-400 hover:text-white transition-colors duration-300 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Вернуться на главную
                 </a>
-            </p>
-        </div>
-        
-        <div class="text-center mt-6">
-            <a href="{{ url_for('index') }}" class="text-bmw-blue hover:text-bmw-accent transition-colors duration-300 font-medium">
-                <i class="fas fa-arrow-left mr-2"></i>Вернуться на главную
-            </a>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #ec4899, #8b5cf6);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #db2777, #7c3aed);
+}
+</style>
 
 <script>
 // Form switching functionality
 function switchToUser() {
     document.getElementById('userForm').classList.remove('hidden');
     document.getElementById('midwifeForm').classList.add('hidden');
-    document.getElementById('userToggle').classList.add('bg-bmw-blue', 'text-white');
-    document.getElementById('userToggle').classList.remove('bg-gray-200', 'text-gray-600');
-    document.getElementById('midwifeToggle').classList.remove('bg-bmw-blue', 'text-white');
-    document.getElementById('midwifeToggle').classList.add('bg-gray-200', 'text-gray-600');
+    document.getElementById('userToggle').classList.add('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
+    document.getElementById('userToggle').classList.remove('text-gray-300');
+    document.getElementById('midwifeToggle').classList.remove('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
+    document.getElementById('midwifeToggle').classList.add('text-gray-300');
 }
 
 function switchToMidwife() {
     document.getElementById('userForm').classList.add('hidden');
     document.getElementById('midwifeForm').classList.remove('hidden');
-    document.getElementById('midwifeToggle').classList.add('bg-bmw-blue', 'text-white');
-    document.getElementById('midwifeToggle').classList.remove('bg-gray-200', 'text-gray-600');
-    document.getElementById('userToggle').classList.remove('bg-bmw-blue', 'text-white');
-    document.getElementById('userToggle').classList.add('bg-gray-200', 'text-gray-600');
+    document.getElementById('midwifeToggle').classList.add('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
+    document.getElementById('midwifeToggle').classList.remove('text-gray-300');
+    document.getElementById('userToggle').classList.remove('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
+    document.getElementById('userToggle').classList.add('text-gray-300');
 }
 
 // Cities and institutions loading for midwife form
@@ -254,50 +316,64 @@ document.addEventListener('DOMContentLoaded', function() {
     const citySelect = document.getElementById('city');
     const institutionSelect = document.getElementById('medical_institution');
     
-    // Загружаем список городов
-    fetch('/api/cities')
-        .then(response => response.json())
-        .then(cities => {
-            cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                citySelect.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Ошибка при загрузке городов:', error);
-        });
-    
-    // Обработчик изменения города
-    citySelect.addEventListener('change', function() {
-        const selectedCity = this.value;
-        institutionSelect.innerHTML = '<option value="">Загрузка...</option>';
-        institutionSelect.disabled = true;
-        
-        if (selectedCity) {
-            fetch(`/api/institutions/${encodeURIComponent(selectedCity)}`)
-                .then(response => response.json())
-                .then(institutions => {
-                    institutionSelect.innerHTML = '<option value="">Выберите учреждение</option>';
-                    institutions.forEach(institution => {
-                        const option = document.createElement('option');
-                        option.value = institution;
-                        option.textContent = institution;
-                        institutionSelect.appendChild(option);
-                    });
-                    institutionSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке учреждений:', error);
-                    institutionSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+    if (citySelect) {
+        // Загружаем список городов
+        fetch('/api/cities')
+            .then(response => response.json())
+            .then(cities => {
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    option.className = 'bg-slate-800';
+                    citySelect.appendChild(option);
                 });
-        } else {
-            institutionSelect.innerHTML = '<option value="">Сначала выберите город</option>';
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке городов:', error);
+            });
+        
+        // Обработчик изменения города
+        citySelect.addEventListener('change', function() {
+            const selectedCity = this.value;
+            institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Загрузка...</option>';
             institutionSelect.disabled = true;
-        }
+            
+            if (selectedCity) {
+                fetch(`/api/institutions/${encodeURIComponent(selectedCity)}`)
+                    .then(response => response.json())
+                    .then(institutions => {
+                        institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Выберите учреждение</option>';
+                        institutions.forEach(institution => {
+                            const option = document.createElement('option');
+                            option.value = institution;
+                            option.textContent = institution;
+                            option.className = 'bg-slate-800';
+                            institutionSelect.appendChild(option);
+                        });
+                        institutionSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке учреждений:', error);
+                        institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Ошибка загрузки</option>';
+                    });
+            } else {
+                institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Сначала выберите город</option>';
+                institutionSelect.disabled = true;
+            }
+        });
+    }
+});
+
+// Add smooth animations to form inputs
+document.querySelectorAll('input, select').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('scale-105');
+    });
+    
+    input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('scale-105');
     });
 });
 </script>
-<!-- SECTION END: Registration Page -->
 {% endblock %} 
