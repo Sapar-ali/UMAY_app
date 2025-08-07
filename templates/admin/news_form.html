@@ -1,0 +1,213 @@
+{% extends "admin/base.html" %}
+
+{% block title %}UMAY Admin - Добавить новость{% endblock %}
+{% block page_title %}Добавить новость{% endblock %}
+{% block page_description %}Создание новой статьи для раздела новостей{% endblock %}
+{% block action_button %}Сохранить{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <form method="POST" class="space-y-6">
+        <!-- Основная информация -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Основная информация</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Заголовок -->
+                <div class="md:col-span-2">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-heading mr-2 text-blue-600"></i>Заголовок новости
+                    </label>
+                    <input type="text" 
+                           id="title" 
+                           name="title" 
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           placeholder="Введите заголовок новости">
+                </div>
+                
+                <!-- Категория -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-tag mr-2 text-blue-600"></i>Категория
+                    </label>
+                    <select id="category" 
+                            name="category" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <option value="general">Общие новости</option>
+                        <option value="diagnostics">Диагностика</option>
+                        <option value="treatment">Лечение</option>
+                        <option value="research">Исследования</option>
+                        <option value="technology">Технологии</option>
+                        <option value="education">Образование</option>
+                    </select>
+                </div>
+                
+                <!-- Изображение -->
+                <div>
+                    <label for="image_url" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-image mr-2 text-blue-600"></i>URL изображения
+                    </label>
+                    <input type="url" 
+                           id="image_url" 
+                           name="image_url" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           placeholder="https://example.com/image.jpg">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Краткое описание -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Краткое описание</h3>
+            <label for="short_description" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-align-left mr-2 text-blue-600"></i>Краткое описание (отображается в списке)
+            </label>
+            <textarea id="short_description" 
+                      name="short_description" 
+                      required 
+                      rows="3"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                      placeholder="Краткое описание новости для отображения в списке..."></textarea>
+        </div>
+        
+        <!-- Полный контент -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Полный контент</h3>
+            <label for="full_content" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-edit mr-2 text-blue-600"></i>Полный текст новости
+            </label>
+            <textarea id="full_content" 
+                      name="full_content" 
+                      required 
+                      rows="12"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                      placeholder="Полный текст новости..."></textarea>
+            
+            <!-- Панель инструментов для форматирования -->
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" onclick="formatText('bold')" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    <i class="fas fa-bold"></i>
+                </button>
+                <button type="button" onclick="formatText('italic')" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    <i class="fas fa-italic"></i>
+                </button>
+                <button type="button" onclick="formatText('underline')" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    <i class="fas fa-underline"></i>
+                </button>
+                <button type="button" onclick="addLink()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    <i class="fas fa-link"></i>
+                </button>
+                <button type="button" onclick="addList()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Кнопки действий -->
+        <div class="flex items-center justify-between">
+            <a href="{{ url_for('admin_news') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Отмена
+            </a>
+            
+            <button type="submit" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-save mr-2"></i>
+                Сохранить новость
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Функции форматирования текста
+function formatText(command) {
+    const textarea = document.getElementById('full_content');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    
+    let formattedText = '';
+    switch(command) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'underline':
+            formattedText = `__${selectedText}__`;
+            break;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+}
+
+function addLink() {
+    const textarea = document.getElementById('full_content');
+    const url = prompt('Введите URL ссылки:');
+    if (url) {
+        const linkText = prompt('Введите текст ссылки:') || url;
+        const link = `[${linkText}](${url})`;
+        
+        const start = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, start) + link + textarea.value.substring(textarea.selectionEnd);
+        textarea.focus();
+        textarea.setSelectionRange(start + link.length, start + link.length);
+    }
+}
+
+function addList() {
+    const textarea = document.getElementById('full_content');
+    const listText = prompt('Введите элементы списка (разделите запятыми):');
+    if (listText) {
+        const items = listText.split(',').map(item => `- ${item.trim()}`).join('\n');
+        const start = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, start) + '\n' + items + '\n' + textarea.value.substring(textarea.selectionEnd);
+        textarea.focus();
+        textarea.setSelectionRange(start + items.length + 2, start + items.length + 2);
+    }
+}
+
+// Автосохранение черновика
+let autoSaveTimer;
+document.getElementById('full_content').addEventListener('input', function() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(function() {
+        const content = document.getElementById('full_content').value;
+        const title = document.getElementById('title').value;
+        if (content || title) {
+            localStorage.setItem('news_draft', JSON.stringify({
+                title: title,
+                short_description: document.getElementById('short_description').value,
+                full_content: content,
+                category: document.getElementById('category').value,
+                image_url: document.getElementById('image_url').value
+            }));
+        }
+    }, 2000);
+});
+
+// Восстановление черновика при загрузке
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('news_draft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('short_description').value = data.short_description || '';
+        document.getElementById('full_content').value = data.full_content || '';
+        document.getElementById('category').value = data.category || 'general';
+        document.getElementById('image_url').value = data.image_url || '';
+    }
+});
+
+// Очистка черновика при отправке формы
+document.querySelector('form').addEventListener('submit', function() {
+    localStorage.removeItem('news_draft');
+});
+</script>
+{% endblock %}

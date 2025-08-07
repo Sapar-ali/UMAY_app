@@ -98,10 +98,52 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     login = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    user_type = db.Column(db.String(20), default='user')  # user или midwife
     position = db.Column(db.String(50), nullable=False)
     city = db.Column(db.String(50), nullable=False)
     medical_institution = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# CMS Модели для контента
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    short_description = db.Column(db.Text, nullable=False)
+    full_content = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(500))
+    category = db.Column(db.String(50), default='general')
+    author = db.Column(db.String(100))
+    published_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_published = db.Column(db.Boolean, default=True)
+    views = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class MamaContent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # sport, nutrition, vitamins, body_care, baby_care, doctor_advice
+    image_url = db.Column(db.String(500))
+    video_url = db.Column(db.String(500))
+    trimester = db.Column(db.String(20))  # 1, 2, 3, all
+    difficulty_level = db.Column(db.String(20))  # easy, medium, hard
+    duration = db.Column(db.String(50))  # для упражнений
+    author = db.Column(db.String(100))
+    is_published = db.Column(db.Boolean, default=True)
+    views = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class MediaFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(200), nullable=False)
+    original_filename = db.Column(db.String(200), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    file_type = db.Column(db.String(50), nullable=False)  # image, video, document
+    file_size = db.Column(db.Integer)
+    uploaded_by = db.Column(db.String(100))
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -207,6 +249,7 @@ def register():
                 full_name=full_name,
                 login=login,
                 password=hashed_password,
+                user_type='user',
                 position='Пользователь',
                 city='Не указан',
                 medical_institution='Не указано'
@@ -221,6 +264,7 @@ def register():
                 full_name=full_name,
                 login=login,
                 password=hashed_password,
+                user_type='midwife',
                 position=position,
                 city=city,
                 medical_institution=medical_institution
@@ -430,6 +474,227 @@ def profile():
                          avg_age=round(avg_age, 1),
                          avg_child_weight=round(avg_weight, 1),
                          recent_patients=recent_patients)
+
+# ============================================================================
+# CMS АДМИН-ПАНЕЛЬ МАРШРУТЫ
+# ============================================================================
+
+@app.route('/admin')
+@login_required
+def admin_panel():
+    """Главная страница админ-панели"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен. Требуются права администратора.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Статистика
+    news_count = News.query.count()
+    mama_content_count = MamaContent.query.count()
+    media_count = MediaFile.query.count()
+    patients_count = Patient.query.count()
+    
+    return render_template('admin/dashboard.html', 
+                         news_count=news_count,
+                         mama_content_count=mama_content_count,
+                         media_count=media_count,
+                         patients_count=patients_count)
+
+@app.route('/admin/news')
+@login_required
+def admin_news():
+    """Управление новостями"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    news = News.query.order_by(News.created_at.desc()).all()
+    return render_template('admin/news.html', news=news)
+
+@app.route('/admin/news/add', methods=['GET', 'POST'])
+@login_required
+def admin_news_add():
+    """Добавление новости"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        short_description = request.form.get('short_description')
+        full_content = request.form.get('full_content')
+        category = request.form.get('category', 'general')
+        image_url = request.form.get('image_url')
+        
+        news = News(
+            title=title,
+            short_description=short_description,
+            full_content=full_content,
+            category=category,
+            image_url=image_url,
+            author=current_user.full_name
+        )
+        
+        db.session.add(news)
+        db.session.commit()
+        
+        flash('Новость успешно добавлена!', 'success')
+        return redirect(url_for('admin_news'))
+    
+    return render_template('admin/news_form.html')
+
+@app.route('/admin/mama-content')
+@login_required
+def admin_mama_content():
+    """Управление контентом для беременных"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    content = MamaContent.query.order_by(MamaContent.created_at.desc()).all()
+    return render_template('admin/mama_content.html', content=content)
+
+@app.route('/admin/mama-content/add', methods=['GET', 'POST'])
+@login_required
+def admin_mama_content_add():
+    """Добавление контента для беременных"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        category = request.form.get('category')
+        image_url = request.form.get('image_url')
+        video_url = request.form.get('video_url')
+        trimester = request.form.get('trimester')
+        difficulty_level = request.form.get('difficulty_level')
+        duration = request.form.get('duration')
+        
+        mama_content = MamaContent(
+            title=title,
+            content=content,
+            category=category,
+            image_url=image_url,
+            video_url=video_url,
+            trimester=trimester,
+            difficulty_level=difficulty_level,
+            duration=duration,
+            author=current_user.full_name
+        )
+        
+        db.session.add(mama_content)
+        db.session.commit()
+        
+        flash('Контент успешно добавлен!', 'success')
+        return redirect(url_for('admin_mama_content'))
+    
+    return render_template('admin/mama_content_form.html')
+
+@app.route('/admin/media')
+@login_required
+def admin_media():
+    """Управление медиафайлами"""
+    if not current_user.user_type == 'midwife':
+        flash('Доступ запрещен.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    media = MediaFile.query.order_by(MediaFile.uploaded_at.desc()).all()
+    return render_template('admin/media.html', media=media)
+
+@app.route('/admin/media/upload', methods=['POST'])
+@login_required
+def admin_media_upload():
+    """Загрузка медиафайлов"""
+    if not current_user.user_type == 'midwife':
+        return jsonify({'error': 'Доступ запрещен.'}), 403
+    
+    if 'file' not in request.files:
+        return jsonify({'error': 'Файл не выбран'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Файл не выбран'}), 400
+    
+    if file:
+        # Создаем папку для медиафайлов
+        os.makedirs('static/uploads', exist_ok=True)
+        
+        # Генерируем уникальное имя файла
+        import uuid
+        filename = str(uuid.uuid4()) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        file_path = os.path.join('static/uploads', filename)
+        
+        # Сохраняем файл
+        file.save(file_path)
+        
+        # Определяем тип файла
+        file_type = 'image' if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) else 'document'
+        if file.filename.lower().endswith(('.mp4', '.avi', '.mov', '.wmv')):
+            file_type = 'video'
+        
+        # Сохраняем в базу данных
+        media_file = MediaFile(
+            filename=filename,
+            original_filename=file.filename,
+            file_path=file_path,
+            file_type=file_type,
+            file_size=os.path.getsize(file_path),
+            uploaded_by=current_user.full_name
+        )
+        
+        db.session.add(media_file)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'url': url_for('static', filename=f'uploads/{filename}')
+        })
+    
+    return jsonify({'error': 'Ошибка загрузки файла'}), 500
+
+# ============================================================================
+# ПУБЛИЧНЫЕ МАРШРУТЫ ДЛЯ КОНТЕНТА
+# ============================================================================
+
+@app.route('/news')
+def news_list():
+    """Список новостей"""
+    news = News.query.filter_by(is_published=True).order_by(News.published_at.desc()).all()
+    return render_template('news/list.html', news=news)
+
+@app.route('/news/<int:news_id>')
+def news_detail(news_id):
+    """Детальная страница новости"""
+    news = News.query.get_or_404(news_id)
+    if news.is_published:
+        news.views += 1
+        db.session.commit()
+    return render_template('news/detail.html', news=news)
+
+@app.route('/mama')
+def mama_content():
+    """Контент для беременных"""
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание', 
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+    
+    selected_category = request.args.get('category', 'sport')
+    content = MamaContent.query.filter_by(
+        category=selected_category, 
+        is_published=True
+    ).order_by(MamaContent.created_at.desc()).all()
+    
+    return render_template('mama/content.html', 
+                         content=content, 
+                         categories=categories,
+                         selected_category=selected_category)
 
 @app.route('/export_csv')
 @login_required

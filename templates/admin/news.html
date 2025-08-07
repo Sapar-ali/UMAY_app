@@ -1,0 +1,247 @@
+{% extends "admin/base.html" %}
+
+{% block title %}UMAY Admin - Управление новостями{% endblock %}
+{% block page_title %}Управление новостями{% endblock %}
+{% block page_description %}Создание и редактирование новостей{% endblock %}
+{% block action_button %}Добавить новость{% endblock %}
+
+{% block content %}
+<!-- Заголовок с кнопкой добавления -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Новости</h2>
+        <p class="text-gray-600">Всего новостей: {{ news|length }}</p>
+    </div>
+    <a href="{{ url_for('admin_news_add') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        Добавить новость
+    </a>
+</div>
+
+<!-- Фильтры -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <div class="flex items-center space-x-4">
+        <div class="flex-1">
+            <input type="text" 
+                   id="search" 
+                   placeholder="Поиск по заголовку..." 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <select id="category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Все категории</option>
+            <option value="general">Общие новости</option>
+            <option value="diagnostics">Диагностика</option>
+            <option value="treatment">Лечение</option>
+            <option value="research">Исследования</option>
+            <option value="technology">Технологии</option>
+            <option value="education">Образование</option>
+        </select>
+        <select id="status-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Все статусы</option>
+            <option value="published">Опубликовано</option>
+            <option value="draft">Черновик</option>
+        </select>
+    </div>
+</div>
+
+<!-- Список новостей -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    {% if news %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Новость
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Категория
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Автор
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Статус
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Просмотры
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Дата
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Действия
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in news %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                {% if item.image_url %}
+                                <div class="flex-shrink-0 h-12 w-12">
+                                    <img class="h-12 w-12 rounded-lg object-cover" src="{{ item.image_url }}" alt="{{ item.title }}">
+                                </div>
+                                {% else %}
+                                <div class="flex-shrink-0 h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-newspaper text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ item.title }}</div>
+                                    <div class="text-sm text-gray-500">{{ item.short_description[:100] }}{% if item.short_description|length > 100 %}...{% endif %}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ item.category }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ item.author }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if item.is_published %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check mr-1"></i>
+                                Опубликовано
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                Черновик
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ item.views }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ item.created_at.strftime('%d.%m.%Y') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-2">
+                                <a href="{{ url_for('news_detail', news_id=item.id) }}" 
+                                   class="text-blue-600 hover:text-blue-900" 
+                                   title="Просмотреть">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" 
+                                   class="text-green-600 hover:text-green-900" 
+                                   title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="deleteNews({{ item.id }})" 
+                                        class="text-red-600 hover:text-red-900" 
+                                        title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <!-- Пустое состояние -->
+        <div class="text-center py-12">
+            <div class="mx-auto h-12 w-12 text-gray-400">
+                <i class="fas fa-newspaper text-4xl"></i>
+            </div>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Нет новостей</h3>
+            <p class="mt-1 text-sm text-gray-500">Начните с создания первой новости.</p>
+            <div class="mt-6">
+                <a href="{{ url_for('admin_news_add') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>
+                    Добавить новость
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Пагинация -->
+{% if news|length > 10 %}
+<div class="mt-6 flex items-center justify-between">
+    <div class="flex-1 flex justify-between sm:hidden">
+        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Предыдущая
+        </a>
+        <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Следующая
+        </a>
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700">
+                Показано <span class="font-medium">1</span> из <span class="font-medium">{{ news|length }}</span> результатов
+            </p>
+        </div>
+        <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
+                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Поиск и фильтрация
+document.getElementById('search').addEventListener('input', filterNews);
+document.getElementById('category-filter').addEventListener('change', filterNews);
+document.getElementById('status-filter').addEventListener('change', filterNews);
+
+function filterNews() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const categoryFilter = document.getElementById('category-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const title = row.querySelector('td:first-child .text-gray-900').textContent.toLowerCase();
+        const category = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+        const status = row.querySelector('td:nth-child(4) span').textContent.toLowerCase();
+        
+        const matchesSearch = title.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category.includes(categoryFilter);
+        const matchesStatus = !statusFilter || status.includes(statusFilter);
+        
+        if (matchesSearch && matchesCategory && matchesStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Удаление новости
+function deleteNews(newsId) {
+    if (confirm('Вы уверены, что хотите удалить эту новость?')) {
+        // Здесь будет AJAX запрос для удаления
+        console.log('Удаление новости:', newsId);
+        alert('Функция удаления будет добавлена позже');
+    }
+}
+
+// Экспорт в CSV
+function exportNews() {
+    // Здесь будет функция экспорта
+    alert('Функция экспорта будет добавлена позже');
+}
+</script>
+{% endblock %}
