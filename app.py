@@ -187,12 +187,10 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        user_type = request.form.get('user_type', 'midwife')
         full_name = request.form['full_name']
         login = request.form['login']
         password = request.form['password']
-        position = request.form['position']
-        city = request.form['city']
-        medical_institution = request.form['medical_institution']
         
         # Проверяем, существует ли пользователь
         existing_user = User.query.filter_by(login=login).first()
@@ -202,19 +200,41 @@ def register():
         
         # Создаем нового пользователя
         hashed_password = generate_password_hash(password)
-        new_user = User(
-            full_name=full_name,
-            login=login,
-            password=hashed_password,
-            position=position,
-            city=city,
-            medical_institution=medical_institution
-        )
+        
+        if user_type == 'user':
+            # Упрощенная регистрация для обычных пользователей
+            new_user = User(
+                full_name=full_name,
+                login=login,
+                password=hashed_password,
+                position='Пользователь',
+                city='Не указан',
+                medical_institution='Не указано'
+            )
+        else:
+            # Полная регистрация для акушерок
+            position = request.form['position']
+            city = request.form['city']
+            medical_institution = request.form['medical_institution']
+            
+            new_user = User(
+                full_name=full_name,
+                login=login,
+                password=hashed_password,
+                position=position,
+                city=city,
+                medical_institution=medical_institution
+            )
         
         try:
             db.session.add(new_user)
             db.session.commit()
-            flash('Регистрация успешна! Теперь вы можете войти.', 'success')
+            
+            if user_type == 'user':
+                flash('Регистрация успешна! Добро пожаловать в UMAY Mama!', 'success')
+            else:
+                flash('Регистрация успешна! Теперь вы можете войти в UMAY Pro.', 'success')
+            
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
@@ -388,6 +408,28 @@ def search():
                          midwives=[m[0] for m in midwives],
                          delivery_methods=[d[0] for d in delivery_methods],
                          genders=[g[0] for g in genders])
+
+@app.route('/profile')
+@login_required
+def profile():
+    # Получаем статистику для текущего пользователя
+    total_patients = Patient.query.filter_by(midwife=current_user.full_name).count()
+    
+    # Дополнительная статистика
+    if total_patients > 0:
+        avg_age = db.session.query(db.func.avg(Patient.age)).filter_by(midwife=current_user.full_name).scalar() or 0
+        avg_weight = db.session.query(db.func.avg(Patient.child_weight)).filter_by(midwife=current_user.full_name).scalar() or 0
+    else:
+        avg_age = avg_weight = 0
+    
+    # Получаем последние пациентов текущего пользователя
+    recent_patients = Patient.query.filter_by(midwife=current_user.full_name).order_by(Patient.created_at.desc()).limit(5).all()
+    
+    return render_template('profile.html', 
+                         total_patients=total_patients,
+                         avg_age=round(avg_age, 1),
+                         avg_child_weight=round(avg_weight, 1),
+                         recent_patients=recent_patients)
 
 @app.route('/export_csv')
 @login_required

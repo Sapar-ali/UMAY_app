@@ -3,44 +3,69 @@
 {% block title %}UMAY - Вход{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card border-0 shadow">
-            <div class="card-header bg-primary text-white text-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-sign-in-alt me-2"></i>Вход в систему
-                </h4>
+<!-- SECTION START: Login Page -->
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-bmw-gradient-light">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center animate-fade-in">
+            <!-- IMAGE PLACEHOLDER 10 -->
+            <div class="w-24 h-24 bg-bmw-gold rounded-full mx-auto mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg shadow-2xl animate-glow">
+                Image 10
             </div>
-            <div class="card-body p-4">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="login" class="form-label">
-                            <i class="fas fa-user me-1"></i>Логин
-                        </label>
-                        <input type="text" class="form-control" id="login" name="login" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">
-                            <i class="fas fa-lock me-1"></i>Пароль
-                        </label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt me-2"></i>Войти
-                        </button>
-                    </div>
-                </form>
-                <div class="text-center mt-3">
-                    <p class="text-muted mb-0">
-                        Нет аккаунта? 
-                        <a href="{{ url_for('register') }}" class="text-decoration-none">
-                            Зарегистрироваться
-                        </a>
-                    </p>
+            <h2 class="text-4xl font-bold text-bmw-dark mb-3">Добро пожаловать</h2>
+            <p class="text-gray-600 text-lg font-medium">Войдите в свою учетную запись</p>
+        </div>
+        
+        <div class="bg-bmw-white rounded-3xl shadow-2xl p-8 animate-scale-in">
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label for="login" class="block text-sm font-semibold text-bmw-dark mb-3">
+                        <i class="fas fa-user mr-2 text-bmw-blue"></i>Логин
+                    </label>
+                    <input type="text" 
+                           id="login" 
+                           name="login" 
+                           required 
+                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
+                           placeholder="Введите ваш логин">
                 </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-bmw-dark mb-3">
+                        <i class="fas fa-lock mr-2 text-bmw-blue"></i>Пароль
+                    </label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required 
+                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-bmw-blue focus:ring-2 focus:ring-bmw-blue/20 transition-all duration-300 text-lg"
+                           placeholder="Введите ваш пароль">
+                </div>
+                
+                <div>
+                    <button type="submit" 
+                            class="w-full bg-bmw-blue hover:bg-bmw-accent text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3 text-lg">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Войти в систему</span>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-8 text-center">
+                <p class="text-gray-600 text-lg">
+                    Нет аккаунта? 
+                    <a href="{{ url_for('register') }}" class="text-bmw-blue hover:text-bmw-accent font-semibold transition-colors duration-300">
+                        Зарегистрироваться
+                    </a>
+                </p>
             </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ url_for('index') }}" class="text-bmw-blue hover:text-bmw-accent transition-colors duration-300 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Вернуться на главную
+            </a>
         </div>
     </div>
 </div>
+<!-- SECTION END: Login Page -->
 {% endblock %} 

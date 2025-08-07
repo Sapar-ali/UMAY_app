@@ -3,259 +3,271 @@
 {% block title %}Поиск и фильтрация - UMAY{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Панель фильтров -->
-        <div class="col-lg-3">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Фильтры
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="GET" id="filterForm">
-                        <!-- Поиск по ФИО -->
-                        <div class="mb-3">
-                            <label for="search" class="form-label">Поиск по ФИО</label>
-                            <input type="text" class="form-control" id="search" name="search" 
-                                   value="{{ request.args.get('search', '') }}" placeholder="Введите имя...">
+<div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 animate-fade-in">
+            <h1 class="text-3xl font-bold text-medical-dark mb-2">Поиск и фильтрация</h1>
+            <p class="text-gray-600">Найдите нужные данные с помощью фильтров</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Filters Panel -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl shadow-xl p-6 animate-slide-up">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-medical-blue rounded-xl flex items-center justify-center">
+                            <i class="fas fa-filter text-medical-accent"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-medical-dark">Фильтры</h2>
+                    </div>
+
+                    <form method="GET" id="filterForm" class="space-y-6">
+                        <!-- Search by Name -->
+                        <div>
+                            <label for="search" class="block text-sm font-semibold text-medical-dark mb-2">
+                                <i class="fas fa-search mr-2"></i>Поиск по ФИО
+                            </label>
+                            <input type="text" 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                   id="search" 
+                                   name="search" 
+                                   value="{{ request.args.get('search', '') }}" 
+                                   placeholder="Введите имя...">
                         </div>
 
-                        <!-- Фильтр по датам -->
-                        <div class="mb-3">
-                            <label class="form-label">Период родов</label>
-                            <div class="row">
-                                <div class="col-6">
-                                    <input type="date" class="form-control" id="date_from" name="date_from" 
-                                           value="{{ request.args.get('date_from', '') }}">
-                                </div>
-                                <div class="col-6">
-                                    <input type="date" class="form-control" id="date_to" name="date_to" 
-                                           value="{{ request.args.get('date_to', '') }}">
-                                </div>
+                        <!-- Date Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-2">
+                                <i class="fas fa-calendar mr-2"></i>Период родов
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="date" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="date_from" 
+                                       name="date_from" 
+                                       value="{{ request.args.get('date_from', '') }}">
+                                <input type="date" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="date_to" 
+                                       name="date_to" 
+                                       value="{{ request.args.get('date_to', '') }}">
                             </div>
                         </div>
 
-                        <!-- Фильтр по акушеркам -->
-                        <div class="mb-3">
-                            <label class="form-label">Акушерки</label>
-                            {% set midwives = patients | map(attribute='midwife') | unique | list %}
-                            {% for midwife in midwives %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="midwives" 
-                                       value="{{ midwife }}" id="midwife_{{ loop.index }}"
-                                       {% if midwife in request.args.getlist('midwives') %}checked{% endif %}>
-                                <label class="form-check-label" for="midwife_{{ loop.index }}">
-                                    {{ midwife }}
+                        <!-- Midwives Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-3">
+                                <i class="fas fa-user-md mr-2"></i>Акушерки
+                            </label>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                {% set midwives = patients | map(attribute='midwife') | unique | list %}
+                                {% for midwife in midwives %}
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-medical-light p-2 rounded-lg transition-colors duration-200">
+                                    <input type="checkbox" 
+                                           name="midwives" 
+                                           value="{{ midwife }}" 
+                                           id="midwife_{{ loop.index }}"
+                                           class="w-4 h-4 text-medical-accent border-gray-300 rounded focus:ring-medical-accent"
+                                           {% if midwife in request.args.getlist('midwives') %}checked{% endif %}>
+                                    <span class="text-sm text-gray-700">{{ midwife }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Delivery Method Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-3">
+                                <i class="fas fa-baby mr-2"></i>Способ родоразрешения
+                            </label>
+                            <div class="space-y-2">
+                                {% set methods = patients | map(attribute='delivery_method') | unique | list %}
+                                {% for method in methods %}
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-medical-light p-2 rounded-lg transition-colors duration-200">
+                                    <input type="checkbox" 
+                                           name="delivery_methods" 
+                                           value="{{ method }}" 
+                                           id="method_{{ loop.index }}"
+                                           class="w-4 h-4 text-medical-accent border-gray-300 rounded focus:ring-medical-accent"
+                                           {% if method in request.args.getlist('delivery_methods') %}checked{% endif %}>
+                                    <span class="text-sm text-gray-700">{{ method }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Gender Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-3">
+                                <i class="fas fa-venus-mars mr-2"></i>Пол ребенка
+                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-medical-light p-2 rounded-lg transition-colors duration-200">
+                                    <input type="checkbox" 
+                                           name="genders" 
+                                           value="Мальчик" 
+                                           id="gender_boy"
+                                           class="w-4 h-4 text-medical-accent border-gray-300 rounded focus:ring-medical-accent"
+                                           {% if 'Мальчик' in request.args.getlist('genders') %}checked{% endif %}>
+                                    <span class="text-sm text-gray-700">Мальчик</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-medical-light p-2 rounded-lg transition-colors duration-200">
+                                    <input type="checkbox" 
+                                           name="genders" 
+                                           value="Девочка" 
+                                           id="gender_girl"
+                                           class="w-4 h-4 text-medical-accent border-gray-300 rounded focus:ring-medical-accent"
+                                           {% if 'Девочка' in request.args.getlist('genders') %}checked{% endif %}>
+                                    <span class="text-sm text-gray-700">Девочка</span>
                                 </label>
                             </div>
-                            {% endfor %}
                         </div>
 
-                        <!-- Фильтр по способу родоразрешения -->
-                        <div class="mb-3">
-                            <label class="form-label">Способ родоразрешения</label>
-                            {% set methods = patients | map(attribute='delivery_method') | unique | list %}
-                            {% for method in methods %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="delivery_methods" 
-                                       value="{{ method }}" id="method_{{ loop.index }}"
-                                       {% if method in request.args.getlist('delivery_methods') %}checked{% endif %}>
-                                <label class="form-check-label" for="method_{{ loop.index }}">
-                                    {{ method }}
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Фильтр по полу ребенка -->
-                        <div class="mb-3">
-                            <label class="form-label">Пол ребенка</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="genders" value="Мальчик" 
-                                       id="gender_boy" {% if 'Мальчик' in request.args.getlist('genders') %}checked{% endif %}>
-                                <label class="form-check-label" for="gender_boy">Мальчик</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="genders" value="Девочка" 
-                                       id="gender_girl" {% if 'Девочка' in request.args.getlist('genders') %}checked{% endif %}>
-                                <label class="form-check-label" for="gender_girl">Девочка</label>
+                        <!-- Age Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-2">
+                                <i class="fas fa-birthday-cake mr-2"></i>Возраст роженицы
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="age_min" 
+                                       name="age_min" 
+                                       placeholder="От" 
+                                       min="14" 
+                                       max="60" 
+                                       value="{{ request.args.get('age_min', '') }}">
+                                <input type="number" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="age_max" 
+                                       name="age_max" 
+                                       placeholder="До" 
+                                       min="14" 
+                                       max="60" 
+                                       value="{{ request.args.get('age_max', '') }}">
                             </div>
                         </div>
 
-                        <!-- Фильтр по возрасту -->
-                        <div class="mb-3">
-                            <label class="form-label">Возраст роженицы</label>
-                            <div class="row">
-                                <div class="col-6">
-                                    <input type="number" class="form-control" id="age_min" name="age_min" 
-                                           placeholder="От" min="14" max="60" 
-                                           value="{{ request.args.get('age_min', '') }}">
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" class="form-control" id="age_max" name="age_max" 
-                                           placeholder="До" min="14" max="60" 
-                                           value="{{ request.args.get('age_max', '') }}">
-                                </div>
+                        <!-- Weight Filter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-medical-dark mb-2">
+                                <i class="fas fa-weight mr-2"></i>Вес ребенка (г)
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="weight_min" 
+                                       name="weight_min" 
+                                       placeholder="От" 
+                                       min="500" 
+                                       max="6000" 
+                                       value="{{ request.args.get('weight_min', '') }}">
+                                <input type="number" 
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-medical-accent focus:ring-2 focus:ring-medical-accent/20 transition-all duration-300"
+                                       id="weight_max" 
+                                       name="weight_max" 
+                                       placeholder="До" 
+                                       min="500" 
+                                       max="6000" 
+                                       value="{{ request.args.get('weight_max', '') }}">
                             </div>
                         </div>
 
-                        <!-- Фильтр по весу ребенка -->
-                        <div class="mb-3">
-                            <label class="form-label">Вес ребенка (г)</label>
-                            <div class="row">
-                                <div class="col-6">
-                                    <input type="number" class="form-control" id="weight_min" name="weight_min" 
-                                           placeholder="От" min="500" max="6000" 
-                                           value="{{ request.args.get('weight_min', '') }}">
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" class="form-control" id="weight_max" name="weight_max" 
-                                           placeholder="До" min="500" max="6000" 
-                                           value="{{ request.args.get('weight_max', '') }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Кнопки фильтров -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search me-1"></i>Применить фильтры
+                        <!-- Action Buttons -->
+                        <div class="space-y-3 pt-4 border-t border-gray-200">
+                            <button type="submit" 
+                                    class="w-full bg-medical-accent hover:bg-medical-dark text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
+                                <i class="fas fa-search"></i>
+                                <span>Применить фильтры</span>
                             </button>
-                            <a href="{{ url_for('search') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-1"></i>Сбросить фильтры
+                            <a href="{{ url_for('search') }}" 
+                               class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
+                                <i class="fas fa-times"></i>
+                                <span>Сбросить</span>
                             </a>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
 
-        <!-- Результаты поиска -->
-        <div class="col-lg-9">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Результаты поиска
-                    </h5>
-                    <div>
-                        <span class="badge bg-light text-dark">{{ filtered_patients|length }} записей</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% if filtered_patients %}
-                        <!-- Кнопки экспорта -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <div class="btn-group" role="group">
-                                    <a href="{{ url_for('export_csv') }}?{{ request.query_string.decode() }}" 
-                                       class="btn btn-outline-success">
-                                        <i class="fas fa-download me-1"></i>Экспорт CSV
-                                    </a>
-                                    <button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
-                                        <i class="fas fa-file-excel me-1"></i>Экспорт Excel
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
-                                        <i class="fas fa-file-pdf me-1"></i>Экспорт PDF
-                                    </button>
-                                </div>
+            <!-- Results -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden animate-fade-in">
+                    <div class="bg-gradient-to-r from-medical-blue to-medical-accent px-6 py-4">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <h2 class="text-xl font-bold text-white mb-4 md:mb-0">
+                                <i class="fas fa-list mr-2"></i>Результаты поиска
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-white text-sm">
+                                    Найдено: <span class="font-bold">{{ patients|length }}</span> записей
+                                </span>
+                                <a href="{{ url_for('export_csv') }}" 
+                                   class="bg-white text-medical-accent hover:bg-medical-light px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center space-x-2">
+                                    <i class="fas fa-download"></i>
+                                    <span>Экспорт</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Таблица результатов -->
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>ФИО роженицы</th>
-                                        <th>Возраст</th>
-                                        <th>Дата родов</th>
-                                        <th>Пол ребенка</th>
-                                        <th>Вес ребенка</th>
-                                        <th>Способ родоразрешения</th>
-                                        <th>Акушерка</th>
-                                        <th>Действия</th>
+                    <div class="p-6">
+                        {% if patients %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b-2 border-medical-blue">
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Дата</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">ФИО роженицы</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Возраст</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Срок</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Пол ребенка</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Вес</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Способ</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Акушерка</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for patient in filtered_patients %}
-                                    <tr>
-                                        <td>{{ patient.patient_name }}</td>
-                                        <td>{{ patient.age }} лет</td>
-                                        <td>{{ patient.birth_date }}</td>
-                                        <td>
-                                            <span class="badge {% if patient.child_gender == 'Мальчик' %}bg-primary{% else %}bg-pink{% endif %}">
+                                    {% for patient in patients %}
+                                    <tr class="border-b border-gray-100 hover:bg-medical-light/50 transition-colors duration-200">
+                                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.date }}</td>
+                                        <td class="py-3 px-4 font-medium text-medical-dark">{{ patient.patient_name }}</td>
+                                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.age }}</td>
+                                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.pregnancy_weeks }} нед.</td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ 'bg-blue-100 text-blue-800' if patient.child_gender == 'Мальчик' else 'bg-pink-100 text-pink-800' }}">
                                                 {{ patient.child_gender }}
                                             </span>
                                         </td>
-                                        <td>{{ patient.child_weight }} г</td>
-                                        <td>
-                                            <span class="badge {% if patient.delivery_method == 'Естественные роды' %}bg-success{% else %}bg-warning{% endif %}">
+                                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.child_weight }} г</td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ 'bg-green-100 text-green-800' if patient.delivery_method == 'Естественные роды' else 'bg-yellow-100 text-yellow-800' }}">
                                                 {{ patient.delivery_method }}
                                             </span>
                                         </td>
-                                        <td>{{ patient.midwife }}</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-info" 
-                                                        onclick="viewPatient({{ patient.id }})">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-warning" 
-                                                        onclick="editPatient({{ patient.id }})">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </div>
-                                        </td>
+                                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.midwife }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Статистика -->
-                        <div class="row mt-4">
-                            <div class="col-md-3">
-                                <div class="card bg-primary text-white">
-                                    <div class="card-body text-center">
-                                        <h6>Всего записей</h6>
-                                        <h4>{{ filtered_patients|length }}</h4>
-                                    </div>
-                                </div>
+                        {% else %}
+                        <div class="text-center py-12">
+                            <!-- IMAGE PLACEHOLDER 13 -->
+                            <div class="w-24 h-24 bg-medical-yellow rounded-full mx-auto mb-6 flex items-center justify-center text-medical-dark font-bold text-lg">
+                                Image 13
                             </div>
-                            <div class="col-md-3">
-                                <div class="card bg-success text-white">
-                                    <div class="card-body text-center">
-                                        <h6>Естественные роды</h6>
-                                        <h4>{{ filtered_patients | selectattr('delivery_method', 'equalto', 'Естественные роды') | list | length }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card bg-warning text-white">
-                                    <div class="card-body text-center">
-                                        <h6>Кесарево сечение</h6>
-                                        <h4>{{ filtered_patients | selectattr('delivery_method', 'equalto', 'Кесарево сечение') | list | length }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card bg-info text-white">
-                                    <div class="card-body text-center">
-                                        <h6>Средний возраст</h6>
-                                        <h4>{{ "%.1f"|format((filtered_patients | map(attribute='age') | sum) / (filtered_patients|length)) }}</h4>
-                                    </div>
-                                </div>
-                            </div>
+                            <h3 class="text-xl font-semibold text-medical-dark mb-2">Нет результатов</h3>
+                            <p class="text-gray-600 mb-6">Попробуйте изменить параметры поиска</p>
+                            <a href="{{ url_for('search') }}" 
+                               class="bg-medical-accent hover:bg-medical-dark text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mx-auto w-fit">
+                                <i class="fas fa-search"></i>
+                                <span>Новый поиск</span>
+                            </a>
                         </div>
-                    {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">По вашему запросу ничего не найдено</h5>
-                            <p class="text-muted">Попробуйте изменить параметры поиска</p>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -263,45 +275,16 @@
 </div>
 
 <script>
-function viewPatient(patientId) {
-    // Функция для просмотра деталей пациента
-    alert('Просмотр пациента с ID: ' + patientId);
-}
-
-function editPatient(patientId) {
-    // Функция для редактирования пациента
-    alert('Редактирование пациента с ID: ' + patientId);
-}
-
-function exportToExcel() {
-    // Функция для экспорта в Excel
-    alert('Экспорт в Excel будет добавлен позже');
-}
-
-function exportToPDF() {
-    // Функция для экспорта в PDF
-    alert('Экспорт в PDF будет добавлен позже');
-}
-
-// Автоматическое применение фильтров при изменении
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filters change
     const form = document.getElementById('filterForm');
-    const inputs = form.querySelectorAll('input, select');
+    const inputs = form.querySelectorAll('input[type="checkbox"], input[type="date"], input[type="number"]');
     
     inputs.forEach(input => {
         input.addEventListener('change', function() {
-            // Не применяем автоматически для текстовых полей
-            if (input.type !== 'text' && input.type !== 'number') {
-                form.submit();
-            }
+            form.submit();
         });
     });
 });
 </script>
-
-<style>
-.bg-pink {
-    background-color: #e83e8c !important;
-}
-</style>
 {% endblock %} 

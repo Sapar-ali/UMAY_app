@@ -3,167 +3,230 @@
 {% block title %}UMAY - Панель управления{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="text-primary">
-            <i class="fas fa-tachometer-alt me-2"></i>Панель управления
-        </h2>
-        <p class="text-muted">Добро пожаловать, {{ current_user.full_name }}!</p>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 bg-primary text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-users fa-2x mb-2"></i>
-                <h4 class="card-title">{{ total_patients }}</h4>
-                <p class="card-text">Всего пациентов</p>
-            </div>
+<!-- Header Section -->
+<div class="mb-8 animate-fade-in">
+    <div class="flex items-center space-x-4 mb-4">
+        <!-- IMAGE PLACEHOLDER 9 -->
+        <div class="w-16 h-16 bg-medical-yellow rounded-full flex items-center justify-center text-medical-dark font-bold shadow-lg">
+            Image 9
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-success text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-baby fa-2x mb-2"></i>
-                <h4 class="card-title">{{ natural_births }}</h4>
-                <p class="card-text">Естественные роды</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-warning text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-procedures fa-2x mb-2"></i>
-                <h4 class="card-title">{{ c_sections }}</h4>
-                <p class="card-text">Кесарево сечение</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-info text-white clickable-card" onclick="window.location.href='{{ url_for('search', genders=['Мальчик']) }}'">
-            <div class="card-body text-center">
-                <i class="fas fa-mars fa-2x mb-2"></i>
-                <h4 class="card-title">{{ boys }}</h4>
-                <p class="card-text">Мальчики</p>
-            </div>
+        <div>
+            <h1 class="text-3xl font-bold text-medical-dark">Панель управления</h1>
+            <p class="text-gray-600">Добро пожаловать, {{ current_user.full_name }}!</p>
         </div>
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 bg-danger text-white clickable-card" onclick="window.location.href='{{ url_for('search', genders=['Девочка']) }}'">
-            <div class="card-body text-center">
-                <i class="fas fa-venus fa-2x mb-2"></i>
-                <h4 class="card-title">{{ girls }}</h4>
-                <p class="card-text">Девочки</p>
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-medical-accent to-medical-dark text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm opacity-75">Всего пациентов</p>
+                <p class="text-3xl font-bold">{{ total_patients }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-users text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-secondary text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-chart-line fa-2x mb-2"></i>
-                <h4 class="card-title">{{ "%.1f"|format(avg_age) }}</h4>
-                <p class="card-text">Средний возраст</p>
+    
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm opacity-75">Мальчики</p>
+                <p class="text-3xl font-bold">{{ boys }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-mars text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-dark text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-weight fa-2x mb-2"></i>
-                <h4 class="card-title">{{ "%.0f"|format(avg_child_weight) }}</h4>
-                <p class="card-text">Средний вес ребенка (г)</p>
+    
+    <div class="bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm opacity-75">Девочки</p>
+                <p class="text-3xl font-bold">{{ girls }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-venus text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-primary text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-percentage fa-2x mb-2"></i>
-                <h4 class="card-title">{{ "%.1f"|format((boys + girls) / total_patients * 100 if total_patients > 0 else 0) }}%</h4>
-                <p class="card-text">Детей от общего числа</p>
+    
+    <div class="bg-gradient-to-br from-medical-gold to-yellow-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm opacity-75">Средний возраст</p>
+                <p class="text-3xl font-bold">{{ "%.1f"|format(avg_age) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-chart-line text-xl"></i>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow">
-            <div class="card-header bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Последние записи
-                    </h5>
-                    <div>
-                        <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i>Добавить пациента
-                        </a>
-                        <a href="{{ url_for('export_csv') }}" class="btn btn-success btn-sm ms-2">
-                            <i class="fas fa-download me-1"></i>Экспорт CSV
-                        </a>
-                    </div>
-                </div>
+<!-- Additional Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-blue rounded-xl flex items-center justify-center">
+                <i class="fas fa-weight text-medical-accent text-xl"></i>
             </div>
-            <div class="card-body">
-                {% if patients %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Дата</th>
-                                <th>ФИО роженицы</th>
-                                <th>Возраст</th>
-                                <th>Срок беременности</th>
-                                <th>Пол ребенка</th>
-                                <th>Вес ребенка</th>
-                                <th>Способ родоразрешения</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for patient in patients[:10] %}
-                            <tr>
-                                <td>{{ patient.date }}</td>
-                                <td>{{ patient.patient_name }}</td>
-                                <td>{{ patient.age }}</td>
-                                <td>{{ patient.pregnancy_weeks }} нед.</td>
-                                <td>
-                                    <span class="badge bg-{{ 'info' if patient.child_gender == 'Мальчик' else 'danger' }}">
-                                        {{ patient.child_gender }}
-                                    </span>
-                                </td>
-                                <td>{{ patient.child_weight }} г</td>
-                                <td>
-                                    <span class="badge bg-{{ 'success' if patient.delivery_method == 'Естественные роды' else 'warning' }}">
-                                        {{ patient.delivery_method }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Нет данных</h5>
-                    <p class="text-muted">Добавьте первого пациента для начала работы</p>
-                    <a href="{{ url_for('add_patient') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Добавить пациента
-                    </a>
-                </div>
-                {% endif %}
+            <div>
+                <p class="text-sm text-gray-600">Средний вес ребенка</p>
+                <p class="text-2xl font-bold text-medical-dark">{{ "%.0f"|format(avg_child_weight) }} г</p>
             </div>
         </div>
     </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-green rounded-xl flex items-center justify-center">
+                <i class="fas fa-percentage text-green-600 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Детей от общего числа</p>
+                <p class="text-2xl font-bold text-medical-dark">{{ "%.1f"|format((boys + girls) / total_patients * 100 if total_patients > 0 else 0) }}%</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-beige rounded-xl flex items-center justify-center">
+                <i class="fas fa-hospital text-medical-gold text-xl"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Учреждений</p>
+                <p class="text-2xl font-bold text-medical-dark">{{ institution_stats|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Patients Table -->
+<div class="bg-white rounded-3xl shadow-xl overflow-hidden animate-slide-up">
+    <div class="bg-gradient-to-r from-medical-blue to-medical-accent px-6 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <h2 class="text-xl font-bold text-white mb-4 md:mb-0">
+                <i class="fas fa-list mr-2"></i>Последние записи
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <a href="{{ url_for('add_patient') }}" 
+                   class="bg-white text-medical-accent hover:bg-medical-light px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Добавить пациента</span>
+                </a>
+                <a href="{{ url_for('export_csv') }}" 
+                   class="bg-medical-green text-white hover:bg-green-600 px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Экспорт CSV</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="p-6">
+        {% if patients %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-medical-blue">
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Дата</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">ФИО роженицы</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Возраст</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Срок</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Пол ребенка</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Вес</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Способ</th>
+                        <th class="text-left py-3 px-4 font-semibold text-medical-dark">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients[:10] %}
+                    <tr class="border-b border-gray-100 hover:bg-medical-light/50 transition-colors duration-200">
+                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.date }}</td>
+                        <td class="py-3 px-4 font-medium text-medical-dark">{{ patient.patient_name }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.age }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.pregnancy_weeks }} нед.</td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ 'bg-blue-100 text-blue-800' if patient.child_gender == 'Мальчик' else 'bg-pink-100 text-pink-800' }}">
+                                {{ patient.child_gender }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600">{{ patient.child_weight }} г</td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ 'bg-green-100 text-green-800' if patient.delivery_method == 'Естественные роды' else 'bg-yellow-100 text-yellow-800' }}">
+                                {{ patient.delivery_method }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button class="w-8 h-8 bg-medical-accent hover:bg-medical-dark text-white rounded-lg transition-colors duration-300 flex items-center justify-center">
+                                <i class="fas fa-eye text-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <!-- IMAGE PLACEHOLDER 10 -->
+            <div class="w-24 h-24 bg-medical-yellow rounded-full mx-auto mb-6 flex items-center justify-center text-medical-dark font-bold text-lg">
+                Image 10
+            </div>
+            <h3 class="text-xl font-semibold text-medical-dark mb-2">Нет данных</h3>
+            <p class="text-gray-600 mb-6">Добавьте первого пациента для начала работы</p>
+            <a href="{{ url_for('add_patient') }}" 
+               class="bg-medical-accent hover:bg-medical-dark text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mx-auto w-fit">
+                <i class="fas fa-plus"></i>
+                <span>Добавить пациента</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <a href="{{ url_for('add_patient') }}" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-blue rounded-xl flex items-center justify-center">
+                <i class="fas fa-plus text-medical-accent text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-medical-dark">Добавить пациента</h3>
+                <p class="text-sm text-gray-600">Новая запись</p>
+            </div>
+        </div>
+    </a>
+    
+    <a href="{{ url_for('search') }}" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-green rounded-xl flex items-center justify-center">
+                <i class="fas fa-search text-green-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-medical-dark">Поиск данных</h3>
+                <p class="text-sm text-gray-600">Найти пациента</p>
+            </div>
+        </div>
+    </a>
+    
+    <a href="{{ url_for('export_csv') }}" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-medical-beige rounded-xl flex items-center justify-center">
+                <i class="fas fa-download text-medical-gold text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-medical-dark">Экспорт данных</h3>
+                <p class="text-sm text-gray-600">Скачать отчет</p>
+            </div>
+        </div>
+    </a>
 </div>
 {% endblock %} 

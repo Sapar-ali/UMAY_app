@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY - Профиль{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8 animate-fade-in">
+            <h1 class="text-3xl font-bold text-medical-dark mb-2">Профиль пользователя</h1>
+            <p class="text-gray-600">Управление личными данными и настройками</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-slide-up">
+                    <div class="text-center mb-6">
+                        <!-- IMAGE PLACEHOLDER 11 -->
+                        <div class="w-24 h-24 bg-medical-yellow rounded-full mx-auto mb-4 flex items-center justify-center text-medical-dark font-bold text-lg shadow-lg">
+                            Image 11
+                        </div>
+                        <h2 class="text-2xl font-bold text-medical-dark">{{ current_user.full_name }}</h2>
+                        <p class="text-medical-accent font-semibold">{{ current_user.position }}</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3 p-3 bg-medical-light rounded-xl">
+                            <div class="w-10 h-10 bg-medical-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-hospital text-medical-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Учреждение</p>
+                                <p class="font-semibold text-medical-dark">{{ current_user.medical_institution }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 p-3 bg-medical-light rounded-xl">
+                            <div class="w-10 h-10 bg-medical-green rounded-lg flex items-center justify-center">
+                                <i class="fas fa-city text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Город</p>
+                                <p class="font-semibold text-medical-dark">{{ current_user.city }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 p-3 bg-medical-light rounded-xl">
+                            <div class="w-10 h-10 bg-medical-beige rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user text-medical-gold"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Логин</p>
+                                <p class="font-semibold text-medical-dark">{{ current_user.login }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 p-3 bg-medical-light rounded-xl">
+                            <div class="w-10 h-10 bg-medical-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar text-medical-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Дата регистрации</p>
+                                <p class="font-semibold text-medical-dark">{{ current_user.created_at.strftime('%d.%m.%Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <button class="w-full bg-medical-accent hover:bg-medical-dark text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
+                            <i class="fas fa-edit"></i>
+                            <span>Редактировать профиль</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Statistics -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
+                    <h3 class="text-xl font-bold text-medical-dark mb-6">Моя статистика</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-medical-blue rounded-2xl">
+                            <div class="w-12 h-12 bg-medical-accent rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-users text-white text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-medical-dark">{{ total_patients }}</p>
+                            <p class="text-sm text-gray-600">Пациентов добавлено</p>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-medical-green rounded-2xl">
+                            <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-medical-dark">{{ "%.1f"|format(avg_age) }}</p>
+                            <p class="text-sm text-gray-600">Средний возраст</p>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-medical-beige rounded-2xl">
+                            <div class="w-12 h-12 bg-medical-gold rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-weight text-white text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-medical-dark">{{ "%.0f"|format(avg_child_weight) }}</p>
+                            <p class="text-sm text-gray-600">Средний вес (г)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
+                    <h3 class="text-xl font-bold text-medical-dark mb-6">Последняя активность</h3>
+                    {% if recent_patients %}
+                    <div class="space-y-4">
+                        {% for patient in recent_patients[:5] %}
+                        <div class="flex items-center space-x-4 p-4 bg-medical-light rounded-xl hover:bg-medical-blue/50 transition-colors duration-200">
+                            <div class="w-10 h-10 bg-medical-accent rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-plus text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-medical-dark">{{ patient.patient_name }}</p>
+                                <p class="text-sm text-gray-600">{{ patient.date }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ 'bg-blue-100 text-blue-800' if patient.child_gender == 'Мальчик' else 'bg-pink-100 text-pink-800' }}">
+                                    {{ patient.child_gender }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <!-- IMAGE PLACEHOLDER 12 -->
+                        <div class="w-16 h-16 bg-medical-yellow rounded-full mx-auto mb-4 flex items-center justify-center text-medical-dark font-bold">
+                            Image 12
+                        </div>
+                        <p class="text-gray-600">Пока нет активности</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
+                    <h3 class="text-xl font-bold text-medical-dark mb-6">Быстрые действия</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <a href="{{ url_for('add_patient') }}" class="flex items-center space-x-4 p-4 bg-medical-blue rounded-xl hover:bg-medical-accent hover:text-white transition-all duration-300">
+                            <div class="w-10 h-10 bg-medical-accent rounded-lg flex items-center justify-center">
+                                <i class="fas fa-plus text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Добавить пациента</p>
+                                <p class="text-sm opacity-75">Новая запись</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('search') }}" class="flex items-center space-x-4 p-4 bg-medical-green rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300">
+                            <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-search text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Поиск данных</p>
+                                <p class="text-sm opacity-75">Найти пациента</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('export_csv') }}" class="flex items-center space-x-4 p-4 bg-medical-beige rounded-xl hover:bg-medical-gold hover:text-white transition-all duration-300">
+                            <div class="w-10 h-10 bg-medical-gold rounded-lg flex items-center justify-center">
+                                <i class="fas fa-download text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Экспорт данных</p>
+                                <p class="text-sm opacity-75">Скачать отчет</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-4 p-4 bg-medical-light rounded-xl hover:bg-medical-accent hover:text-white transition-all duration-300">
+                            <div class="w-10 h-10 bg-medical-accent rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tachometer-alt text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Панель управления</p>
+                                <p class="text-sm opacity-75">Обзор статистики</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

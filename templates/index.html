@@ -1,100 +1,441 @@
 {% extends "base.html" %}
 
-{% block title %}UMAY - Главная{% endblock %}
+{% block title %}UMAY - Медицинская цифровая платформа{% endblock %}
 
 {% block content %}
-<div class="hero-section text-center py-5">
-    <div class="container">
-        <div class="logo-container mb-4">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="UMAY" class="hero-logo mb-3" style="height: 120px; width: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
-            <h1 class="display-4 fw-bold text-primary mb-4">UMAY</h1>
-        </div>
-        <p class="lead text-muted mb-5">
-            Профессиональная система управления данными рожениц для медицинских учреждений
+<!-- SECTION START: Full Screen Hero -->
+<div class="relative min-h-screen bg-bmw-gradient flex items-center justify-center overflow-hidden">
+    <!-- IMAGE PLACEHOLDER 1: Full Screen Background -->
+    <div class="absolute inset-0 bg-bmw-gold opacity-20 flex items-center justify-center">
+        <div class="text-bmw-dark text-6xl font-bold">Image 1</div>
+    </div>
+    
+    <!-- Glass Effect Overlay -->
+    <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+    
+    <!-- Hero Content -->
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto animate-fade-in">
+        <h1 class="text-5xl md:text-7xl font-bold text-bmw-white mb-6 animate-slide-up">
+            UMAY
+        </h1>
+        <p class="text-xl md:text-2xl text-bmw-white/90 mb-12 font-light animate-slide-up">
+            Забота, знание, технология
         </p>
-        <div class="row g-4">
-            <div class="col-md-6">
-                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
-                </a>
+        
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up">
+            <a href="{{ url_for('login') }}" class="bg-bmw-white hover:bg-bmw-gray text-bmw-blue px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Войти в систему</span>
+            </a>
+            <a href="{{ url_for('register') }}" class="bg-transparent hover:bg-bmw-white/20 text-bmw-white border-2 border-bmw-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center space-x-3">
+                <i class="fas fa-user-plus"></i>
+                <span>Регистрация</span>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- SECTION END: Full Screen Hero -->
+
+<!-- SECTION START: Floating Action Buttons -->
+<div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-3">
+    <!-- UMAY Pro Button -->
+    <button onclick="toggleProPanel()" class="group relative">
+        <div class="bg-bmw-blue hover:bg-bmw-accent text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow">
+            <i class="fas fa-user-md text-xl"></i>
+        </div>
+        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-bmw-dark text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            UMAY Pro
+        </div>
+    </button>
+    
+    <!-- UMAY Mama Button -->
+    <button onclick="toggleMamaPanel()" class="group relative">
+        <div class="bg-bmw-gold hover:bg-yellow-400 text-bmw-dark w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow">
+            <i class="fas fa-heart text-xl"></i>
+        </div>
+        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-bmw-dark text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            UMAY Mama
+        </div>
+    </button>
+</div>
+<!-- SECTION END: Floating Action Buttons -->
+
+<!-- SECTION START: UMAY Pro Side Panel -->
+<div id="proPanel" class="fixed left-0 top-0 h-full w-80 bg-bmw-white shadow-2xl transform -translate-x-full transition-transform duration-500 z-50">
+    <div class="h-full flex flex-col">
+        <!-- Header -->
+        <div class="bg-bmw-gradient p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">UMAY Pro</h2>
+                <button onclick="toggleProPanel()" class="text-white hover:text-gray-200 transition-colors duration-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="col-md-6">
-                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg w-100">
-                    <i class="fas fa-user-plus me-2"></i>Регистрация
+            <p class="text-white/90">Профессиональные инструменты для медицинских специалистов</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file-medical text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold">📋 Отчёты</h4>
+                            <p class="text-sm opacity-75">Детальная аналитика</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold">📊 Дашборды</h4>
+                            <p class="text-sm opacity-75">Визуализация данных</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-folder text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold">📂 Документы</h4>
+                            <p class="text-sm opacity-75">Управление файлами</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-book text-2xl"></i>
+                        <div>
+                            <h4 class="font-semibold">📚 Методички</h4>
+                            <p class="text-sm opacity-75">Обучающие материалы</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <a href="{{ url_for('login') }}" class="w-full bg-bmw-blue hover:bg-bmw-accent text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Войти в UMAY Pro</span>
                 </a>
             </div>
         </div>
     </div>
 </div>
+<!-- SECTION END: UMAY Pro Side Panel -->
 
-<div class="container mt-5">
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+<!-- SECTION START: UMAY Mama Side Panel -->
+<div id="mamaPanel" class="fixed left-0 top-0 h-full w-80 bg-bmw-white shadow-2xl transform -translate-x-full transition-transform duration-500 z-50">
+    <div class="h-full flex flex-col">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-pink-400 to-red-400 p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">UMAY Mama</h2>
+                <button onclick="toggleMamaPanel()" class="text-white hover:text-gray-200 transition-colors duration-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <p class="text-white/90">Забота о здоровье будущих мам и их малышей</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="grid grid-cols-1 gap-3">
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-dumbbell text-xl text-pink-500"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">🧘‍♀️ Спорт</h4>
+                            <p class="text-xs opacity-75">Упражнения для беременных</p>
+                        </div>
                     </div>
-                    <h5 class="card-title">Регистрация пользователей</h5>
-                    <p class="card-text text-muted">
-                        Безопасная регистрация медицинского персонала с разграничением доступа
-                    </p>
+                </div>
+                
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-apple-alt text-xl text-green-500"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">🥗 Питание</h4>
+                            <p class="text-xs opacity-75">Правильное питание</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-pills text-xl text-purple-500"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">💊 Витамины</h4>
+                            <p class="text-xs opacity-75">Витаминные комплексы</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-spa text-xl text-blue-500"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">🛁 Уход за телом</h4>
+                            <p class="text-xs opacity-75">Косметические процедуры</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-baby text-xl text-pink-400"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">🍼 Уход за новорождённым</h4>
+                            <p class="text-xs opacity-75">Советы по уходу</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-pink-50 rounded-xl p-4 hover:bg-pink-100 transition-all duration-300 cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-video text-xl text-red-500"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm">🎥 Советы от врачей</h4>
+                            <p class="text-xs opacity-75">Видео консультации</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-notes-medical fa-3x text-primary"></i>
-                    </div>
-                    <h5 class="card-title">Ввод данных</h5>
-                    <p class="card-text text-muted">
-                        Удобный ввод и редактирование данных рожениц с полной медицинской информацией
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-chart-bar fa-3x text-primary"></i>
-                    </div>
-                    <h5 class="card-title">Анализ и отчеты</h5>
-                    <p class="card-text text-muted">
-                        Детальная статистика и экспорт данных в различных форматах
-                    </p>
-                </div>
+            
+            <div class="mt-6">
+                <a href="{{ url_for('register') }}" class="w-full bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                    <i class="fas fa-heart"></i>
+                    <span>Присоединиться к UMAY Mama</span>
+                </a>
             </div>
         </div>
     </div>
+</div>
+<!-- SECTION END: UMAY Mama Side Panel -->
 
-    <div class="row mt-5">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-shield-alt text-primary me-2"></i>Безопасность данных
-                    </h5>
-                    <p class="card-text text-muted">
-                        Все данные хранятся в защищенной базе данных с шифрованием паролей и контролем доступа
-                    </p>
+<!-- SECTION START: News Feed -->
+<div class="py-20 bg-bmw-white">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16 animate-fade-in">
+            <h2 class="text-4xl md:text-5xl font-bold text-bmw-dark mb-6">Новости медицины</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Последние достижения в области акушерства и гинекологии
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- News Card 1 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 2 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 2
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Новые методы диагностики</h3>
+                <p class="text-gray-600 mb-4">Инновационные подходы в акушерстве и современные технологии диагностики беременности</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">2 часа назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-download text-primary me-2"></i>Экспорт данных
-                    </h5>
-                    <p class="card-text text-muted">
-                        Экспорт отчетов в Excel, PDF и другие форматы для дальнейшего анализа
-                    </p>
+            
+            <!-- News Card 2 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 3 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 3
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Конференция акушеров</h3>
+                <p class="text-gray-600 mb-4">Международная встреча специалистов по акушерству и гинекологии</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">1 день назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                </div>
+            </div>
+            
+            <!-- News Card 3 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 4 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 4
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Обновление протоколов</h3>
+                <p class="text-gray-600 mb-4">Новые стандарты ведения родов и современные медицинские протоколы</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">3 дня назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                </div>
+            </div>
+            
+            <!-- News Card 4 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 5 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 5
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Цифровые технологии</h3>
+                <p class="text-gray-600 mb-4">Внедрение искусственного интеллекта в акушерскую практику</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">5 дней назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                </div>
+            </div>
+            
+            <!-- News Card 5 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 6 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 6
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Здоровье матери и ребенка</h3>
+                <p class="text-gray-600 mb-4">Современные подходы к сохранению здоровья беременных женщин</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">1 неделя назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
+                </div>
+            </div>
+            
+            <!-- News Card 6 -->
+            <div class="bg-bmw-gray rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <!-- IMAGE PLACEHOLDER 7 -->
+                <div class="w-full h-48 bg-bmw-gold rounded-xl mb-6 flex items-center justify-center text-bmw-dark font-bold text-lg">
+                    Image 7
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-3">Медицинское образование</h3>
+                <p class="text-gray-600 mb-4">Новые программы обучения для акушерок и медицинского персонала</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-bmw-blue font-medium">2 недели назад</span>
+                    <i class="fas fa-arrow-right text-bmw-blue"></i>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!-- SECTION END: News Feed -->
+
+<!-- SECTION START: Features Overview -->
+<div class="py-20 bg-bmw-gradient-light">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16 animate-fade-in">
+            <h2 class="text-4xl md:text-5xl font-bold text-bmw-dark mb-6">Возможности платформы</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Современные инструменты для медицинских специалистов и будущих мам
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-bmw-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <div class="w-16 h-16 bg-bmw-blue rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-shield-alt text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-4">Безопасность данных</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Все данные хранятся в защищенной базе данных с шифрованием и контролем доступа
+                </p>
+            </div>
+            
+            <div class="bg-bmw-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <div class="w-16 h-16 bg-bmw-blue rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-chart-bar text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-4">Аналитика и отчеты</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Детальная статистика и экспорт данных в различных форматах для анализа
+                </p>
+            </div>
+            
+            <div class="bg-bmw-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in">
+                <div class="w-16 h-16 bg-bmw-blue rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-mobile-alt text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-bmw-dark mb-4">Мобильная доступность</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Полная адаптивность для работы на любых устройствах и платформах
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- SECTION END: Features Overview -->
+
+<!-- SECTION START: Call to Action -->
+<div class="py-20 bg-bmw-gradient">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 animate-slide-up">
+            Готовы начать?
+        </h2>
+        <p class="text-xl text-white/90 mb-12 animate-slide-up">
+            Присоединяйтесь к медицинской цифровой платформе нового поколения
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up">
+            <a href="{{ url_for('register') }}" class="bg-white hover:bg-bmw-gray text-bmw-blue px-10 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
+                <i class="fas fa-rocket"></i>
+                <span>Начать бесплатно</span>
+            </a>
+            <a href="{{ url_for('login') }}" class="bg-transparent hover:bg-white/20 text-white border-2 border-white px-10 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center space-x-3">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Войти в систему</span>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- SECTION END: Call to Action -->
+
+<!-- JavaScript for Side Panels -->
+<script>
+function toggleProPanel() {
+    const panel = document.getElementById('proPanel');
+    const mamaPanel = document.getElementById('mamaPanel');
+    
+    // Close mama panel if open
+    mamaPanel.classList.add('-translate-x-full');
+    
+    // Toggle pro panel
+    if (panel.classList.contains('-translate-x-full')) {
+        panel.classList.remove('-translate-x-full');
+        panel.classList.add('translate-x-0');
+    } else {
+        panel.classList.remove('translate-x-0');
+        panel.classList.add('-translate-x-full');
+    }
+}
+
+function toggleMamaPanel() {
+    const panel = document.getElementById('mamaPanel');
+    const proPanel = document.getElementById('proPanel');
+    
+    // Close pro panel if open
+    proPanel.classList.add('-translate-x-full');
+    
+    // Toggle mama panel
+    if (panel.classList.contains('-translate-x-full')) {
+        panel.classList.remove('-translate-x-full');
+        panel.classList.add('translate-x-0');
+    } else {
+        panel.classList.remove('translate-x-0');
+        panel.classList.add('-translate-x-full');
+    }
+}
+
+// Close panels when clicking outside
+document.addEventListener('click', function(event) {
+    const proPanel = document.getElementById('proPanel');
+    const mamaPanel = document.getElementById('mamaPanel');
+    
+    if (!proPanel.contains(event.target) && !event.target.closest('button[onclick*="toggleProPanel"]')) {
+        proPanel.classList.remove('translate-x-0');
+        proPanel.classList.add('-translate-x-full');
+    }
+    
+    if (!mamaPanel.contains(event.target) && !event.target.closest('button[onclick*="toggleMamaPanel"]')) {
+        mamaPanel.classList.remove('translate-x-0');
+        mamaPanel.classList.add('-translate-x-full');
+    }
+});
+</script>
 {% endblock %} 
