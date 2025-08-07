@@ -13,8 +13,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
 # ============================================================================
-# UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER
-# Версия: 5.0 - Только SQLite для стабильности
+# UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER И RAILWAY
+# Версия: 5.1 - Поддержка Render и Railway
 # ============================================================================
 
 # Настройка логирования
@@ -36,21 +36,30 @@ except Exception as e:
     print(f"Ошибка при создании папки data: {e}")
 
 # ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - SQLITE И POSTGRESQL
-# Проверяем наличие PostgreSQL URL от Render
+# Проверяем наличие PostgreSQL URL от Render или Railway
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL and (DATABASE_URL.startswith('postgres://') or DATABASE_URL.startswith('postgresql://')):
-    # PostgreSQL на Render - попробуем без специальных библиотек
+    # PostgreSQL на Render или Railway - попробуем без специальных библиотек
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    logger.info("✅ Using Render PostgreSQL database")
+    if os.environ.get('RENDER'):
+        logger.info("✅ Using Render PostgreSQL database")
+    elif os.environ.get('RAILWAY'):
+        logger.info("✅ Using Railway PostgreSQL database")
+    else:
+        logger.info("✅ Using PostgreSQL database")
     logger.info(f"PostgreSQL URL: {DATABASE_URL[:50]}...")  # Показываем только начало URL
     logger.info("⚠️ Попытка подключения без psycopg2")
 elif os.environ.get('RENDER'):
     # SQLite на Render (fallback)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
     logger.info("✅ Using Render SQLite database in /tmp")
+elif os.environ.get('RAILWAY'):
+    # SQLite на Railway (fallback)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
+    logger.info("✅ Using Railway SQLite database in /tmp")
 else:
     # Локально используем абсолютный путь
     current_dir = os.getcwd()
