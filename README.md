@@ -14,8 +14,8 @@ cd UMAY_stat
 
 2. **Создайте виртуальное окружение:**
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # На Windows: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate  # На Windows: .venv\Scripts\activate
 ```
 
 3. **Установите зависимости:**
@@ -23,17 +23,21 @@ source venv/bin/activate  # На Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. **Создайте базу данных:**
+4. **Запустите приложение:**
 ```bash
-python3 -c "from app import app, db; app.app_context().push(); db.create_all()"
+python run_local.py
 ```
 
-5. **Запустите приложение:**
+Приложение будет доступно по адресу: **http://localhost:5001**
+
+### Публичная ссылка (для демонстрации)
+
+Для создания публичной ссылки используйте:
 ```bash
-python3 run_local.py
+python run_public.py
 ```
 
-Приложение будет доступно по адресу: http://localhost:5000
+**Требования:** Установленный ngrok (`brew install ngrok`)
 
 ## 🌐 Деплой на Render
 
