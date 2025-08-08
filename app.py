@@ -535,14 +535,21 @@ def mama_dashboard():
     """Дашборд для пользователей UMAY Mama"""
     logger.info(f"Mama Dashboard accessed by user: {current_user.full_name} (login: {current_user.login})")
     try:
-        # Получаем контент для беременных
-        mama_content = MamaContent.query.filter_by(is_published=True).order_by(MamaContent.created_at.desc()).limit(6).all()
+        # Получаем ВСЕ статьи для отладки (убираем фильтр is_published)
+        mama_content = MamaContent.query.order_by(MamaContent.created_at.desc()).limit(6).all()
         
-        # Статистика контента
-        total_content = MamaContent.query.filter_by(is_published=True).count()
-        sport_content = MamaContent.query.filter_by(category='sport', is_published=True).count()
-        nutrition_content = MamaContent.query.filter_by(category='nutrition', is_published=True).count()
-        vitamins_content = MamaContent.query.filter_by(category='vitamins', is_published=True).count()
+        # Отладочная информация
+        logger.info(f"Found {len(mama_content)} articles in mama_content")
+        for article in mama_content:
+            logger.info(f"Article: {article.title}, Published: {article.is_published}, Category: {article.category}")
+        
+        # Статистика контента (убираем фильтр is_published)
+        total_content = MamaContent.query.count()
+        sport_content = MamaContent.query.filter_by(category='sport').count()
+        nutrition_content = MamaContent.query.filter_by(category='nutrition').count()
+        vitamins_content = MamaContent.query.filter_by(category='vitamins').count()
+        
+        logger.info(f"Statistics - Total: {total_content}, Sport: {sport_content}, Nutrition: {nutrition_content}, Vitamins: {vitamins_content}")
         
         return render_template('mama/dashboard.html',
                              mama_content=mama_content,
@@ -1400,8 +1407,7 @@ def mama_content():
     
     selected_category = request.args.get('category', 'sport')
     content = MamaContent.query.filter_by(
-        category=selected_category, 
-        is_published=True
+        category=selected_category
     ).order_by(MamaContent.created_at.desc()).all()
     
     return render_template('mama/content.html', 
