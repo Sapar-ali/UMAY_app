@@ -323,9 +323,28 @@ def login():
 def register():
     if request.method == 'POST':
         user_type = request.form.get('user_type', 'midwife')
-        full_name = request.form['full_name']
-        login = request.form['login']
-        password = request.form['password']
+        full_name = request.form.get('full_name', '').strip()
+        login = request.form.get('login', '').strip()
+        password = request.form.get('password', '')
+        
+        # Валидация данных
+        if not full_name:
+            flash('Имя обязательно для заполнения!', 'error')
+            return render_template('register.html')
+        
+        if not login:
+            flash('Логин обязателен для заполнения!', 'error')
+            return render_template('register.html')
+        
+        if len(password) < 6:
+            flash('Пароль должен содержать минимум 6 символов!', 'error')
+            return render_template('register.html')
+        
+        # Проверяем подтверждение пароля
+        confirm_password = request.form.get('confirm_password', '')
+        if password != confirm_password:
+            flash('Пароли не совпадают!', 'error')
+            return render_template('register.html')
         
         # Проверяем, существует ли пользователь
         existing_user = User.query.filter_by(login=login).first()
@@ -378,8 +397,9 @@ def register():
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Ошибка при регистрации: {e}")
-            flash('Ошибка при регистрации. Попробуйте еще раз.', 'error')
+            logger.error(f"Ошибка при регистрации пользователя {login}: {e}")
+            flash(f'Ошибка при регистрации: {str(e)}. Попробуйте еще раз.', 'error')
+            return render_template('register.html')
     
     return render_template('register.html')
 
