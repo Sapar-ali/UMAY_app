@@ -318,19 +318,20 @@ def login():
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
+        is_medic = request.form.get('is_medic') == 'on'  # Переключатель "Медик"
         
-        # Check both databases for the user
+        # Определяем, какую базу данных проверять на основе переключателя
         user = None
         app_type = None
         
-        # First check UMAY Pro database
-        with app.app_context():
-            user = db.session.query(UserPro).filter_by(login=login).first()
-            if user:
-                app_type = 'pro'
-        
-        # Then check UMAY Mama database
-        if not user:
+        if is_medic:
+            # Если переключатель "Медик" включен - ищем в UMAY Pro
+            with app.app_context():
+                user = db.session.query(UserPro).filter_by(login=login).first()
+                if user:
+                    app_type = 'pro'
+        else:
+            # Если переключатель "Медик" выключен - ищем в UMAY Mama
             with app.app_context():
                 user = db.session.query(UserMama).filter_by(login=login).first()
                 if user:
@@ -355,7 +356,10 @@ def login():
                 flash('Добро пожаловать в UMAY Pro!', 'success')
                 return redirect(url_for('dashboard'))
         else:
-            flash('Неверный логин или пароль!', 'error')
+            if is_medic:
+                flash('Неверный логин или пароль для медицинского персонала!', 'error')
+            else:
+                flash('Неверный логин или пароль для рожениц!', 'error')
     
     return render_template('login.html')
 

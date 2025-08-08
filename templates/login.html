@@ -51,6 +51,19 @@
                                placeholder="Введите ваш пароль">
                     </div>
                     
+                    <!-- Переключатель "Медик" -->
+                    <div class="flex items-center justify-center space-x-4 py-4">
+                        <span class="text-gray-300 font-medium">Роженица</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   name="is_medic" 
+                                   class="sr-only peer"
+                                   id="medic-toggle">
+                            <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-pink-500"></div>
+                        </label>
+                        <span class="text-gray-300 font-medium">Медик</span>
+                    </div>
+                    
                     <button type="submit" 
                             class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
                         <i class="fas fa-sign-in-alt group-hover:animate-pulse"></i>
