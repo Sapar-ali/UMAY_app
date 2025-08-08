@@ -463,20 +463,31 @@
                         </div>
                         
                         <div class="content-actions">
-                            <a href="{{ url_for('admin_mama_content_approve', content_id=content.id) }}" 
-                               class="btn btn-approve">
-                                <i class="fas fa-check"></i> Одобрить
-                            </a>
-                            <a href="{{ url_for('admin_mama_content_reject', content_id=content.id) }}" 
-                               class="btn btn-reject"
-                               onclick="return confirm('Вы уверены, что хотите отклонить эту статью?')">
-                                <i class="fas fa-times"></i> Отклонить
-                            </a>
+                            <form method="POST" action="{{ url_for('admin_mama_content_approve', content_id=content.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-approve">
+                                    <i class="fas fa-check"></i> Одобрить
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="{{ url_for('admin_mama_content_reject', content_id=content.id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите отклонить эту статью?')">
+                                <button type="submit" class="btn btn-reject">
+                                    <i class="fas fa-times"></i> Отклонить
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="{{ url_for('admin_mama_content_delete', content_id=content.id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите УДАЛИТЬ эту статью? Это действие нельзя отменить!')">
+                                <button type="submit" class="btn btn-danger" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border: none; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </form>
+                            
                             <a href="{{ url_for('admin_mama_content_edit', content_id=content.id) }}" 
                                class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Редактировать
                             </a>
-                            <a href="#" onclick="previewContent({{ content.id }})" 
+                            
+                            <a href="{{ url_for('mama_article_detail', content_id=content.id) }}" 
+                               target="_blank"
                                class="btn btn-preview">
                                 <i class="fas fa-eye"></i> Предпросмотр
                             </a>
