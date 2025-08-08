@@ -786,8 +786,30 @@ def mama_content():
 @app.route('/export_csv')
 @login_required
 def export_csv():
-    # Получаем все пациентов
-    patients = Patient.query.all()
+    # Получаем параметры фильтрации
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user_only = request.args.get('user_only', 'false').lower() == 'true'
+    
+    # Базовый запрос
+    query = Patient.query
+    
+    # Применяем фильтры по датам
+    if start_date:
+        query = query.filter(Patient.birth_date >= start_date)
+    if end_date:
+        query = query.filter(Patient.birth_date <= end_date)
+    
+    # Если запрошен экспорт только для текущего пользователя
+    if user_only:
+        query = query.filter(Patient.midwife == current_user.full_name)
+    
+    # Получаем отфильтрованных пациентов
+    patients = query.all()
+    
+    if not patients:
+        flash('Нет данных для экспорта в указанном периоде', 'error')
+        return redirect(url_for('dashboard'))
     
     # Создаем данные для экспорта
     data = []
@@ -826,11 +848,20 @@ def export_csv():
     df.to_csv(output, index=False, encoding='utf-8-sig')
     output.seek(0)
     
+    # Формируем имя файла с периодом
+    period_suffix = ""
+    if start_date and end_date:
+        period_suffix = f"_{start_date}_to_{end_date}"
+    elif start_date:
+        period_suffix = f"_from_{start_date}"
+    elif end_date:
+        period_suffix = f"_until_{end_date}"
+    
     return send_file(
         io.BytesIO(output.getvalue().encode('utf-8-sig')),
         mimetype='text/csv',
         as_attachment=True,
-        download_name=f'umay_report_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
+        download_name=f'umay_patients{period_suffix}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     )
 
 @app.route('/analytics')
@@ -918,11 +949,29 @@ def analytics():
 def export_pdf():
     """Экспорт данных в красивый PDF отчет"""
     try:
-        # Получаем все пациентов
-        patients = Patient.query.all()
+        # Получаем параметры фильтрации
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        user_only = request.args.get('user_only', 'false').lower() == 'true'
+        
+        # Базовый запрос
+        query = Patient.query
+        
+        # Применяем фильтры по датам
+        if start_date:
+            query = query.filter(Patient.birth_date >= start_date)
+        if end_date:
+            query = query.filter(Patient.birth_date <= end_date)
+        
+        # Если запрошен экспорт только для текущего пользователя
+        if user_only:
+            query = query.filter(Patient.midwife == current_user.full_name)
+        
+        # Получаем отфильтрованных пациентов
+        patients = query.all()
         
         if not patients:
-            flash('Нет данных для экспорта', 'error')
+            flash('Нет данных для экспорта в указанном периоде', 'error')
             return redirect(url_for('dashboard'))
         
         # Создаем PDF в памяти

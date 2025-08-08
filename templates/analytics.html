@@ -185,10 +185,74 @@
                class="btn-secondary">
                 <i class="fas fa-arrow-left mr-2"></i>Назад к дашборду
             </a>
-            <a href="{{ url_for('export_pdf') }}" 
+            <button onclick="openExportModal('pdf')" 
                class="btn-primary">
                 <i class="fas fa-file-pdf mr-2"></i>Экспорт в PDF
-            </a>
+            </button>
+            <button onclick="openExportModal('csv')" 
+               class="btn-primary">
+                <i class="fas fa-download mr-2"></i>Экспорт в CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-download text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">Экспорт данных</h3>
+                <p class="text-gray-600">Выберите период для экспорта</p>
+            </div>
+
+            <form id="exportForm" method="GET">
+                <div class="space-y-6">
+                    <!-- Quick Periods -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="setPeriod('all')" class="period-btn bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-infinity mr-2"></i>Все время
+                        </button>
+                        <button type="button" onclick="setPeriod('month')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar mr-2"></i>Этот месяц
+                        </button>
+                        <button type="button" onclick="setPeriod('quarter')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar-alt mr-2"></i>Этот квартал
+                        </button>
+                        <button type="button" onclick="setPeriod('year')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar-day mr-2"></i>Этот год
+                        </button>
+                    </div>
+
+                    <!-- Custom Date Range -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Или укажите период:</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">От</label>
+                                <input type="date" id="startDate" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">До</label>
+                                <input type="date" id="endDate" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeExportModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                            Отмена
+                        </button>
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-download mr-2"></i>Экспорт
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -333,6 +397,105 @@ document.addEventListener('DOMContentLoaded', function() {
         
         updateCounter();
     });
+});
+
+// Export Modal Functions
+let currentExportType = '';
+
+function openExportModal(type) {
+    currentExportType = type;
+    const modal = document.getElementById('exportModal');
+    const title = document.getElementById('modalTitle');
+    
+    if (type === 'csv') {
+        title.textContent = 'Экспорт CSV';
+    } else if (type === 'pdf') {
+        title.textContent = 'Экспорт PDF';
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeExportModal() {
+    const modal = document.getElementById('exportModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('exportForm').reset();
+    resetPeriodButtons();
+}
+
+function setPeriod(period) {
+    // Reset all buttons
+    resetPeriodButtons();
+    
+    // Highlight selected button
+    const buttons = document.querySelectorAll('.period-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes(period === 'all' ? 'Все время' : 
+                                   period === 'month' ? 'Этот месяц' :
+                                   period === 'quarter' ? 'Этот квартал' : 'Этот год')) {
+            btn.className = 'period-btn bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105';
+        }
+    });
+    
+    // Set date range based on period
+    const today = new Date();
+    const startDate = document.getElementById('startDate');
+    const endDate = document.getElementById('endDate');
+    
+    endDate.value = today.toISOString().split('T')[0];
+    
+    switch(period) {
+        case 'all':
+            startDate.value = '';
+            break;
+        case 'month':
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            startDate.value = firstDay.toISOString().split('T')[0];
+            break;
+        case 'quarter':
+            const quarter = Math.floor(today.getMonth() / 3);
+            const quarterStart = new Date(today.getFullYear(), quarter * 3, 1);
+            startDate.value = quarterStart.toISOString().split('T')[0];
+            break;
+        case 'year':
+            const yearStart = new Date(today.getFullYear(), 0, 1);
+            startDate.value = yearStart.toISOString().split('T')[0];
+            break;
+    }
+}
+
+function resetPeriodButtons() {
+    const buttons = document.querySelectorAll('.period-btn');
+    buttons.forEach(btn => {
+        btn.className = 'period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105';
+    });
+}
+
+// Handle form submission
+document.getElementById('exportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    let url = '';
+    if (currentExportType === 'csv') {
+        url = '{{ url_for("export_csv") }}';
+    } else if (currentExportType === 'pdf') {
+        url = '{{ url_for("export_pdf") }}';
+    }
+    
+    // Add date parameters
+    if (startDate) url += `?start_date=${startDate}`;
+    if (endDate) url += `${startDate ? '&' : '?'}end_date=${endDate}`;
+    
+    // Close modal and redirect
+    closeExportModal();
+    window.location.href = url;
 });
 </script>
 {% endblock %}
