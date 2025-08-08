@@ -134,9 +134,23 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <button class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center transform hover:scale-110">
-                                        <i class="fas fa-eye text-sm"></i>
-                                    </button>
+                                    <div class="flex space-x-2">
+                                        <!-- Проверяем права доступа -->
+                                        {% if current_user.login == 'Joker' or patient.midwife == current_user.full_name %}
+                                            <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" 
+                                               class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center transform hover:scale-110"
+                                               title="Редактировать">
+                                                <i class="fas fa-edit text-sm"></i>
+                                            </a>
+                                            <button onclick="confirmDelete({{ patient.id }}, '{{ patient.patient_name }}')" 
+                                                    class="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center transform hover:scale-110"
+                                                    title="Удалить">
+                                                <i class="fas fa-trash text-sm"></i>
+                                            </button>
+                                        {% else %}
+                                            <span class="text-gray-400 text-xs">Нет прав</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -443,5 +457,17 @@ document.getElementById('exportForm').addEventListener('submit', function(e) {
     closeExportModal();
     window.location.href = url;
 });
+
+// Delete confirmation function
+function confirmDelete(patientId, patientName) {
+    if (confirm(`Вы уверены, что хотите удалить запись пациента "${patientName}"?\n\nЭто действие нельзя отменить.`)) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/delete_patient/${patientId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 {% endblock %} 

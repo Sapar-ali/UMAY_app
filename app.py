@@ -508,6 +508,106 @@ def add_patient():
     
     return render_template('add_patient.html')
 
+@app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
+@login_required
+def edit_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Проверяем права доступа
+    # Супер-админ может редактировать все записи
+    # Акушерки могут редактировать только свои записи
+    if current_user.login != 'Joker' and patient.midwife != current_user.full_name:
+        flash('У вас нет прав для редактирования этой записи', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            # Обработка чекбоксов - если не отмечен, то "Нет"
+            gestosis = "Да" if 'gestosis' in request.form else "Нет"
+            diabetes = "Да" if 'diabetes' in request.form else "Нет"
+            hypertension = "Да" if 'hypertension' in request.form else "Нет"
+            anemia = "Да" if 'anemia' in request.form else "Нет"
+            infections = "Да" if 'infections' in request.form else "Нет"
+            placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
+            polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
+            oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
+            
+            # Валидация обязательных полей
+            if not request.form['patient_name'] or request.form['patient_name'].strip() == "":
+                flash('ФИО роженицы обязательно для заполнения', 'error')
+                return render_template('edit_patient.html', patient=patient)
+            
+            if not request.form['child_gender'] or request.form['child_gender'] == "":
+                flash('Необходимо выбрать пол ребенка', 'error')
+                return render_template('edit_patient.html', patient=patient)
+            
+            if not request.form['delivery_method'] or request.form['delivery_method'] == "":
+                flash('Необходимо выбрать способ родоразрешения', 'error')
+                return render_template('edit_patient.html', patient=patient)
+            
+            if not request.form['anesthesia'] or request.form['anesthesia'] == "":
+                flash('Необходимо выбрать тип анестезии', 'error')
+                return render_template('edit_patient.html', patient=patient)
+            
+            # Обновляем данные пациента
+            patient.patient_name = request.form['patient_name'].strip()
+            patient.age = int(request.form['age'])
+            patient.pregnancy_weeks = int(request.form['pregnancy_weeks'])
+            patient.weight_before = float(request.form['weight_before'])
+            patient.weight_after = float(request.form['weight_after'])
+            patient.complications = request.form['complications'] or ""
+            patient.notes = request.form['notes'] or ""
+            patient.birth_date = request.form['birth_date']
+            patient.birth_time = request.form['birth_time']
+            patient.child_gender = request.form['child_gender']
+            patient.child_weight = int(request.form['child_weight'])
+            patient.delivery_method = request.form['delivery_method']
+            patient.anesthesia = request.form['anesthesia']
+            patient.blood_loss = int(request.form['blood_loss'])
+            patient.labor_duration = float(request.form['labor_duration'])
+            patient.other_diseases = request.form['other_diseases'] or ""
+            patient.gestosis = gestosis
+            patient.diabetes = diabetes
+            patient.hypertension = hypertension
+            patient.anemia = anemia
+            patient.infections = infections
+            patient.placenta_pathology = placenta_pathology
+            patient.polyhydramnios = polyhydramnios
+            patient.oligohydramnios = oligohydramnios
+            
+            db.session.commit()
+            flash('Данные пациента успешно обновлены!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при обновлении пациента: {e}")
+            flash('Ошибка при обновлении данных пациента. Проверьте данные.', 'error')
+    
+    return render_template('edit_patient.html', patient=patient)
+
+@app.route('/delete_patient/<int:patient_id>', methods=['POST'])
+@login_required
+def delete_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Проверяем права доступа
+    # Супер-админ может удалять все записи
+    # Акушерки могут удалять только свои записи
+    if current_user.login != 'Joker' and patient.midwife != current_user.full_name:
+        flash('У вас нет прав для удаления этой записи', 'error')
+        return redirect(url_for('dashboard'))
+    
+    try:
+        db.session.delete(patient)
+        db.session.commit()
+        flash('Запись пациента успешно удалена!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Ошибка при удалении пациента: {e}")
+        flash('Ошибка при удалении записи пациента.', 'error')
+    
+    return redirect(url_for('dashboard'))
+
 @app.route('/search')
 @login_required
 def search():
