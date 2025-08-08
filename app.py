@@ -364,42 +364,48 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Получаем статистику
-    patients = Patient.query.all()
-    total_patients = len(patients)
-    
-    # Статистика по полу
-    male_count = sum(1 for p in patients if p.child_gender == 'Мальчик')
-    female_count = sum(1 for p in patients if p.child_gender == 'Девочка')
-    
-    # Статистика по способам родоразрешения
-    natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
-    cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
-    
-    # Статистика за этот месяц
-    from datetime import datetime
-    current_month = datetime.now().month
-    current_year = datetime.now().year
-    this_month = 0
-    
-    for patient in patients:
-        try:
-            birth_date = datetime.strptime(patient.birth_date, '%Y-%m-%d')
-            if birth_date.month == current_month and birth_date.year == current_year:
-                this_month += 1
-        except:
-            continue
-    
-    # Получаем последние 10 пациентов
-    recent_patients = Patient.query.order_by(Patient.id.desc()).limit(10).all()
-    
-    return render_template('dashboard.html',
-                         total_patients=total_patients,
-                         male_count=male_count, female_count=female_count,
-                         natural_births=natural_births,
-                         cesarean_count=cesarean_count,
-                         this_month=this_month,
-                         patients=recent_patients)
+    logger.info(f"Dashboard accessed by user: {current_user.full_name} (login: {current_user.login})")
+    try:
+        # Получаем статистику
+        patients = Patient.query.all()
+        total_patients = len(patients)
+        
+        # Статистика по полу
+        male_count = sum(1 for p in patients if p.child_gender == 'Мальчик')
+        female_count = sum(1 for p in patients if p.child_gender == 'Девочка')
+        
+        # Статистика по способам родоразрешения
+        natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
+        cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
+        
+        # Статистика за этот месяц
+        from datetime import datetime
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        this_month = 0
+        
+        for patient in patients:
+            try:
+                birth_date = datetime.strptime(patient.birth_date, '%Y-%m-%d')
+                if birth_date.month == current_month and birth_date.year == current_year:
+                    this_month += 1
+            except:
+                continue
+        
+        # Получаем последние 10 пациентов
+        recent_patients = Patient.query.order_by(Patient.id.desc()).limit(10).all()
+        
+        return render_template('dashboard.html',
+                             total_patients=total_patients,
+                             male_count=male_count, female_count=female_count,
+                             natural_births=natural_births,
+                             cesarean_count=cesarean_count,
+                             this_month=this_month,
+                             patients=recent_patients)
+    except Exception as e:
+        logger.error(f"Error in dashboard: {e}")
+        flash('Ошибка при загрузке панели управления', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/add_patient', methods=['GET', 'POST'])
 @login_required
@@ -1195,6 +1201,11 @@ def export_pdf():
         flash('Ошибка при создании PDF отчета', 'error')
         return redirect(url_for('dashboard'))
 
+# Тестовый маршрут для проверки
+@app.route('/test')
+def test():
+    return "Приложение работает! Пользователь Joker существует и может войти."
+
 if __name__ == '__main__':
     # Для прямого запуска app.py (не рекомендуется)
     # Используйте run_local.py для локального запуска
@@ -1206,9 +1217,9 @@ if __name__ == '__main__':
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal Server Error: {error}")
-    return "Internal Server Error", 500
+    return render_template('error.html', error_code=500, error_message="Внутренняя ошибка сервера"), 500
 
 @app.errorhandler(404)
 def not_found_error(error):
     logger.error(f"Not Found Error: {error}")
-    return "Not Found", 404 
+    return render_template('error.html', error_code=404, error_message="Страница не найдена"), 404 
