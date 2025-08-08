@@ -3,201 +3,543 @@
 {% block title %}ИИ-Генерация контента{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Заголовок -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-magic"></i> ИИ-Генерация контента</h1>
-        <a href="{{ url_for('admin_mama_content') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Назад к панели
-        </a>
-    </div>
+<style>
+/* Apple/BMW стиль дизайн */
+.ai-generation-page {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
 
-    <!-- Информация -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="alert alert-info">
-                <h5><i class="fas fa-info-circle"></i> Как работает ИИ-генерация</h5>
-                <ul class="mb-0">
-                    <li>Система автоматически создает статьи на основе медицинских шаблонов</li>
-                    <li>Контент адаптируется под выбранную категорию и триместр</li>
-                    <li>Все сгенерированные статьи требуют модерации перед публикацией</li>
-                    <li>Автор статей: "ИИ-Помощник"</li>
-                </ul>
+.page-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.back-button {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(23, 162, 184, 0.3);
+}
+
+.info-card h5 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.info-card ul {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.generation-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.generation-card .card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.generation-card .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.generation-card .card-body {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background: white;
+}
+
+.btn-generate {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    margin-right: 1rem;
+}
+
+.btn-generate:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+    color: white;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    border: none;
+    color: white;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+}
+
+.btn-cancel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4);
+    color: white;
+}
+
+.templates-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+}
+
+.templates-card .card-header {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.templates-card .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.template-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid transparent;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #495057;
+    display: block;
+}
+
+.template-item:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.2);
+    text-decoration: none;
+    color: #495057;
+}
+
+.template-item i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #007bff;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.stats-card .card-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.stats-card .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stats-card .card-body {
+    padding: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #007bff;
+    display: block;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.examples-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+}
+
+.examples-card .card-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.examples-card .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.example-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.example-item:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
+}
+
+.example-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.example-header h6 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.example-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.example-description {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.generation-card,
+.templates-card,
+.stats-card,
+.examples-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+</style>
+
+<div class="ai-generation-page">
+    <div class="container-fluid">
+        <!-- Заголовок -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-magic"></i> ИИ-Генерация контента</h1>
+                <a href="{{ url_for('admin_mama_content') }}" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Назад к панели
+                </a>
             </div>
         </div>
-    </div>
 
-    <!-- Форма генерации -->
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-cogs"></i> Настройки генерации</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <!-- Категория -->
-                        <div class="form-group">
-                            <label for="category"><strong>Категория контента:</strong></label>
-                            <select class="form-control" id="category" name="category" required>
-                                <option value="">Выберите категорию</option>
-                                {% for key, name in categories.items() %}
-                                <option value="{{ key }}" {% if request.args.get('category') == key %}selected{% endif %}>
-                                    {% if key == 'sport' %}🏃 {{ name }}
-                                    {% elif key == 'nutrition' %}🍎 {{ name }}
-                                    {% elif key == 'vitamins' %}💊 {{ name }}
-                                    {% elif key == 'body_care' %}💅 {{ name }}
-                                    {% elif key == 'baby_care' %}👶 {{ name }}
-                                    {% elif key == 'doctor_advice' %}👨‍⚕️ {{ name }}
-                                    {% else %}{{ name }}
-                                    {% endif %}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Триместр -->
-                        <div class="form-group">
-                            <label for="trimester"><strong>Триместр беременности:</strong></label>
-                            <select class="form-control" id="trimester" name="trimester" required>
-                                <option value="">Выберите триместр</option>
-                                <option value="1" {% if request.args.get('trimester') == '1' %}selected{% endif %}>1 триместр (1-12 неделя)</option>
-                                <option value="2" {% if request.args.get('trimester') == '2' %}selected{% endif %}>2 триместр (13-27 неделя)</option>
-                                <option value="3" {% if request.args.get('trimester') == '3' %}selected{% endif %}>3 триместр (28-40 неделя)</option>
-                                <option value="all" {% if request.args.get('trimester') == 'all' %}selected{% endif %}>Любой триместр</option>
-                            </select>
-                        </div>
-
-                        <!-- Количество статей -->
-                        <div class="form-group">
-                            <label for="count"><strong>Количество статей:</strong></label>
-                            <select class="form-control" id="count" name="count">
-                                <option value="1" {% if request.args.get('count') == '1' %}selected{% endif %}>1 статья</option>
-                                <option value="3" {% if request.args.get('count') == '3' %}selected{% endif %}>3 статьи</option>
-                                <option value="5" {% if request.args.get('count') == '5' %}selected{% endif %}>5 статей</option>
-                                <option value="10" {% if request.args.get('count') == '10' %}selected{% endif %}>10 статей</option>
-                                <option value="20" {% if request.args.get('count') == '20' %}selected{% endif %}>20 статей</option>
-                            </select>
-                        </div>
-
-                        <!-- Кнопки -->
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-magic"></i> Генерировать контент
-                            </button>
-                            <a href="{{ url_for('admin_mama_content') }}" class="btn btn-secondary">
-                                Отмена
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <!-- Информация -->
+        <div class="info-card">
+            <h5><i class="fas fa-info-circle"></i> Как работает ИИ-генерация</h5>
+            <ul class="mb-0">
+                <li>Система автоматически создает статьи на основе медицинских шаблонов</li>
+                <li>Контент адаптируется под выбранную категорию и триместр</li>
+                <li>Все сгенерированные статьи требуют модерации перед публикацией</li>
+                <li>Автор статей: "ИИ-Помощник"</li>
+            </ul>
         </div>
 
-        <!-- Быстрые шаблоны -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bolt"></i> Быстрые шаблоны</h5>
+        <!-- Основной контент -->
+        <div class="row">
+            <!-- Форма генерации -->
+            <div class="col-lg-8">
+                <div class="generation-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cogs"></i> Настройки генерации</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            <!-- Категория -->
+                            <div class="form-group">
+                                <label for="category">Категория контента:</label>
+                                <select class="form-control" id="category" name="category" required>
+                                    <option value="">Выберите категорию</option>
+                                    {% for key, name in categories.items() %}
+                                    <option value="{{ key }}" {% if request.args.get('category') == key %}selected{% endif %}>
+                                        {% if key == 'sport' %}🏃 {{ name }}
+                                        {% elif key == 'nutrition' %}🍎 {{ name }}
+                                        {% elif key == 'vitamins' %}💊 {{ name }}
+                                        {% elif key == 'body_care' %}💅 {{ name }}
+                                        {% elif key == 'baby_care' %}👶 {{ name }}
+                                        {% elif key == 'doctor_advice' %}👨‍⚕️ {{ name }}
+                                        {% else %}{{ name }}
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Триместр -->
+                            <div class="form-group">
+                                <label for="trimester">Триместр беременности:</label>
+                                <select class="form-control" id="trimester" name="trimester" required>
+                                    <option value="">Выберите триместр</option>
+                                    <option value="1" {% if request.args.get('trimester') == '1' %}selected{% endif %}>1 триместр (1-12 неделя)</option>
+                                    <option value="2" {% if request.args.get('trimester') == '2' %}selected{% endif %}>2 триместр (13-27 неделя)</option>
+                                    <option value="3" {% if request.args.get('trimester') == '3' %}selected{% endif %}>3 триместр (28-40 неделя)</option>
+                                    <option value="all" {% if request.args.get('trimester') == 'all' %}selected{% endif %}>Любой триместр</option>
+                                </select>
+                            </div>
+
+                            <!-- Количество статей -->
+                            <div class="form-group">
+                                <label for="count">Количество статей:</label>
+                                <select class="form-control" id="count" name="count">
+                                    <option value="1" {% if request.args.get('count') == '1' %}selected{% endif %}>1 статья</option>
+                                    <option value="3" {% if request.args.get('count') == '3' %}selected{% endif %}>3 статьи</option>
+                                    <option value="5" {% if request.args.get('count') == '5' %}selected{% endif %}>5 статей</option>
+                                    <option value="10" {% if request.args.get('count') == '10' %}selected{% endif %}>10 статей</option>
+                                    <option value="20" {% if request.args.get('count') == '20' %}selected{% endif %}>20 статей</option>
+                                </select>
+                            </div>
+
+                            <!-- Кнопки -->
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-generate">
+                                    <i class="fas fa-magic"></i> Генерировать контент
+                                </button>
+                                <a href="{{ url_for('admin_mama_content') }}" class="btn btn-cancel">
+                                    Отмена
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="list-group">
+            </div>
+
+            <!-- Боковая панель -->
+            <div class="col-lg-4">
+                <!-- Быстрые шаблоны -->
+                <div class="templates-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Быстрые шаблоны</h5>
+                    </div>
+                    <div class="card-body">
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=sport&trimester=1&count=5" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-dumbbell"></i> Спорт - 1 триместр (5 статей)
                         </a>
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=nutrition&trimester=2&count=5" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-apple-alt"></i> Питание - 2 триместр (5 статей)
                         </a>
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=doctor_advice&trimester=3&count=5" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-user-md"></i> Советы врачей - 3 триместр (5 статей)
                         </a>
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=vitamins&trimester=all&count=10" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-pills"></i> Витамины - любой триместр (10 статей)
                         </a>
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=baby_care&trimester=all&count=5" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-baby"></i> Уход за малышом (5 статей)
                         </a>
                         <a href="{{ url_for('admin_mama_content_generate') }}?category=body_care&trimester=all&count=5" 
-                           class="list-group-item list-group-item-action">
+                           class="template-item">
                             <i class="fas fa-spa"></i> Уход за телом (5 статей)
                         </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Статистика -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-bar"></i> Статистика генерации</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <h4 class="text-primary">0</h4>
-                            <small>Сгенерировано сегодня</small>
-                        </div>
-                        <div class="col-6">
-                            <h4 class="text-success">0</h4>
-                            <small>Одобрено сегодня</small>
+                <!-- Статистика -->
+                <div class="stats-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Статистика генерации</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <span class="stat-number">0</span>
+                                    <span class="stat-label">Сгенерировано сегодня</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <span class="stat-number">0</span>
+                                    <span class="stat-label">Одобрено сегодня</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Примеры контента -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-eye"></i> Примеры генерируемого контента</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <h6><i class="fas fa-dumbbell"></i> Спорт</h6>
-                                </div>
-                                <div class="card-body">
-                                    <h6>Упражнения для беременных в первом триместре</h6>
-                                    <p class="small">В первом триместре беременности важно поддерживать физическую активность. Эти упражнения помогут укрепить мышцы и подготовиться к родам.</p>
-                                    <span class="badge badge-info">1 триместр</span>
-                                    <span class="badge badge-secondary">Средняя сложность</span>
-                                </div>
+        <!-- Примеры контента -->
+        <div class="examples-card">
+            <div class="card-header">
+                <h5><i class="fas fa-eye"></i> Примеры генерируемого контента</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="example-item">
+                            <div class="example-header">
+                                <h6><i class="fas fa-dumbbell"></i> Спорт</h6>
                             </div>
+                            <div class="example-title">Упражнения для беременных в первом триместре</div>
+                            <div class="example-description">В первом триместре беременности важно поддерживать физическую активность. Эти упражнения помогут укрепить мышцы и подготовиться к родам.</div>
+                            <span class="badge badge-info">1 триместр</span>
+                            <span class="badge badge-secondary">Средняя сложность</span>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h6><i class="fas fa-apple-alt"></i> Питание</h6>
-                                </div>
-                                <div class="card-body">
-                                    <h6>Правильное питание во втором триместре</h6>
-                                    <p class="small">Во втором триместре особенно важно следить за питанием. Рацион должен быть сбалансированным и богатым витаминами.</p>
-                                    <span class="badge badge-info">2 триместр</span>
-                                    <span class="badge badge-secondary">Легкая сложность</span>
-                                </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="example-item">
+                            <div class="example-header">
+                                <h6><i class="fas fa-apple-alt"></i> Питание</h6>
                             </div>
+                            <div class="example-title">Правильное питание во втором триместре</div>
+                            <div class="example-description">Во втором триместре особенно важно следить за питанием. Рацион должен быть сбалансированным и богатым витаминами.</div>
+                            <span class="badge badge-info">2 триместр</span>
+                            <span class="badge badge-secondary">Легкая сложность</span>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-info text-white">
-                                    <h6><i class="fas fa-user-md"></i> Советы врачей</h6>
-                                </div>
-                                <div class="card-body">
-                                    <h6>Советы врача: третий триместр</h6>
-                                    <p class="small">В третьем триместре важно регулярно посещать врача и сдавать анализы. При любых тревожных симптомах немедленно обращайтесь к врачу.</p>
-                                    <span class="badge badge-info">3 триместр</span>
-                                    <span class="badge badge-secondary">Средняя сложность</span>
-                                </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="example-item">
+                            <div class="example-header">
+                                <h6><i class="fas fa-user-md"></i> Советы врачей</h6>
                             </div>
+                            <div class="example-title">Советы врача: третий триместр</div>
+                            <div class="example-description">В третьем триместре важно регулярно посещать врача и сдавать анализы. При любых тревожных симптомах немедленно обращайтесь к врачу.</div>
+                            <span class="badge badge-info">3 триместр</span>
+                            <span class="badge badge-secondary">Средняя сложность</span>
                         </div>
                     </div>
                 </div>
