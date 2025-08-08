@@ -71,7 +71,42 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Database configuration is now handled by create_app_database() function
+# Initialize database tables
+def init_database():
+    """Initialize both databases with tables"""
+    try:
+        with app_pro.app_context():
+            db_pro.create_all()
+            logger.info("✅ UMAY Pro database initialized")
+            
+            # Create admin user if not exists
+            admin_user = db_pro.session.query(UserPro).filter_by(login='Joker').first()
+            if not admin_user:
+                hashed_password = generate_password_hash('19341934')
+                admin_user = UserPro(
+                    full_name='Super Admin',
+                    login='Joker',
+                    password=hashed_password,
+                    user_type='admin',
+                    position='Super Admin',
+                    city='Шымкент',
+                    medical_institution='UMAY System',
+                    department='Administration',
+                    app_type='pro'
+                )
+                db_pro.session.add(admin_user)
+                db_pro.session.commit()
+                logger.info("✅ Admin user created in UMAY Pro")
+        
+        with app_mama.app_context():
+            db_mama.create_all()
+            logger.info("✅ UMAY Mama database initialized")
+            
+    except Exception as e:
+        logger.error(f"❌ Error initializing databases: {e}")
+
+# Initialize databases
+init_database()
 
 # Данные о городах и медицинских учреждениях с отделениями
 CITIES_DATA = {
@@ -105,60 +140,9 @@ CITIES_DATA = {
     }
 }
 
-# Инициализация базы данных
-def init_database():
-    """Initialize both databases"""
-    try:
-        # Initialize UMAY Pro database
-        with app_pro.app_context():
-            db_pro.create_all()
-            logger.info("✅ UMAY Pro database initialized")
-        
-        # Initialize UMAY Mama database  
-        with app_mama.app_context():
-            db_mama.create_all()
-            logger.info("✅ UMAY Mama database initialized")
-            
-        # Create admin user in Pro database if not exists
-        with app_pro.app_context():
-            admin_user = db_pro.session.query(UserPro).filter_by(login='Joker').first()
-            if not admin_user:
-                admin_user = UserPro(
-                    full_name='Супер Администратор',
-                    login='Joker',
-                    password=generate_password_hash('19341934'),
-                    user_type='admin',
-                    position='Администратор',
-                    city='Алматы',
-                    medical_institution='UMAY System',
-                    department='IT',
-                    app_type='pro'
-                )
-                db_pro.session.add(admin_user)
-                db_pro.session.commit()
-                logger.info("✅ Admin user created in UMAY Pro")
-        
-        return True
-    except Exception as e:
-        logger.error(f"❌ Database initialization error: {e}")
-        return False
 
-# Модели базы данных
-class User(UserMixin, db.Model):
-    __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(100), nullable=False)
-    login = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    user_type = db.Column(db.String(10), default='user')  # 'user', 'midwife', 'admin'
-    position = db.Column(db.String(100), nullable=False)
-    city = db.Column(db.String(100), nullable=False)
-    medical_institution = db.Column(db.String(200), nullable=False)
-    department = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    app_type = db.Column(db.String(10), default='pro')  # 'pro' or 'mama'
 
-# Создаем отдельные модели для каждой базы данных
+# Модели базы данных - отдельные для каждой системы
 class UserPro(UserMixin, db_pro.Model):
     __tablename__ = 'user_pro'
     id = db.Column(db.Integer, primary_key=True)
@@ -187,7 +171,7 @@ class UserMama(UserMixin, db_mama.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='mama')
 
-# CMS Модели для контента
+# CMS Модели для контента - используем основную базу данных (UMAY Pro)
 class News(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -273,9 +257,6 @@ def load_user(user_id):
             user = db_mama.session.query(UserMama).get(int(user_id))
     
     return user
-
-# Initialize databases on startup
-init_database()
 
 # Маршруты
 @app.route('/')
@@ -1385,7 +1366,9 @@ def export_csv():
     data = []
     for patient in patients:
         # Находим информацию об акушерке
-        midwife_info = User.query.filter_by(full_name=patient.midwife).first()
+        midwife_info = None
+        with app_pro.app_context():
+            midwife_info = db_pro.session.query(UserPro).filter_by(full_name=patient.midwife).first()
         midwife_position = midwife_info.position if midwife_info else "Не указано"
         midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
         midwife_institution = midwife_info.medical_institution if midwife_info else "Не указано"
@@ -1667,7 +1650,9 @@ def export_pdf():
         
         for patient in patients:
             # Находим информацию об акушерке
-            midwife_info = User.query.filter_by(full_name=patient.midwife).first()
+            midwife_info = None
+            with app_pro.app_context():
+                midwife_info = db_pro.session.query(UserPro).filter_by(full_name=patient.midwife).first()
             midwife_position = midwife_info.position if midwife_info else "Не указано"
             midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
             
@@ -1768,10 +1753,7 @@ if __name__ == '__main__':
     logger.info("Data directory created/verified")
     
     # Initialize databases
-    if init_database():
-        logger.info("✅ Both databases initialized successfully")
-    else:
-        logger.error("❌ Failed to initialize databases")
+    init_database()
     
     print("⚠️  Для запуска используйте: python run_local.py")
     print("📱 Или: python run_public.py для публичной ссылки")
