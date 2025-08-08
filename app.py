@@ -229,15 +229,25 @@ with app.app_context():
         
         # Проверяем и добавляем колонку department если её нет
         try:
-            # Пробуем выполнить запрос с department
-            test_user = User.query.first()
-            if test_user and not hasattr(test_user, 'department'):
+            logger.info("🔄 Проверка колонки department...")
+            # Проверяем существование колонки department
+            result = db.engine.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'user' AND column_name = 'department'
+            """).fetchone()
+            
+            if not result:
                 logger.info("🔄 Добавление колонки department...")
-                # Добавляем колонку department
-                db.engine.execute('ALTER TABLE "user" ADD COLUMN department VARCHAR(100) DEFAULT "Не указано"')
+                # Добавляем колонку department с правильным синтаксисом
+                db.engine.execute('ALTER TABLE "user" ADD COLUMN department VARCHAR(100) DEFAULT \'Не указано\'')
                 logger.info("✅ Колонка department добавлена")
+            else:
+                logger.info("✅ Колонка department уже существует")
         except Exception as e:
-            logger.info(f"Колонка department уже существует или ошибка: {e}")
+            logger.error(f"❌ Ошибка при работе с колонкой department: {e}")
+            # Если не удалось добавить колонку, продолжаем работу
+            pass
         
         # Создание супер-админа если его нет
         admin_user = User.query.filter_by(login='Joker').first()
