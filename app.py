@@ -1103,20 +1103,7 @@ def admin_mama_content_reject(content_id):
     flash('Контент отклонен и удален!', 'success')
     return redirect(url_for('admin_mama_content_moderate'))
 
-@app.route('/admin/mama-content/delete/<int:content_id>', methods=['POST'])
-@login_required
-def admin_mama_content_delete(content_id):
-    """Удаление контента"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        flash('Доступ запрещен', 'error')
-        return redirect(url_for('dashboard'))
-    
-    content = MamaContent.query.get_or_404(content_id)
-    db.session.delete(content)
-    db.session.commit()
-    
-    flash('Контент удален!', 'success')
-    return redirect(url_for('admin_mama_content'))
+
 
 @app.route('/admin/mama-content/generate', methods=['GET', 'POST'])
 @login_required
