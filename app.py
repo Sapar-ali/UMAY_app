@@ -337,35 +337,41 @@ def logout():
 @login_required
 def dashboard():
     # Получаем статистику
-    total_patients = Patient.query.count()
-    boys_count = Patient.query.filter_by(child_gender='Мальчик').count()
-    girls_count = Patient.query.filter_by(child_gender='Девочка').count()
+    patients = Patient.query.all()
+    total_patients = len(patients)
     
-    # Дополнительная статистика
-    if total_patients > 0:
-        avg_age = db.session.query(db.func.avg(Patient.age)).scalar() or 0
-        avg_weight = db.session.query(db.func.avg(Patient.child_weight)).scalar() or 0
-        children_percentage = ((boys_count + girls_count) / total_patients) * 100
-    else:
-        avg_age = avg_weight = children_percentage = 0
+    # Статистика по полу
+    male_count = sum(1 for p in patients if p.child_gender == 'Мальчик')
+    female_count = sum(1 for p in patients if p.child_gender == 'Девочка')
     
-    # Статистика по учреждениям
-    institution_stats = db.session.query(
-        Patient.midwife,
-        db.func.count(Patient.id).label('count')
-    ).group_by(Patient.midwife).all()
+    # Статистика по способам родоразрешения
+    natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
+    cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
     
-    # Получаем последние пациентов для таблицы
-    patients = Patient.query.order_by(Patient.created_at.desc()).limit(10).all()
+    # Статистика за этот месяц
+    from datetime import datetime
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    this_month = 0
     
-    return render_template('dashboard.html', 
+    for patient in patients:
+        try:
+            birth_date = datetime.strptime(patient.birth_date, '%Y-%m-%d')
+            if birth_date.month == current_month and birth_date.year == current_year:
+                this_month += 1
+        except:
+            continue
+    
+    # Получаем последние 10 пациентов
+    recent_patients = Patient.query.order_by(Patient.id.desc()).limit(10).all()
+    
+    return render_template('dashboard.html',
                          total_patients=total_patients,
-                         boys=boys_count,
-                         girls=girls_count,
-                         avg_age=round(avg_age, 1),
-                         avg_child_weight=round(avg_weight, 1),
-                         institution_stats=institution_stats,
-                         patients=patients)
+                         male_count=male_count, female_count=female_count,
+                         natural_births=natural_births,
+                         cesarean_count=cesarean_count,
+                         this_month=this_month,
+                         patients=recent_patients)
 
 @app.route('/add_patient', methods=['GET', 'POST'])
 @login_required
@@ -836,81 +842,72 @@ def analytics():
         patients = Patient.query.all()
         
         if not patients:
-            flash('Нет данных для анализа', 'error')
-            return redirect(url_for('dashboard'))
+            return render_template('analytics.html', 
+                                total_patients=0,
+                                male_count=0, female_count=0, avg_age=0,
+                                delivery_methods={}, complications={}, anesthesia_types={},
+                                avg_child_weight=0, avg_pregnancy_weeks=0, avg_blood_loss=0, avg_labor_duration=0,
+                                monthly_trends={})
         
-        # Подсчет статистики
+        # Основная статистика
         total_patients = len(patients)
+        male_count = sum(1 for p in patients if p.child_gender == 'Мальчик')
+        female_count = sum(1 for p in patients if p.child_gender == 'Девочка')
+        avg_age = sum(p.age for p in patients) / total_patients if total_patients > 0 else 0
         
-        # Статистика по полу
-        boys = sum(1 for p in patients if p.child_gender == 'Мальчик')
-        girls = sum(1 for p in patients if p.child_gender == 'Девочка')
+        # Способы родоразрешения
+        delivery_methods = {}
+        for patient in patients:
+            method = patient.delivery_method or 'Не указан'
+            delivery_methods[method] = delivery_methods.get(method, 0) + 1
         
-        # Статистика по способам родоразрешения
-        natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
-        cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
-        vacuum_count = sum(1 for p in patients if p.delivery_method == 'Вакуум-экстракция')
-        forceps_count = sum(1 for p in patients if p.delivery_method == 'Акушерские щипцы')
+        # Осложнения
+        complications = {}
+        for patient in patients:
+            if patient.gestosis == 'Да':
+                complications['Гестоз'] = complications.get('Гестоз', 0) + 1
+            if patient.diabetes == 'Да':
+                complications['Сахарный диабет'] = complications.get('Сахарный диабет', 0) + 1
+            if patient.hypertension == 'Да':
+                complications['Гипертония'] = complications.get('Гипертония', 0) + 1
+            if patient.anemia == 'Да':
+                complications['Анемия'] = complications.get('Анемия', 0) + 1
+            if patient.infections == 'Да':
+                complications['Инфекции'] = complications.get('Инфекции', 0) + 1
         
-        # Статистика по осложнениям
-        gestosis_count = sum(1 for p in patients if p.gestosis == 'Да')
-        diabetes_count = sum(1 for p in patients if p.diabetes == 'Да')
-        hypertension_count = sum(1 for p in patients if p.hypertension == 'Да')
-        anemia_count = sum(1 for p in patients if p.anemia == 'Да')
-        infections_count = sum(1 for p in patients if p.infections == 'Да')
-        
-        # Статистика по анестезии
-        no_anesthesia = sum(1 for p in patients if p.anesthesia == 'Нет')
-        epidural_count = sum(1 for p in patients if p.anesthesia == 'Эпидуральная')
-        spinal_count = sum(1 for p in patients if p.anesthesia == 'Спинальная')
-        general_count = sum(1 for p in patients if p.anesthesia == 'Общая')
-        local_count = sum(1 for p in patients if p.anesthesia == 'Местная')
+        # Типы анестезии
+        anesthesia_types = {}
+        for patient in patients:
+            anesthesia = patient.anesthesia or 'Не указан'
+            anesthesia_types[anesthesia] = anesthesia_types.get(anesthesia, 0) + 1
         
         # Средние показатели
-        avg_age = sum(p.age for p in patients) / total_patients
-        avg_pregnancy_weeks = sum(p.pregnancy_weeks for p in patients) / total_patients
-        avg_child_weight = sum(p.child_weight for p in patients) / total_patients
-        avg_blood_loss = sum(p.blood_loss for p in patients) / total_patients
-        avg_labor_duration = sum(p.labor_duration for p in patients) / total_patients
+        avg_child_weight = sum(p.child_weight for p in patients) / total_patients if total_patients > 0 else 0
+        avg_pregnancy_weeks = sum(p.pregnancy_weeks for p in patients) / total_patients if total_patients > 0 else 0
+        avg_blood_loss = sum(p.blood_loss for p in patients) / total_patients if total_patients > 0 else 0
+        avg_labor_duration = sum(p.labor_duration for p in patients) / total_patients if total_patients > 0 else 0
         
-        # Статистика по месяцам (последние 12 месяцев)
-        from collections import defaultdict
-        monthly_stats = defaultdict(int)
+        # Месячные тренды
+        monthly_trends = {}
         for patient in patients:
             try:
                 birth_date = datetime.strptime(patient.birth_date, '%Y-%m-%d')
-                month_key = birth_date.strftime('%Y-%m')
-                monthly_stats[month_key] += 1
+                month_key = birth_date.strftime('%B %Y')
+                monthly_trends[month_key] = monthly_trends.get(month_key, 0) + 1
             except:
                 continue
         
-        # Сортируем по месяцам
-        sorted_months = sorted(monthly_stats.items())[-12:]
-        
         return render_template('analytics.html',
-                             total_patients=total_patients,
-                             boys=boys, girls=girls,
-                             natural_births=natural_births,
-                             cesarean_count=cesarean_count,
-                             vacuum_count=vacuum_count,
-                             forceps_count=forceps_count,
-                             gestosis_count=gestosis_count,
-                             diabetes_count=diabetes_count,
-                             hypertension_count=hypertension_count,
-                             anemia_count=anemia_count,
-                             infections_count=infections_count,
-                             no_anesthesia=no_anesthesia,
-                             epidural_count=epidural_count,
-                             spinal_count=spinal_count,
-                             general_count=general_count,
-                             local_count=local_count,
-                             avg_age=avg_age,
-                             avg_pregnancy_weeks=avg_pregnancy_weeks,
-                             avg_child_weight=avg_child_weight,
-                             avg_blood_loss=avg_blood_loss,
-                             avg_labor_duration=avg_labor_duration,
-                             monthly_stats=sorted_months)
-                             
+                            total_patients=total_patients,
+                            male_count=male_count, female_count=female_count, avg_age=round(avg_age, 1),
+                            delivery_methods=delivery_methods, complications=complications, 
+                            anesthesia_types=anesthesia_types,
+                            avg_child_weight=round(avg_child_weight, 0),
+                            avg_pregnancy_weeks=round(avg_pregnancy_weeks, 1),
+                            avg_blood_loss=round(avg_blood_loss, 0),
+                            avg_labor_duration=round(avg_labor_duration, 1),
+                            monthly_trends=monthly_trends)
+    
     except Exception as e:
         logger.error(f"Ошибка при загрузке аналитики: {e}")
         flash('Ошибка при загрузке аналитики', 'error')
