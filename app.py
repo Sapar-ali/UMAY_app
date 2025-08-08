@@ -138,11 +138,11 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     login = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    user_type = db.Column(db.String(20), default='user')  # user или midwife
-    position = db.Column(db.String(50), nullable=False)
-    city = db.Column(db.String(50), nullable=False)
-    medical_institution = db.Column(db.String(100), nullable=False)
-    department = db.Column(db.String(100), nullable=False)  # Новое поле для отделения
+    user_type = db.Column(db.String(10), default='user')  # user или midwife
+    position = db.Column(db.String(100), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    medical_institution = db.Column(db.String(200), nullable=False)
+    department = db.Column(db.String(200), nullable=False)  # Новое поле для отделения
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # CMS Модели для контента
@@ -346,6 +346,15 @@ def register():
             flash('Пароли не совпадают!', 'error')
             return render_template('register.html')
         
+        # Ограничиваем длину полей для PostgreSQL
+        if len(full_name) > 100:
+            flash('Имя слишком длинное! Максимум 100 символов.', 'error')
+            return render_template('register.html')
+        
+        if len(login) > 50:
+            flash('Логин слишком длинный! Максимум 50 символов.', 'error')
+            return render_template('register.html')
+        
         # Проверяем, существует ли пользователь
         existing_user = User.query.filter_by(login=login).first()
         if existing_user:
@@ -358,8 +367,8 @@ def register():
         if user_type == 'user':
             # Упрощенная регистрация для обычных пользователей
             new_user = User(
-                full_name=full_name,
-                login=login,
+                full_name=full_name[:100],  # Ограничиваем длину
+                login=login[:50],  # Ограничиваем длину
                 password=hashed_password,
                 user_type='user',
                 position='Пользователь',
@@ -375,14 +384,14 @@ def register():
             department = request.form.get('department', 'Не указано')
             
             new_user = User(
-                full_name=full_name,
-                login=login,
+                full_name=full_name[:100],  # Ограничиваем длину
+                login=login[:50],  # Ограничиваем длину
                 password=hashed_password,
                 user_type='midwife',
-                position=position,
-                city=city,
-                medical_institution=medical_institution,
-                department=department
+                position=position[:100],  # Ограничиваем длину
+                city=city[:100],  # Ограничиваем длину
+                medical_institution=medical_institution[:200],  # Ограничиваем длину
+                department=department[:200]  # Ограничиваем длину
             )
         
         try:
