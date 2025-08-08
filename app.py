@@ -140,7 +140,7 @@ class User(UserMixin, db.Model):
     position = db.Column(db.String(50), nullable=False)
     city = db.Column(db.String(50), nullable=False)
     medical_institution = db.Column(db.String(100), nullable=False)
-    department = db.Column(db.String(100), nullable=False)  # Новое поле для отделения
+    department = db.Column(db.String(100), nullable=True)  # Новое поле для отделения
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # CMS Модели для контента
