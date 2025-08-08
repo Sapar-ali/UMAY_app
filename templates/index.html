@@ -30,11 +30,11 @@
         </p>
         
         <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up">
-            <a href="{{ url_for('login') }}" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3 border border-gray-600">
+            <a href="{{ url_for('login') }}" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
                 <i class="fas fa-sign-in-alt"></i>
                 <span>Войти в систему</span>
             </a>
-            <a href="{{ url_for('register') }}" class="bg-transparent hover:bg-gray-600/50 text-gray-700 border-2 border-gray-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center space-x-3">
+            <a href="{{ url_for('register') }}" class="bg-white/20 hover:bg-white/30 text-white border-2 border-white/50 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center space-x-3">
                 <i class="fas fa-user-plus"></i>
                 <span>Регистрация</span>
             </a>
@@ -47,20 +47,20 @@
 <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-3">
     <!-- UMAY Pro Button -->
     <button onclick="toggleProPanel()" class="group relative">
-        <div class="bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-gray-200 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow border border-gray-600">
+        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow">
             <i class="fas fa-user-md text-xl"></i>
         </div>
-        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap border border-gray-600">
+        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             UMAY Pro
         </div>
     </button>
     
     <!-- UMAY Mama Button -->
     <button onclick="toggleMamaPanel()" class="group relative">
-        <div class="bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-gray-200 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow border border-gray-600">
+        <div class="bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 animate-glow">
             <i class="fas fa-heart text-xl"></i>
         </div>
-        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-gray-800 text-gray-200 px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap border border-gray-600">
+        <div class="absolute left-20 top-1/2 transform -translate-y-1/2 bg-pink-600 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             UMAY Mama
         </div>
     </button>
