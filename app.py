@@ -1703,12 +1703,12 @@ def export_pdf():
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f59e0b')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                                        ('FONTNAME', (0, 0), (-1, 0), font_name),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
-            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#fde68a')),
-            ('FONTNAME', (0, 1), (-1, -1), font_name),
+                ('FONTNAME', (0, 0), (-1, 0), font_name),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#fde68a')),
+                ('FONTNAME', (0, 1), (-1, -1), font_name),
                 ('FONTSIZE', (0, 1), (-1, -1), 8),
                 ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fef3c7')])
             ]))
