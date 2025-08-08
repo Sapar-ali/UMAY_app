@@ -41,7 +41,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-600">Отделение</p>
-                                <p class="font-semibold text-medical-dark">{{ current_user.department }}</p>
+                                <p class="font-semibold text-medical-dark">{{ current_user.department or 'Не указано' }}</p>
                             </div>
                         </div>
                         

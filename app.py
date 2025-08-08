@@ -845,7 +845,7 @@ def export_csv():
         # Находим информацию об акушерке
         midwife_info = User.query.filter_by(full_name=patient.midwife).first()
         midwife_position = midwife_info.position if midwife_info else "Не указано"
-        midwife_department = midwife_info.department if midwife_info else "Не указано"
+        midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
         midwife_institution = midwife_info.medical_institution if midwife_info else "Не указано"
         
         data.append({
@@ -1110,7 +1110,7 @@ def export_pdf():
             # Находим информацию об акушерке
             midwife_info = User.query.filter_by(full_name=patient.midwife).first()
             midwife_position = midwife_info.position if midwife_info else "Не указано"
-            midwife_department = midwife_info.department if midwife_info else "Не указано"
+            midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
             
             patient_data.append([
                 patient.patient_name,
