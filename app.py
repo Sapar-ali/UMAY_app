@@ -242,6 +242,10 @@ with app.app_context():
                 # Добавляем колонку department с правильным синтаксисом
                 db.engine.execute('ALTER TABLE "user" ADD COLUMN department VARCHAR(100) DEFAULT \'Не указано\'')
                 logger.info("✅ Колонка department добавлена")
+                
+                # Обновляем существующие записи
+                db.engine.execute('UPDATE "user" SET department = \'Не указано\' WHERE department IS NULL')
+                logger.info("✅ Существующие записи обновлены")
             else:
                 logger.info("✅ Колонка department уже существует")
         except Exception as e:
