@@ -2318,6 +2318,7 @@ def mama_article_detail(content_id):
 
 @app.route('/export_csv')
 @login_required
+@pro_required
 def export_csv():
     # Получаем параметры фильтрации
     start_date = request.args.get('start_date')
@@ -2410,6 +2411,7 @@ def export_csv():
 
 @app.route('/analytics')
 @login_required
+@pro_required
 def analytics():
     """Улучшенная аналитика с графиками"""
     try:
@@ -2518,6 +2520,7 @@ def analytics():
 
 @app.route('/export_pdf')
 @login_required
+@pro_required
 def export_pdf():
     """Экспорт данных в красивый PDF отчет"""
     try:
