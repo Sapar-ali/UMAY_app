@@ -7,6 +7,7 @@ import pandas as pd
 import io
 import os
 import sys
+import markdown
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -58,6 +59,14 @@ app, db = create_app_database()
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Markdown filter for templates
+@app.template_filter('markdown')
+def markdown_filter(text):
+    """Convert markdown text to HTML"""
+    if not text:
+        return ""
+    return markdown.markdown(text, extensions=['extra', 'codehilite'])
 
 # Система ролей и ограничений доступа
 def pro_required(f):
