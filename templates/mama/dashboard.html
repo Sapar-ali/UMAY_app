@@ -136,7 +136,7 @@
                                     </div>
                                 </div>
                                 
-                                <a href="{{ url_for('mama_content') }}#content-{{ content.id }}" 
+                                <a href="{{ url_for('mama_article_detail', content_id=content.id) }}" 
                                    class="inline-flex items-center text-pink-600 hover:text-pink-700 font-medium text-sm group-hover:scale-105 transition-transform duration-300">
                                     Читать статью
                                     <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>

@@ -1399,6 +1399,37 @@ def mama_content():
                          categories=categories,
                          selected_category=selected_category)
 
+@app.route('/mama/article/<int:content_id>')
+def mama_article_detail(content_id):
+    """Детальный просмотр статьи UMAY Mama"""
+    article = MamaContent.query.get_or_404(content_id)
+    
+    # Увеличиваем счетчик просмотров
+    article.views = (article.views or 0) + 1
+    db.session.commit()
+    
+    # Получаем категории для навигации
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание', 
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+    
+    # Получаем похожие статьи
+    similar_articles = MamaContent.query.filter_by(
+        category=article.category
+    ).filter(
+        MamaContent.id != article.id
+    ).order_by(MamaContent.created_at.desc()).limit(3).all()
+    
+    return render_template('mama/article_detail.html',
+                         article=article,
+                         categories=categories,
+                         similar_articles=similar_articles)
+
 @app.route('/export_csv')
 @login_required
 def export_csv():
