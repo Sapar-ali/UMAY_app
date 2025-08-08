@@ -959,6 +959,32 @@ def admin_mama_content():
                          stats=stats,
                          recent_content=recent_content)
 
+@app.route('/admin/mama-content/list')
+@login_required
+@admin_required
+def admin_mama_content_list():
+    """Список всех статей с возможностью редактирования/удаления"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Получаем все статьи
+    all_content = MamaContent.query.order_by(MamaContent.created_at.desc()).all()
+    
+    # Категории для отображения
+    categories = {
+        'sport': '🏃 Спорт',
+        'nutrition': '🍎 Питание',
+        'vitamins': '💊 Витамины',
+        'body_care': '💅 Уход за телом',
+        'baby_care': '👶 Уход за малышом',
+        'doctor_advice': '👨‍⚕️ Советы врачей'
+    }
+    
+    return render_template('admin/mama_content_list.html',
+                         content_list=all_content,
+                         categories=categories)
+
 @app.route('/admin/mama-content/add', methods=['GET', 'POST'])
 @login_required
 def admin_mama_content_add():

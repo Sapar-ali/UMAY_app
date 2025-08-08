@@ -4,33 +4,31 @@
 
 {% block content %}
 <style>
-/* Apple/BMW стиль дизайн */
+/* Apple/BMW минималистичный стиль */
 .mama-dashboard {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #fafafa;
     min-height: 100vh;
     padding: 2rem 0;
 }
 
 .page-header {
-    background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 20px;
+    background: white;
+    border-bottom: 1px solid #e5e5e7;
+    padding: 1.5rem 0;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(232, 62, 140, 0.3);
 }
 
 .page-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1d1d1f;
     margin: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .page-header p {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    color: #86868b;
     margin: 0.5rem 0 0 0;
-    opacity: 0.9;
 }
 
 .stats-grid {
@@ -97,21 +95,21 @@
 
 .action-card {
     background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    border: none;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e5e5e7;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     text-decoration: none;
-    color: #495057;
+    color: #1d1d1f;
 }
 
 .action-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    border-color: #007aff;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.1);
     text-decoration: none;
-    color: #495057;
+    color: #1d1d1f;
 }
 
 .action-card.primary {
@@ -140,21 +138,23 @@
 }
 
 .action-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
     display: block;
+    color: #007aff;
 }
 
 .action-title {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
+    color: #1d1d1f;
 }
 
 .action-description {
-    font-size: 1rem;
-    opacity: 0.8;
-    line-height: 1.5;
+    font-size: 0.9rem;
+    color: #86868b;
+    line-height: 1.4;
 }
 
 .category-stats {
@@ -372,7 +372,7 @@
                 <div class="action-description">Статистика и отчеты</div>
             </a>
             
-            <a href="{{ url_for('admin_mama_content') }}" class="action-card purple">
+            <a href="{{ url_for('admin_mama_content_list') }}" class="action-card purple">
                 <i class="fas fa-list action-icon"></i>
                 <div class="action-title">Все статьи</div>
                 <div class="action-description">Просмотр и редактирование</div>
