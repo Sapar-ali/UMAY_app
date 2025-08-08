@@ -206,7 +206,12 @@
                                 <a href="{{ url_for('export_csv') }}" 
                                    class="bg-white text-medical-accent hover:bg-medical-light px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center space-x-2">
                                     <i class="fas fa-download"></i>
-                                    <span>Экспорт</span>
+                                    <span>CSV</span>
+                                </a>
+                                <a href="{{ url_for('export_pdf') }}" 
+                                   class="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center space-x-2">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <span>PDF</span>
                                 </a>
                             </div>
                         </div>

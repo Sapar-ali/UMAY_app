@@ -827,6 +827,284 @@ def export_csv():
         download_name=f'umay_report_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
     )
 
+@app.route('/analytics')
+@login_required
+def analytics():
+    """Улучшенная аналитика с графиками"""
+    try:
+        # Получаем все пациентов
+        patients = Patient.query.all()
+        
+        if not patients:
+            flash('Нет данных для анализа', 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Подсчет статистики
+        total_patients = len(patients)
+        
+        # Статистика по полу
+        boys = sum(1 for p in patients if p.child_gender == 'Мальчик')
+        girls = sum(1 for p in patients if p.child_gender == 'Девочка')
+        
+        # Статистика по способам родоразрешения
+        natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
+        cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
+        vacuum_count = sum(1 for p in patients if p.delivery_method == 'Вакуум-экстракция')
+        forceps_count = sum(1 for p in patients if p.delivery_method == 'Акушерские щипцы')
+        
+        # Статистика по осложнениям
+        gestosis_count = sum(1 for p in patients if p.gestosis == 'Да')
+        diabetes_count = sum(1 for p in patients if p.diabetes == 'Да')
+        hypertension_count = sum(1 for p in patients if p.hypertension == 'Да')
+        anemia_count = sum(1 for p in patients if p.anemia == 'Да')
+        infections_count = sum(1 for p in patients if p.infections == 'Да')
+        
+        # Статистика по анестезии
+        no_anesthesia = sum(1 for p in patients if p.anesthesia == 'Нет')
+        epidural_count = sum(1 for p in patients if p.anesthesia == 'Эпидуральная')
+        spinal_count = sum(1 for p in patients if p.anesthesia == 'Спинальная')
+        general_count = sum(1 for p in patients if p.anesthesia == 'Общая')
+        local_count = sum(1 for p in patients if p.anesthesia == 'Местная')
+        
+        # Средние показатели
+        avg_age = sum(p.age for p in patients) / total_patients
+        avg_pregnancy_weeks = sum(p.pregnancy_weeks for p in patients) / total_patients
+        avg_child_weight = sum(p.child_weight for p in patients) / total_patients
+        avg_blood_loss = sum(p.blood_loss for p in patients) / total_patients
+        avg_labor_duration = sum(p.labor_duration for p in patients) / total_patients
+        
+        # Статистика по месяцам (последние 12 месяцев)
+        from collections import defaultdict
+        monthly_stats = defaultdict(int)
+        for patient in patients:
+            try:
+                birth_date = datetime.strptime(patient.birth_date, '%Y-%m-%d')
+                month_key = birth_date.strftime('%Y-%m')
+                monthly_stats[month_key] += 1
+            except:
+                continue
+        
+        # Сортируем по месяцам
+        sorted_months = sorted(monthly_stats.items())[-12:]
+        
+        return render_template('analytics.html',
+                             total_patients=total_patients,
+                             boys=boys, girls=girls,
+                             natural_births=natural_births,
+                             cesarean_count=cesarean_count,
+                             vacuum_count=vacuum_count,
+                             forceps_count=forceps_count,
+                             gestosis_count=gestosis_count,
+                             diabetes_count=diabetes_count,
+                             hypertension_count=hypertension_count,
+                             anemia_count=anemia_count,
+                             infections_count=infections_count,
+                             no_anesthesia=no_anesthesia,
+                             epidural_count=epidural_count,
+                             spinal_count=spinal_count,
+                             general_count=general_count,
+                             local_count=local_count,
+                             avg_age=avg_age,
+                             avg_pregnancy_weeks=avg_pregnancy_weeks,
+                             avg_child_weight=avg_child_weight,
+                             avg_blood_loss=avg_blood_loss,
+                             avg_labor_duration=avg_labor_duration,
+                             monthly_stats=sorted_months)
+                             
+    except Exception as e:
+        logger.error(f"Ошибка при загрузке аналитики: {e}")
+        flash('Ошибка при загрузке аналитики', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/export_pdf')
+@login_required
+def export_pdf():
+    """Экспорт данных в красивый PDF отчет"""
+    try:
+        # Получаем все пациентов
+        patients = Patient.query.all()
+        
+        if not patients:
+            flash('Нет данных для экспорта', 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Создаем PDF в памяти
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        story = []
+        
+        # Стили
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            spaceAfter=30,
+            alignment=1,  # Центрирование
+            textColor=colors.HexColor('#1e40af')  # Синий цвет
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Heading2'],
+            fontSize=16,
+            spaceAfter=20,
+            textColor=colors.HexColor('#374151')  # Серый цвет
+        )
+        
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=6
+        )
+        
+        # Заголовок
+        story.append(Paragraph("🏥 UMAY - Медицинский отчет", title_style))
+        story.append(Paragraph(f"Дата создания: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
+        story.append(Paragraph(f"Всего пациентов: {len(patients)}", normal_style))
+        story.append(Spacer(1, 20))
+        
+        # Статистика
+        story.append(Paragraph("📊 Общая статистика", subtitle_style))
+        
+        # Подсчет статистики
+        total_patients = len(patients)
+        avg_age = sum(p.age for p in patients) / total_patients
+        avg_pregnancy_weeks = sum(p.pregnancy_weeks for p in patients) / total_patients
+        avg_child_weight = sum(p.child_weight for p in patients) / total_patients
+        
+        # Подсчет осложнений
+        gestosis_count = sum(1 for p in patients if p.gestosis == 'Да')
+        diabetes_count = sum(1 for p in patients if p.diabetes == 'Да')
+        hypertension_count = sum(1 for p in patients if p.hypertension == 'Да')
+        anemia_count = sum(1 for p in patients if p.anemia == 'Да')
+        
+        # Подсчет способов родоразрешения
+        natural_births = sum(1 for p in patients if p.delivery_method == 'Естественные роды')
+        cesarean_count = sum(1 for p in patients if p.delivery_method == 'Кесарево сечение')
+        
+        # Создаем таблицу статистики
+        stats_data = [
+            ['Показатель', 'Значение'],
+            ['Общее количество пациентов', str(total_patients)],
+            ['Средний возраст', f'{avg_age:.1f} лет'],
+            ['Средний срок беременности', f'{avg_pregnancy_weeks:.1f} недель'],
+            ['Средний вес ребенка', f'{avg_child_weight:.0f} г'],
+            ['Естественные роды', f'{natural_births} ({natural_births/total_patients*100:.1f}%)'],
+            ['Кесарево сечение', f'{cesarean_count} ({cesarean_count/total_patients*100:.1f}%)'],
+            ['Гестоз', f'{gestosis_count} ({gestosis_count/total_patients*100:.1f}%)'],
+            ['Сахарный диабет', f'{diabetes_count} ({diabetes_count/total_patients*100:.1f}%)'],
+            ['Гипертония', f'{hypertension_count} ({hypertension_count/total_patients*100:.1f}%)'],
+            ['Анемия', f'{anemia_count} ({anemia_count/total_patients*100:.1f}%)']
+        ]
+        
+        stats_table = Table(stats_data)
+        stats_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3b82f6')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f1f5f9')])
+        ]))
+        
+        story.append(stats_table)
+        story.append(Spacer(1, 30))
+        
+        # Детальная информация о пациентах
+        story.append(Paragraph("👥 Детальная информация о пациентах", subtitle_style))
+        
+        # Создаем таблицу пациентов
+        patient_data = [['ФИО', 'Возраст', 'Срок', 'Вес ребенка', 'Пол', 'Способ родов', 'Дата родов']]
+        
+        for patient in patients:
+            patient_data.append([
+                patient.patient_name,
+                str(patient.age),
+                f'{patient.pregnancy_weeks} нед',
+                f'{patient.child_weight} г',
+                patient.child_gender,
+                patient.delivery_method,
+                patient.birth_date
+            ])
+        
+        patient_table = Table(patient_data)
+        patient_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0fdf4')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#bbf7d0')),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0fdf4')])
+        ]))
+        
+        story.append(patient_table)
+        story.append(Spacer(1, 30))
+        
+        # Осложнения и примечания
+        story.append(Paragraph("⚠️ Осложнения и примечания", subtitle_style))
+        
+        complications_data = []
+        for patient in patients:
+            if patient.complications or patient.notes:
+                complications_data.append([
+                    patient.patient_name,
+                    patient.complications or 'Нет',
+                    patient.notes or 'Нет'
+                ])
+        
+        if complications_data:
+            complications_table = Table([['Пациент', 'Осложнения', 'Примечания']] + complications_data)
+            complications_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f59e0b')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#fde68a')),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fef3c7')])
+            ]))
+            story.append(complications_table)
+        else:
+            story.append(Paragraph("Осложнений не зарегистрировано", normal_style))
+        
+        story.append(Spacer(1, 30))
+        
+        # Подпись
+        story.append(Paragraph("Отчет сгенерирован системой UMAY", normal_style))
+        story.append(Paragraph("© 2024 UMAY - Медицинская информационная система", normal_style))
+        
+        # Создаем PDF
+        doc.build(story)
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'umay_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        )
+        
+    except Exception as e:
+        logger.error(f"Ошибка при создании PDF: {e}")
+        flash('Ошибка при создании PDF отчета', 'error')
+        return redirect(url_for('dashboard'))
+
 if __name__ == '__main__':
     # Для прямого запуска app.py (не рекомендуется)
     # Используйте run_local.py для локального запуска

@@ -169,8 +169,18 @@
                                 <i class="fas fa-download text-white"></i>
                             </div>
                             <div>
-                                <p class="font-semibold">Экспорт данных</p>
-                                <p class="text-sm opacity-75">Скачать отчет</p>
+                                <p class="font-semibold">Экспорт CSV</p>
+                                <p class="text-sm opacity-75">Скачать данные</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('export_pdf') }}" class="flex items-center space-x-4 p-4 bg-red-500 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300">
+                            <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-file-pdf text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Экспорт PDF</p>
+                                <p class="text-sm opacity-75">Красивый отчет</p>
                             </div>
                         </a>
                         
