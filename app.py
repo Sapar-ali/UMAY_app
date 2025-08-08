@@ -691,7 +691,7 @@ def profile():
 @login_required
 def admin_panel():
     """Главная страница админ-панели"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         flash('Доступ запрещен. Требуются права администратора.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -711,7 +711,7 @@ def admin_panel():
 @login_required
 def admin_news():
     """Управление новостями"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -722,7 +722,7 @@ def admin_news():
 @login_required
 def admin_news_add():
     """Добавление новости"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -754,7 +754,7 @@ def admin_news_add():
 @login_required
 def admin_news_edit(news_id):
     """Редактирование новости"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -779,7 +779,7 @@ def admin_news_edit(news_id):
 @login_required
 def admin_news_delete(news_id):
     """Удаление новости"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         return jsonify({'error': 'Доступ запрещен.'}), 403
     
     news = News.query.get_or_404(news_id)
@@ -795,57 +795,370 @@ def admin_news_delete(news_id):
 @app.route('/admin/mama-content')
 @login_required
 def admin_mama_content():
-    """Управление контентом для беременных"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
-        flash('Доступ запрещен.', 'error')
+    """Админ панель для управления контентом Умай Мама"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
         return redirect(url_for('dashboard'))
     
-    content = MamaContent.query.order_by(MamaContent.created_at.desc()).all()
-    return render_template('admin/mama_content.html', content=content)
+    # Получаем статистику
+    total_content = MamaContent.query.count()
+    published_content = MamaContent.query.filter_by(is_published=True).count()
+    pending_content = MamaContent.query.filter_by(is_published=False).count()
+    
+    # Популярные категории
+    categories_stats = db.session.query(
+        MamaContent.category,
+        db.func.count(MamaContent.id).label('count')
+    ).group_by(MamaContent.category).all()
+    
+    # Последние статьи
+    recent_content = MamaContent.query.order_by(MamaContent.created_at.desc()).limit(5).all()
+    
+    return render_template('admin/mama_content_dashboard.html',
+                         total_content=total_content,
+                         published_content=published_content,
+                         pending_content=pending_content,
+                         categories_stats=categories_stats,
+                         recent_content=recent_content)
 
 @app.route('/admin/mama-content/add', methods=['GET', 'POST'])
 @login_required
 def admin_mama_content_add():
-    """Добавление контента для беременных"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
-        flash('Доступ запрещен.', 'error')
+    """Добавление нового контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
         category = request.form.get('category')
-        image_url = request.form.get('image_url')
-        video_url = request.form.get('video_url')
         trimester = request.form.get('trimester')
         difficulty_level = request.form.get('difficulty_level')
         duration = request.form.get('duration')
+        image_url = request.form.get('image_url')
+        video_url = request.form.get('video_url')
+        author = request.form.get('author', current_user.full_name)
         
-        mama_content = MamaContent(
+        new_content = MamaContent(
             title=title,
             content=content,
             category=category,
-            image_url=image_url,
-            video_url=video_url,
             trimester=trimester,
             difficulty_level=difficulty_level,
             duration=duration,
-            author=current_user.full_name
+            image_url=image_url,
+            video_url=video_url,
+            author=author,
+            is_published=True
         )
         
-        db.session.add(mama_content)
+        db.session.add(new_content)
         db.session.commit()
         
         flash('Контент успешно добавлен!', 'success')
         return redirect(url_for('admin_mama_content'))
     
-    return render_template('admin/mama_content_form.html')
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание',
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+    
+    return render_template('admin/mama_content_add.html', categories=categories)
+
+@app.route('/admin/mama-content/edit/<int:content_id>', methods=['GET', 'POST'])
+@login_required
+def admin_mama_content_edit(content_id):
+    """Редактирование контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    content = MamaContent.query.get_or_404(content_id)
+    
+    if request.method == 'POST':
+        content.title = request.form.get('title')
+        content.content = request.form.get('content')
+        content.category = request.form.get('category')
+        content.trimester = request.form.get('trimester')
+        content.difficulty_level = request.form.get('difficulty_level')
+        content.duration = request.form.get('duration')
+        content.image_url = request.form.get('image_url')
+        content.video_url = request.form.get('video_url')
+        content.is_published = request.form.get('is_published') == 'on'
+        
+        db.session.commit()
+        flash('Контент успешно обновлен!', 'success')
+        return redirect(url_for('admin_mama_content'))
+    
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание',
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+    
+    return render_template('admin/mama_content_edit.html', content=content, categories=categories)
+
+@app.route('/admin/mama-content/delete/<int:content_id>', methods=['POST'])
+@login_required
+def admin_mama_content_delete(content_id):
+    """Удаление контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    content = MamaContent.query.get_or_404(content_id)
+    db.session.delete(content)
+    db.session.commit()
+    
+    flash('Контент успешно удален!', 'success')
+    return redirect(url_for('admin_mama_content'))
+
+@app.route('/admin/mama-content/moderate')
+@login_required
+def admin_mama_content_moderate():
+    """Модерация контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Получаем статьи для модерации (неопубликованные)
+    pending_content = MamaContent.query.filter_by(is_published=False).order_by(MamaContent.created_at.desc()).all()
+    
+    return render_template('admin/mama_content_moderate.html', pending_content=pending_content)
+
+@app.route('/admin/mama-content/approve/<int:content_id>', methods=['POST'])
+@login_required
+def admin_mama_content_approve(content_id):
+    """Одобрение контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    content = MamaContent.query.get_or_404(content_id)
+    content.is_published = True
+    db.session.commit()
+    
+    flash('Контент одобрен и опубликован!', 'success')
+    return redirect(url_for('admin_mama_content_moderate'))
+
+@app.route('/admin/mama-content/reject/<int:content_id>', methods=['POST'])
+@login_required
+def admin_mama_content_reject(content_id):
+    """Отклонение контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    content = MamaContent.query.get_or_404(content_id)
+    db.session.delete(content)
+    db.session.commit()
+    
+    flash('Контент отклонен и удален!', 'success')
+    return redirect(url_for('admin_mama_content_moderate'))
+
+@app.route('/admin/mama-content/generate', methods=['GET', 'POST'])
+@login_required
+def admin_mama_content_generate():
+    """ИИ-генерация контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        category = request.form.get('category')
+        trimester = request.form.get('trimester')
+        count = int(request.form.get('count', 1))
+        
+        # Генерируем контент с помощью ИИ
+        generated_content = generate_ai_content(category, trimester, count)
+        
+        flash(f'Сгенерировано {len(generated_content)} статей!', 'success')
+        return redirect(url_for('admin_mama_content'))
+    
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание',
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+    
+    return render_template('admin/mama_content_generate.html', categories=categories)
+
+@app.route('/admin/mama-content/analytics')
+@login_required
+def admin_mama_content_analytics():
+    """Аналитика контента"""
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Статистика по категориям
+    category_stats = db.session.query(
+        MamaContent.category,
+        db.func.count(MamaContent.id).label('count'),
+        db.func.avg(MamaContent.views).label('avg_views')
+    ).group_by(MamaContent.category).all()
+    
+    # Статистика по триместрам
+    trimester_stats = db.session.query(
+        MamaContent.trimester,
+        db.func.count(MamaContent.id).label('count')
+    ).filter(MamaContent.trimester.isnot(None)).group_by(MamaContent.trimester).all()
+    
+    # Популярные статьи
+    popular_content = MamaContent.query.order_by(MamaContent.views.desc()).limit(10).all()
+    
+    # Статистика по времени
+    recent_stats = db.session.query(
+        db.func.date(MamaContent.created_at).label('date'),
+        db.func.count(MamaContent.id).label('count')
+    ).group_by(db.func.date(MamaContent.created_at)).order_by(db.func.date(MamaContent.created_at).desc()).limit(30).all()
+    
+    return render_template('admin/mama_content_analytics.html',
+                         category_stats=category_stats,
+                         trimester_stats=trimester_stats,
+                         popular_content=popular_content,
+                         recent_stats=recent_stats)
+
+def generate_ai_content(category, trimester, count):
+    """ИИ-генерация контента"""
+    # Базовые шаблоны для генерации
+    templates = {
+        'sport': {
+            'titles': [
+                'Упражнения для беременных в {trimester} триместре',
+                'Безопасная гимнастика для будущих мам',
+                'Йога для беременных: {trimester} триместр',
+                'Дыхательные упражнения для родов',
+                'Пилатес для беременных'
+            ],
+            'content': [
+                'В {trimester} триместре беременности важно поддерживать физическую активность. Эти упражнения помогут укрепить мышцы и подготовиться к родам.',
+                'Регулярные занятия спортом во время беременности улучшают кровообращение и общее самочувствие.',
+                'Перед началом любых упражнений обязательно проконсультируйтесь с врачом.'
+            ]
+        },
+        'nutrition': {
+            'titles': [
+                'Правильное питание в {trimester} триместре',
+                'Витамины и минералы для беременных',
+                'Рецепты здорового питания для будущих мам',
+                'Продукты, которые нужно исключить',
+                'Питьевой режим во время беременности'
+            ],
+            'content': [
+                'В {trimester} триместре особенно важно следить за питанием. Рацион должен быть сбалансированным и богатым витаминами.',
+                'Включите в меню больше овощей, фруктов, белковых продуктов и полезных жиров.',
+                'Избегайте сырых продуктов, непастеризованного молока и избытка кофеина.'
+            ]
+        },
+        'vitamins': {
+            'titles': [
+                'Витамины для {trimester} триместра',
+                'Фолиевая кислота: зачем она нужна',
+                'Витамин D во время беременности',
+                'Железо и анемия беременных',
+                'Омега-3 для развития мозга малыша'
+            ],
+            'content': [
+                'В {trimester} триместре потребность в витаминах меняется. Важно принимать назначенные врачом препараты.',
+                'Фолиевая кислота особенно важна в первом триместре для профилактики пороков развития.',
+                'Не принимайте витамины без назначения врача - это может быть опасно.'
+            ]
+        },
+        'body_care': {
+            'titles': [
+                'Уход за кожей во время беременности',
+                'Профилактика растяжек в {trimester} триместре',
+                'Уход за волосами и ногтями',
+                'Гигиена беременных',
+                'Косметика для будущих мам'
+            ],
+            'content': [
+                'Во время беременности кожа требует особого ухода. Используйте увлажняющие кремы и избегайте агрессивных средств.',
+                'Для профилактики растяжек регулярно увлажняйте кожу специальными средствами.',
+                'Выбирайте косметику без вредных химических веществ.'
+            ]
+        },
+        'baby_care': {
+            'titles': [
+                'Подготовка к рождению малыша',
+                'Что нужно купить для новорождённого',
+                'Уход за пуповиной',
+                'Кормление новорождённого',
+                'Сон новорождённого'
+            ],
+            'content': [
+                'Заблаговременно подготовьте все необходимое для малыша. Составьте список покупок.',
+                'Изучите основы ухода за новорождённым: кормление, сон, гигиена.',
+                'Не стесняйтесь обращаться за помощью к педиатру и опытным мамам.'
+            ]
+        },
+        'doctor_advice': {
+            'titles': [
+                'Советы врача: {trimester} триместр',
+                'Когда обращаться к врачу',
+                'Тревожные симптомы беременности',
+                'Подготовка к родам',
+                'Послеродовой период'
+            ],
+            'content': [
+                'В {trimester} триместре важно регулярно посещать врача и сдавать анализы.',
+                'При любых тревожных симптомах немедленно обращайтесь к врачу.',
+                'Задавайте врачу все интересующие вопросы - это нормально и необходимо.'
+            ]
+        }
+    }
+    
+    trimester_names = {
+        '1': 'первом',
+        '2': 'втором', 
+        '3': 'третьем',
+        'all': 'любом'
+    }
+    
+    generated = []
+    
+    for i in range(count):
+        template = templates.get(category, templates['doctor_advice'])
+        title = template['titles'][i % len(template['titles'])].format(
+            trimester=trimester_names.get(trimester, 'любом')
+        )
+        content = template['content'][i % len(template['content'])].format(
+            trimester=trimester_names.get(trimester, 'любом')
+        )
+        
+        new_content = MamaContent(
+            title=title,
+            content=content,
+            category=category,
+            trimester=trimester,
+            difficulty_level='medium',
+            author='ИИ-Помощник',
+            is_published=False  # Требует модерации
+        )
+        
+        db.session.add(new_content)
+        generated.append(new_content)
+    
+    db.session.commit()
+    return generated
 
 @app.route('/admin/media')
 @login_required
 def admin_media():
     """Управление медиафайлами"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         flash('Доступ запрещен.', 'error')
         return redirect(url_for('dashboard'))
     
@@ -856,7 +1169,7 @@ def admin_media():
 @login_required
 def admin_media_upload():
     """Загрузка медиафайлов"""
-    if not (current_user.user_type == 'midwife' or current_user.login == 'Joker'):
+    if current_user.user_type != 'admin' and current_user.login != 'Joker':
         return jsonify({'error': 'Доступ запрещен.'}), 403
     
     if 'file' not in request.files:

@@ -1,0 +1,251 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Умай Мама - Супер Админ Панель{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-baby"></i> Умай Мама - Супер Админ Панель</h1>
+        <div class="btn-group">
+            <a href="{{ url_for('admin_mama_content_add') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать статью
+            </a>
+            <a href="{{ url_for('admin_mama_content_generate') }}" class="btn btn-success">
+                <i class="fas fa-magic"></i> ИИ-Генерация
+            </a>
+            <a href="{{ url_for('admin_mama_content_moderate') }}" class="btn btn-warning">
+                <i class="fas fa-eye"></i> Модерация
+            </a>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_content }}</h4>
+                            <p class="card-text">Всего статей</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ published_content }}</h4>
+                            <p class="card-text">Опубликовано</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ pending_content }}</h4>
+                            <p class="card-text">На модерации</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ categories_stats|length }}</h4>
+                            <p class="card-text">Категорий</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tags fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Быстрые действия</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_generate') }}?category=sport&count=5" 
+                               class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-dumbbell"></i> Генерировать спорт (5 статей)
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_generate') }}?category=nutrition&count=5" 
+                               class="btn btn-outline-success btn-block">
+                                <i class="fas fa-apple-alt"></i> Генерировать питание (5 статей)
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_generate') }}?category=doctor_advice&count=5" 
+                               class="btn btn-outline-info btn-block">
+                                <i class="fas fa-user-md"></i> Генерировать советы врачей (5 статей)
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_moderate') }}" 
+                               class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-eye"></i> Модерация ({{ pending_content }})
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика по категориям -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Статистика по категориям</h5>
+                </div>
+                <div class="card-body">
+                    {% if categories_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Категория</th>
+                                    <th>Количество</th>
+                                    <th>Процент</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in categories_stats %}
+                                <tr>
+                                    <td>
+                                        {% if stat.category == 'sport' %}🏃 Спорт
+                                        {% elif stat.category == 'nutrition' %}🍎 Питание
+                                        {% elif stat.category == 'vitamins' %}💊 Витамины
+                                        {% elif stat.category == 'body_care' %}💅 Уход за телом
+                                        {% elif stat.category == 'baby_care' %}👶 Уход за малышом
+                                        {% elif stat.category == 'doctor_advice' %}👨‍⚕️ Советы врачей
+                                        {% else %}{{ stat.category }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ stat.count }}</td>
+                                    <td>{{ "%.1f"|format(stat.count / total_content * 100) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Нет данных для отображения</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние статьи -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> Последние статьи</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_content %}
+                    <div class="list-group list-group-flush">
+                        {% for item in recent_content %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ item.title }}</h6>
+                                    <small class="text-muted">
+                                        {% if item.category == 'sport' %}🏃 Спорт
+                                        {% elif item.category == 'nutrition' %}🍎 Питание
+                                        {% elif item.category == 'vitamins' %}💊 Витамины
+                                        {% elif item.category == 'body_care' %}💅 Уход за телом
+                                        {% elif item.category == 'baby_care' %}👶 Уход за малышом
+                                        {% elif item.category == 'doctor_advice' %}👨‍⚕️ Советы врачей
+                                        {% else %}{{ item.category }}
+                                        {% endif %}
+                                        {% if item.trimester %} | Триместр: {{ item.trimester }}{% endif %}
+                                    </small>
+                                </div>
+                                <div class="ml-2">
+                                    {% if item.is_published %}
+                                    <span class="badge badge-success">Опубликовано</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">На модерации</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Нет статей для отображения</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Управление</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_add') }}" class="btn btn-primary btn-block">
+                                <i class="fas fa-plus"></i> Создать статью
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_generate') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-magic"></i> ИИ-Генерация
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_moderate') }}" class="btn btn-warning btn-block">
+                                <i class="fas fa-eye"></i> Модерация
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_mama_content_analytics') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-chart-line"></i> Аналитика
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
