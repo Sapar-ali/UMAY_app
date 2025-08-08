@@ -11,6 +11,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 # ============================================================================
 # UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER И RAILWAY
@@ -1049,8 +1051,11 @@ def export_pdf():
         doc = SimpleDocTemplate(buffer, pagesize=A4)
         story = []
         
-        # Стили
+        # Стили с поддержкой кириллицы
         styles = getSampleStyleSheet()
+        # Используем встроенные шрифты ReportLab с поддержкой кириллицы
+        from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+        pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
@@ -1120,12 +1125,12 @@ def export_pdf():
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3b82f6')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (-1, 0), 'STSong-Light'),
             ('FONTSIZE', (0, 0), (-1, 0), 12),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (0, 1), (-1, -1), 'STSong-Light'),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f1f5f9')])
         ]))
@@ -1162,12 +1167,12 @@ def export_pdf():
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (-1, 0), 'STSong-Light'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0fdf4')),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#bbf7d0')),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (0, 1), (-1, -1), 'STSong-Light'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0fdf4')])
         ]))
@@ -1193,12 +1198,12 @@ def export_pdf():
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f59e0b')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#fde68a')),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                                        ('FONTNAME', (0, 0), (-1, 0), 'STSong-Light'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#fde68a')),
+            ('FONTNAME', (0, 1), (-1, -1), 'STSong-Light'),
                 ('FONTSIZE', (0, 1), (-1, -1), 8),
                 ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fef3c7')])
             ]))
