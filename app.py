@@ -13,6 +13,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from functools import wraps
 
 # ============================================================================
 # UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER И RAILWAY
@@ -57,6 +58,52 @@ app, db = create_app_database()
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Система ролей и ограничений доступа
+def pro_required(f):
+    """Декоратор для доступа только пользователям UMAY Pro"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        
+        # Проверяем, что пользователь из UMAY Pro
+        if hasattr(current_user, 'app_type') and current_user.app_type != 'pro':
+            flash('Доступ запрещен. Эта функция доступна только для медицинского персонала UMAY Pro.', 'error')
+            return redirect(url_for('index'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def mama_required(f):
+    """Декоратор для доступа только пользователям UMAY Mama"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        
+        # Проверяем, что пользователь из UMAY Mama
+        if hasattr(current_user, 'app_type') and current_user.app_type != 'mama':
+            flash('Доступ запрещен. Эта функция доступна только для пользователей UMAY Mama.', 'error')
+            return redirect(url_for('index'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    """Декоратор для доступа только администраторам"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        
+        # Проверяем, что пользователь администратор
+        if hasattr(current_user, 'user_type') and current_user.user_type != 'admin':
+            flash('Доступ запрещен. Эта функция доступна только для администраторов.', 'error')
+            return redirect(url_for('index'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Initialize database tables
 def init_database():
@@ -303,7 +350,7 @@ def login():
                 return redirect(url_for('admin_panel'))
             elif app_type == 'mama':
                 flash('Добро пожаловать в UMAY Mama!', 'success')
-                return redirect(url_for('mama_content'))
+                return redirect(url_for('mama_dashboard'))
             else:
                 flash('Добро пожаловать в UMAY Pro!', 'success')
                 return redirect(url_for('dashboard'))
@@ -432,6 +479,7 @@ def logout():
 
 @app.route('/dashboard')
 @login_required
+@pro_required
 def dashboard():
     logger.info(f"Dashboard accessed by user: {current_user.full_name} (login: {current_user.login})")
     try:
@@ -476,8 +524,36 @@ def dashboard():
         flash('Ошибка при загрузке панели управления', 'error')
         return redirect(url_for('index'))
 
+@app.route('/mama-dashboard')
+@login_required
+@mama_required
+def mama_dashboard():
+    """Дашборд для пользователей UMAY Mama"""
+    logger.info(f"Mama Dashboard accessed by user: {current_user.full_name} (login: {current_user.login})")
+    try:
+        # Получаем контент для беременных
+        mama_content = MamaContent.query.filter_by(is_published=True).order_by(MamaContent.created_at.desc()).limit(6).all()
+        
+        # Статистика контента
+        total_content = MamaContent.query.filter_by(is_published=True).count()
+        sport_content = MamaContent.query.filter_by(category='sport', is_published=True).count()
+        nutrition_content = MamaContent.query.filter_by(category='nutrition', is_published=True).count()
+        vitamins_content = MamaContent.query.filter_by(category='vitamins', is_published=True).count()
+        
+        return render_template('mama/dashboard.html',
+                             mama_content=mama_content,
+                             total_content=total_content,
+                             sport_content=sport_content,
+                             nutrition_content=nutrition_content,
+                             vitamins_content=vitamins_content)
+    except Exception as e:
+        logger.error(f"Error in mama dashboard: {e}")
+        flash('Ошибка при загрузке панели управления UMAY Mama', 'error')
+        return redirect(url_for('index'))
+
 @app.route('/add_patient', methods=['GET', 'POST'])
 @login_required
+@pro_required
 def add_patient():
     if request.method == 'POST':
         try:
@@ -550,6 +626,7 @@ def add_patient():
 
 @app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
 @login_required
+@pro_required
 def edit_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     
@@ -627,6 +704,7 @@ def edit_patient(patient_id):
 
 @app.route('/delete_patient/<int:patient_id>', methods=['POST'])
 @login_required
+@pro_required
 def delete_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     
@@ -650,6 +728,7 @@ def delete_patient(patient_id):
 
 @app.route('/search')
 @login_required
+@pro_required
 def search():
     # Получаем параметры поиска
     search_query = request.args.get('search', '')
@@ -703,6 +782,7 @@ def search():
 
 @app.route('/profile')
 @login_required
+@pro_required
 def profile():
     # Получаем статистику для текущего пользователя
     total_patients = Patient.query.filter_by(midwife=current_user.full_name).count()
@@ -729,6 +809,7 @@ def profile():
 
 @app.route('/admin')
 @login_required
+@admin_required
 def admin_panel():
     """Главная страница админ-панели"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -749,6 +830,7 @@ def admin_panel():
 
 @app.route('/admin/news')
 @login_required
+@admin_required
 def admin_news():
     """Управление новостями"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -760,6 +842,7 @@ def admin_news():
 
 @app.route('/admin/news/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_news_add():
     """Добавление новости"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -792,6 +875,7 @@ def admin_news_add():
 
 @app.route('/admin/news/edit/<int:news_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_news_edit(news_id):
     """Редактирование новости"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -817,6 +901,7 @@ def admin_news_edit(news_id):
 
 @app.route('/admin/news/delete/<int:news_id>', methods=['POST'])
 @login_required
+@admin_required
 def admin_news_delete(news_id):
     """Удаление новости"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -834,6 +919,7 @@ def admin_news_delete(news_id):
 
 @app.route('/admin/mama-content')
 @login_required
+@admin_required
 def admin_mama_content():
     """Админ панель для управления контентом Умай Мама"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -971,6 +1057,7 @@ def admin_mama_content_delete(content_id):
 
 @app.route('/admin/mama-content/moderate')
 @login_required
+@admin_required
 def admin_mama_content_moderate():
     """Модерация контента"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -1053,6 +1140,7 @@ def admin_mama_content_generate():
 
 @app.route('/admin/mama-content/analytics')
 @login_required
+@admin_required
 def admin_mama_content_analytics():
     """Аналитика контента"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':
@@ -1213,6 +1301,7 @@ def generate_ai_content(category, trimester, count):
 
 @app.route('/admin/media')
 @login_required
+@admin_required
 def admin_media():
     """Управление медиафайлами"""
     if current_user.user_type != 'admin' and current_user.login != 'Joker':

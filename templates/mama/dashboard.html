@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY Mama - Панель управления{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-heart text-danger"></i>
+                UMAY Mama - Панель управления
+            </h1>
+            <p class="text-muted">Добро пожаловать, {{ current_user.full_name }}!</p>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-newspaper"></i>
+                        Всего статей
+                    </h5>
+                    <h2>{{ total_content }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-dumbbell"></i>
+                        Спорт
+                    </h5>
+                    <h2>{{ sport_content }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-apple-alt"></i>
+                        Питание
+                    </h5>
+                    <h2>{{ nutrition_content }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-pills"></i>
+                        Витамины
+                    </h5>
+                    <h2>{{ vitamins_content }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние статьи -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star"></i>
+                        Последние статьи для вас
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mama_content %}
+                        <div class="row">
+                            {% for content in mama_content %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100">
+                                    {% if content.image_url %}
+                                    <img src="{{ content.image_url }}" class="card-img-top" alt="{{ content.title }}">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ content.title }}</h6>
+                                        <p class="card-text small">{{ content.content[:100] }}...</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary">{{ content.category }}</span>
+                                            {% if content.trimester %}
+                                            <span class="badge bg-secondary">{{ content.trimester }} триместр</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{{ url_for('mama_content') }}#content-{{ content.id }}" class="btn btn-sm btn-outline-primary">
+                                            Читать
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Пока нет статей. Скоро появятся полезные материалы для вас!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt"></i>
+                        Быстрые действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('mama_content') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-book"></i>
+                                Все статьи
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('news_list') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-newspaper"></i>
+                                Новости
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-user"></i>
+                                Профиль
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Выйти
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
