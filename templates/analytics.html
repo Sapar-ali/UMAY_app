@@ -118,6 +118,151 @@
             </div>
         </div>
 
+        <!-- Blood Loss Statistics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Blood Loss Chart -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-tint text-red-600 mr-3"></i>
+                    Статистика кровопотери
+                </h3>
+                <div class="space-y-4">
+                    {% for category, count in blood_loss_stats.items() %}
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700">{{ category }}</span>
+                            <span class="text-sm text-gray-500">{{ count }} ({{ "%.1f"|format(count/total_patients*100) }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-red-500 to-pink-600 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                 style="width: {{ count/total_patients*100 }}%"
+                                 data-count="{{ count }}"
+                                 data-total="{{ total_patients }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Critical Complications -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
+                    Критические осложнения
+                </h3>
+                <div class="space-y-4">
+                    {% if complications.get('Преэклампсия', 0) > 0 %}
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-800">Преэклампсия</h4>
+                                <p class="text-red-600">{{ complications.get('Преэклампсия', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Эклампсия', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Эклампсия</h4>
+                                <p class="text-red-700">{{ complications.get('Эклампсия', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Дистоция плечиков', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Дистоция плечиков</h4>
+                                <p class="text-red-700">{{ complications.get('Дистоция плечиков', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Разрыв 3 степени', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Разрыв 3 степени</h4>
+                                <p class="text-red-700">{{ complications.get('Разрыв 3 степени', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Выпадение петель пуповины', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Выпадение петель пуповины</h4>
+                                <p class="text-red-700">{{ complications.get('Выпадение петель пуповины', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПРК', 0) > 0 %}
+                    <div class="bg-orange-100 border-l-4 border-orange-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tint text-orange-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-900">Послеродовое кровотечение</h4>
+                                <p class="text-orange-700">{{ complications.get('ПРК', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПОНРП', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">ПОНРП</h4>
+                                <p class="text-red-700">{{ complications.get('ПОНРП', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if blood_loss_stats.get('Значительная (1000+ мл)', 0) > 0 %}
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tint text-orange-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-800">Значительная кровопотеря</h4>
+                                <p class="text-orange-600">{{ blood_loss_stats.get('Значительная (1000+ мл)', 0) }} случаев (1000+ мл)</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Преэклампсия', 0) == 0 and complications.get('Эклампсия', 0) == 0 and complications.get('Дистоция плечиков', 0) == 0 and complications.get('Разрыв 3 степени', 0) == 0 and complications.get('Выпадение петель пуповины', 0) == 0 and complications.get('ПРК', 0) == 0 and complications.get('ПОНРП', 0) == 0 and blood_loss_stats.get('Значительная (1000+ мл)', 0) == 0 %}
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-green-800">Отличные показатели!</h4>
+                                <p class="text-green-600">Критических осложнений не зарегистрировано</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
         <!-- Animated Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <!-- Anesthesia Types -->

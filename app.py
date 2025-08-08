@@ -281,6 +281,15 @@ class Patient(db.Model):
     placenta_pathology = db.Column(db.String(10), nullable=False)
     polyhydramnios = db.Column(db.String(10), nullable=False)
     oligohydramnios = db.Column(db.String(10), nullable=False)
+    preeclampsia = db.Column(db.String(10), nullable=False)
+    eclampsia = db.Column(db.String(10), nullable=False)
+    gestational_hypertension = db.Column(db.String(10), nullable=False)
+    placenta_previa = db.Column(db.String(10), nullable=False)
+    shoulder_dystocia = db.Column(db.String(10), nullable=False)
+    third_degree_tear = db.Column(db.String(10), nullable=False)
+    cord_prolapse = db.Column(db.String(10), nullable=False)
+    postpartum_hemorrhage = db.Column(db.String(10), nullable=False)
+    placental_abruption = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
@@ -589,6 +598,15 @@ def add_patient():
             placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
             polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
             oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
+            preeclampsia = "Да" if 'preeclampsia' in request.form else "Нет"
+            eclampsia = "Да" if 'eclampsia' in request.form else "Нет"
+            gestational_hypertension = "Да" if 'gestational_hypertension' in request.form else "Нет"
+            placenta_previa = "Да" if 'placenta_previa' in request.form else "Нет"
+            shoulder_dystocia = "Да" if 'shoulder_dystocia' in request.form else "Нет"
+            third_degree_tear = "Да" if 'third_degree_tear' in request.form else "Нет"
+            cord_prolapse = "Да" if 'cord_prolapse' in request.form else "Нет"
+            postpartum_hemorrhage = "Да" if 'postpartum_hemorrhage' in request.form else "Нет"
+            placental_abruption = "Да" if 'placental_abruption' in request.form else "Нет"
             
             # Валидация обязательных полей
             if not request.form['patient_name'] or request.form['patient_name'].strip() == "":
@@ -633,7 +651,16 @@ def add_patient():
                 infections=infections,
                 placenta_pathology=placenta_pathology,
                 polyhydramnios=polyhydramnios,
-                oligohydramnios=oligohydramnios
+                oligohydramnios=oligohydramnios,
+                preeclampsia=preeclampsia,
+                eclampsia=eclampsia,
+                gestational_hypertension=gestational_hypertension,
+                placenta_previa=placenta_previa,
+                shoulder_dystocia=shoulder_dystocia,
+                third_degree_tear=third_degree_tear,
+                cord_prolapse=cord_prolapse,
+                postpartum_hemorrhage=postpartum_hemorrhage,
+                placental_abruption=placental_abruption
             )
             
             db.session.add(new_patient)
@@ -671,6 +698,15 @@ def edit_patient(patient_id):
             placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
             polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
             oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
+            preeclampsia = "Да" if 'preeclampsia' in request.form else "Нет"
+            eclampsia = "Да" if 'eclampsia' in request.form else "Нет"
+            gestational_hypertension = "Да" if 'gestational_hypertension' in request.form else "Нет"
+            placenta_previa = "Да" if 'placenta_previa' in request.form else "Нет"
+            shoulder_dystocia = "Да" if 'shoulder_dystocia' in request.form else "Нет"
+            third_degree_tear = "Да" if 'third_degree_tear' in request.form else "Нет"
+            cord_prolapse = "Да" if 'cord_prolapse' in request.form else "Нет"
+            postpartum_hemorrhage = "Да" if 'postpartum_hemorrhage' in request.form else "Нет"
+            placental_abruption = "Да" if 'placental_abruption' in request.form else "Нет"
             
             # Валидация обязательных полей
             if not request.form['patient_name'] or request.form['patient_name'].strip() == "":
@@ -714,6 +750,15 @@ def edit_patient(patient_id):
             patient.placenta_pathology = placenta_pathology
             patient.polyhydramnios = polyhydramnios
             patient.oligohydramnios = oligohydramnios
+            patient.preeclampsia = preeclampsia
+            patient.eclampsia = eclampsia
+            patient.gestational_hypertension = gestational_hypertension
+            patient.placenta_previa = placenta_previa
+            patient.shoulder_dystocia = shoulder_dystocia
+            patient.third_degree_tear = third_degree_tear
+            patient.cord_prolapse = cord_prolapse
+            patient.postpartum_hemorrhage = postpartum_hemorrhage
+            patient.placental_abruption = placental_abruption
             
             db.session.commit()
             flash('Данные пациента успешно обновлены!', 'success')
@@ -2399,6 +2444,24 @@ def analytics():
                 complications['Анемия'] = complications.get('Анемия', 0) + 1
             if patient.infections == 'Да':
                 complications['Инфекции'] = complications.get('Инфекции', 0) + 1
+            if patient.preeclampsia == 'Да':
+                complications['Преэклампсия'] = complications.get('Преэклампсия', 0) + 1
+            if patient.eclampsia == 'Да':
+                complications['Эклампсия'] = complications.get('Эклампсия', 0) + 1
+            if patient.gestational_hypertension == 'Да':
+                complications['Гестационная гипертензия'] = complications.get('Гестационная гипертензия', 0) + 1
+            if patient.placenta_previa == 'Да':
+                complications['Плотное лежание плаценты'] = complications.get('Плотное лежание плаценты', 0) + 1
+            if patient.shoulder_dystocia == 'Да':
+                complications['Дистоция плечиков'] = complications.get('Дистоция плечиков', 0) + 1
+            if patient.third_degree_tear == 'Да':
+                complications['Разрыв 3 степени'] = complications.get('Разрыв 3 степени', 0) + 1
+            if patient.cord_prolapse == 'Да':
+                complications['Выпадение петель пуповины'] = complications.get('Выпадение петель пуповины', 0) + 1
+            if patient.postpartum_hemorrhage == 'Да':
+                complications['ПРК'] = complications.get('ПРК', 0) + 1
+            if patient.placental_abruption == 'Да':
+                complications['ПОНРП'] = complications.get('ПОНРП', 0) + 1
         
         # Типы анестезии
         anesthesia_types = {}
@@ -2411,6 +2474,13 @@ def analytics():
         avg_pregnancy_weeks = sum(p.pregnancy_weeks for p in patients) / total_patients if total_patients > 0 else 0
         avg_blood_loss = sum(p.blood_loss for p in patients) / total_patients if total_patients > 0 else 0
         avg_labor_duration = sum(p.labor_duration for p in patients) / total_patients if total_patients > 0 else 0
+        
+        # Статистика кровопотери
+        blood_loss_stats = {
+            'Нормальная (до 500 мл)': sum(1 for p in patients if p.blood_loss <= 500),
+            'Повышенная (500-1000 мл)': sum(1 for p in patients if 500 < p.blood_loss <= 1000),
+            'Значительная (1000+ мл)': sum(1 for p in patients if p.blood_loss > 1000)
+        }
         
         # Месячные тренды
         monthly_trends = {}
@@ -2431,6 +2501,7 @@ def analytics():
                             avg_pregnancy_weeks=round(avg_pregnancy_weeks, 1),
                             avg_blood_loss=round(avg_blood_loss, 0),
                             avg_labor_duration=round(avg_labor_duration, 1),
+                            blood_loss_stats=blood_loss_stats,
                             monthly_trends=monthly_trends)
     
     except Exception as e:

@@ -205,6 +205,78 @@
                                     <i class="fas fa-tint-slash mr-2"></i>Маловодие
                                 </label>
                             </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="preeclampsia" name="preeclampsia" class="checkbox-input" {{ 'checked' if patient.preeclampsia == 'Да' }}>
+                                <label for="preeclampsia" class="checkbox-label">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-red-500"></i>Преэклампсия
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="eclampsia" name="eclampsia" class="checkbox-input" {{ 'checked' if patient.eclampsia == 'Да' }}>
+                                <label for="eclampsia" class="checkbox-label">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Эклампсия
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Осложнения в родах -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                Осложнения в родах
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="gestational_hypertension" name="gestational_hypertension" class="checkbox-input" {{ 'checked' if patient.gestational_hypertension == 'Да' }}>
+                                    <label for="gestational_hypertension" class="checkbox-label">
+                                        <i class="fas fa-heart mr-2 text-orange-500"></i>Гестационная гипертензия
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="placenta_previa" name="placenta_previa" class="checkbox-input" {{ 'checked' if patient.placenta_previa == 'Да' }}>
+                                    <label for="placenta_previa" class="checkbox-label">
+                                        <i class="fas fa-baby mr-2 text-red-500"></i>Плотное лежание плаценты
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="shoulder_dystocia" name="shoulder_dystocia" class="checkbox-input" {{ 'checked' if patient.shoulder_dystocia == 'Да' }}>
+                                    <label for="shoulder_dystocia" class="checkbox-label">
+                                        <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Дистоция плечиков
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="third_degree_tear" name="third_degree_tear" class="checkbox-input" {{ 'checked' if patient.third_degree_tear == 'Да' }}>
+                                    <label for="third_degree_tear" class="checkbox-label">
+                                        <i class="fas fa-exclamation-triangle mr-2 text-red-700"></i>Разрыв 3 степени
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="cord_prolapse" name="cord_prolapse" class="checkbox-input" {{ 'checked' if patient.cord_prolapse == 'Да' }}>
+                                    <label for="cord_prolapse" class="checkbox-label">
+                                        <i class="fas fa-exclamation-triangle mr-2 text-red-800"></i>Выпадение петель пуповины
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="postpartum_hemorrhage" name="postpartum_hemorrhage" class="checkbox-input" {{ 'checked' if patient.postpartum_hemorrhage == 'Да' }}>
+                                    <label for="postpartum_hemorrhage" class="checkbox-label">
+                                        <i class="fas fa-tint mr-2 text-red-600"></i>ПРК
+                                    </label>
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="placental_abruption" name="placental_abruption" class="checkbox-input" {{ 'checked' if patient.placental_abruption == 'Да' }}>
+                                    <label for="placental_abruption" class="checkbox-label">
+                                        <i class="fas fa-exclamation-triangle mr-2 text-red-900"></i>ПОНРП
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="mt-6">
