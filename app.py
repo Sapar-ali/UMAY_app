@@ -97,8 +97,8 @@ def admin_required(f):
         if not current_user.is_authenticated:
             return redirect(url_for('login'))
         
-        # Проверяем, что пользователь администратор
-        if hasattr(current_user, 'user_type') and current_user.user_type != 'admin':
+        # Проверяем, что пользователь администратор или Joker
+        if hasattr(current_user, 'user_type') and current_user.user_type != 'admin' and current_user.login != 'Joker':
             flash('Доступ запрещен. Эта функция доступна только для администраторов.', 'error')
             return redirect(url_for('index'))
         
@@ -823,10 +823,6 @@ def profile():
 @admin_required
 def admin_panel():
     """Главная страница админ-панели"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        flash('Доступ запрещен. Требуются права администратора.', 'error')
-        return redirect(url_for('dashboard'))
-    
     # Статистика
     news_count = News.query.count()
     mama_content_count = MamaContent.query.count()
@@ -844,10 +840,6 @@ def admin_panel():
 @admin_required
 def admin_news():
     """Управление новостями"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        flash('Доступ запрещен.', 'error')
-        return redirect(url_for('dashboard'))
-    
     news = News.query.order_by(News.created_at.desc()).all()
     return render_template('admin/news.html', news=news)
 
@@ -856,9 +848,6 @@ def admin_news():
 @admin_required
 def admin_news_add():
     """Добавление новости"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        flash('Доступ запрещен.', 'error')
-        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         title = request.form.get('title')
@@ -889,9 +878,6 @@ def admin_news_add():
 @admin_required
 def admin_news_edit(news_id):
     """Редактирование новости"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        flash('Доступ запрещен.', 'error')
-        return redirect(url_for('dashboard'))
     
     news = News.query.get_or_404(news_id)
     
@@ -915,8 +901,6 @@ def admin_news_edit(news_id):
 @admin_required
 def admin_news_delete(news_id):
     """Удаление новости"""
-    if current_user.user_type != 'admin' and current_user.login != 'Joker':
-        return jsonify({'error': 'Доступ запрещен.'}), 403
     
     news = News.query.get_or_404(news_id)
     
