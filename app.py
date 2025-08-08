@@ -27,69 +27,51 @@ logger = logging.getLogger(__name__)
 
 logger.info("=== UMAY APP STARTING - SIMPLE VERSION v5.0 ===")
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-
-# Создаем папку data если её нет
-try:
-    os.makedirs('data', exist_ok=True)
-    logger.info("Data directory created/verified")
-except Exception as e:
-    logger.error(f"Ошибка при создании папки data: {e}")
-    print(f"Ошибка при создании папки data: {e}")
-
-# ПРОСТАЯ НАСТРОЙКА БАЗЫ ДАННЫХ - SQLITE И POSTGRESQL
-# Проверяем наличие PostgreSQL URL от Render или Railway
-DATABASE_URL = os.environ.get('DATABASE_URL')
-
-# Проверяем Railway PostgreSQL переменные
-if not DATABASE_URL and os.environ.get('RAILWAY'):
-    # Railway автоматически предоставляет эти переменные
-    pg_user = os.environ.get('PGUSER')
-    pg_password = os.environ.get('POSTGRES_PASSWORD')
-    pg_host = os.environ.get('RAILWAY_PRIVATE_DOMAIN')
-    pg_database = os.environ.get('PGDATABASE')
-    
-    if all([pg_user, pg_password, pg_host, pg_database]):
-        DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_host}:5432/{pg_database}"
-        logger.info("✅ Constructed Railway PostgreSQL URL from environment variables")
-
-if DATABASE_URL and (DATABASE_URL.startswith('postgres://') or DATABASE_URL.startswith('postgresql://')):
-    # PostgreSQL на Render или Railway - попробуем без специальных библиотек
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    if os.environ.get('RENDER'):
-        logger.info("✅ Using Render PostgreSQL database")
-    elif os.environ.get('RAILWAY'):
-        logger.info("✅ Using Railway PostgreSQL database")
+# Database configuration
+def get_database_uri(app_type='pro'):
+    """Get database URI based on application type"""
+    if os.getenv('DATABASE_URL'):
+        # Production - use PostgreSQL with different schemas
+        base_url = os.getenv('DATABASE_URL')
+        if app_type == 'mama':
+            return base_url + "?options=-csearch_path%3Dmama_schema"
+        else:
+            return base_url + "?options=-csearch_path%3Dpro_schema"
     else:
-        logger.info("✅ Using PostgreSQL database")
-    logger.info(f"PostgreSQL URL: {DATABASE_URL[:50]}...")  # Показываем только начало URL
-    logger.info("⚠️ Попытка подключения без psycopg2")
-elif os.environ.get('RENDER'):
-    # SQLite на Render (fallback)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
-    logger.info("✅ Using Render SQLite database in /tmp")
-elif os.environ.get('RAILWAY'):
-    # SQLite на Railway (fallback)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/umay.db'
-    logger.info("✅ Using Railway SQLite database in /tmp")
-else:
-    # Локально используем абсолютный путь
-    current_dir = os.getcwd()
-    db_path = os.path.join(current_dir, 'data', 'umay.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-    logger.info("✅ Using local SQLite database with absolute path")
+        # Local development - use separate SQLite files
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+        os.makedirs(data_dir, exist_ok=True)
+        
+        if app_type == 'mama':
+            return f'sqlite:///{os.path.join(data_dir, "umay_mama.db")}'
+        else:
+            return f'sqlite:///{os.path.join(data_dir, "umay_pro.db")}'
 
-logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+# Create separate database instances
+def create_app_database(app_type='pro'):
+    """Create database instance for specific app type"""
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+    app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri(app_type)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    db = SQLAlchemy(app)
+    return app, db
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Initialize databases
+app_pro, db_pro = create_app_database('pro')
+app_mama, db_mama = create_app_database('mama')
 
-db = SQLAlchemy(app)
+# Use the main app instance and its database
+app = app_pro
+db = db_pro
+
+# Initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Database configuration is now handled by create_app_database() function
 
 # Данные о городах и медицинских учреждениях с отделениями
 CITIES_DATA = {
@@ -124,26 +106,86 @@ CITIES_DATA = {
 }
 
 # Инициализация базы данных
-with app.app_context():
+def init_database():
+    """Initialize both databases"""
     try:
-        db.create_all()
-        logger.info("✅ База данных успешно инициализирована")
+        # Initialize UMAY Pro database
+        with app_pro.app_context():
+            db_pro.create_all()
+            logger.info("✅ UMAY Pro database initialized")
+        
+        # Initialize UMAY Mama database  
+        with app_mama.app_context():
+            db_mama.create_all()
+            logger.info("✅ UMAY Mama database initialized")
+            
+        # Create admin user in Pro database if not exists
+        with app_pro.app_context():
+            admin_user = db_pro.session.query(UserPro).filter_by(login='Joker').first()
+            if not admin_user:
+                admin_user = UserPro(
+                    full_name='Супер Администратор',
+                    login='Joker',
+                    password=generate_password_hash('19341934'),
+                    user_type='admin',
+                    position='Администратор',
+                    city='Алматы',
+                    medical_institution='UMAY System',
+                    department='IT',
+                    app_type='pro'
+                )
+                db_pro.session.add(admin_user)
+                db_pro.session.commit()
+                logger.info("✅ Admin user created in UMAY Pro")
+        
+        return True
     except Exception as e:
-        logger.error(f"❌ Ошибка при инициализации базы данных: {e}")
-        print(f"❌ Ошибка при инициализации базы данных: {e}")
+        logger.error(f"❌ Database initialization error: {e}")
+        return False
 
 # Модели базы данных
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
     login = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    user_type = db.Column(db.String(10), default='user')  # user или midwife
+    password = db.Column(db.String(255), nullable=False)
+    user_type = db.Column(db.String(10), default='user')  # 'user', 'midwife', 'admin'
     position = db.Column(db.String(100), nullable=False)
     city = db.Column(db.String(100), nullable=False)
     medical_institution = db.Column(db.String(200), nullable=False)
-    department = db.Column(db.String(200), nullable=False)  # Новое поле для отделения
+    department = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    app_type = db.Column(db.String(10), default='pro')  # 'pro' or 'mama'
+
+# Создаем отдельные модели для каждой базы данных
+class UserPro(UserMixin, db_pro.Model):
+    __tablename__ = 'user_pro'
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    login = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    user_type = db.Column(db.String(10), default='user')
+    position = db.Column(db.String(100), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    medical_institution = db.Column(db.String(200), nullable=False)
+    department = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    app_type = db.Column(db.String(10), default='pro')
+
+class UserMama(UserMixin, db_mama.Model):
+    __tablename__ = 'user_mama'
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    login = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    user_type = db.Column(db.String(10), default='user')
+    position = db.Column(db.String(100), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    medical_institution = db.Column(db.String(200), nullable=False)
+    department = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    app_type = db.Column(db.String(10), default='mama')
 
 # CMS Модели для контента
 class News(db.Model):
@@ -218,64 +260,22 @@ class Patient(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    # Check both databases for the user
+    user = None
+    
+    # First check UMAY Pro database
+    with app_pro.app_context():
+        user = db_pro.session.query(UserPro).get(int(user_id))
+    
+    # Then check UMAY Mama database
+    if not user:
+        with app_mama.app_context():
+            user = db_mama.session.query(UserMama).get(int(user_id))
+    
+    return user
 
-# Создание таблиц при запуске
-with app.app_context():
-    try:
-        logger.info("🔄 Создание таблиц базы данных...")
-        logger.info(f"Текущая директория: {os.getcwd()}")
-        logger.info(f"Путь к базе данных: {app.config['SQLALCHEMY_DATABASE_URI']}")
-        db.create_all()
-        logger.info("✅ Таблицы успешно созданы")
-        
-        # Проверяем и добавляем колонку department если её нет
-        try:
-            logger.info("🔄 Проверка колонки department...")
-            # Проверяем существование колонки department
-            result = db.engine.execute("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'user' AND column_name = 'department'
-            """).fetchone()
-            
-            if not result:
-                logger.info("🔄 Добавление колонки department...")
-                # Добавляем колонку department с правильным синтаксисом
-                db.engine.execute('ALTER TABLE "user" ADD COLUMN department VARCHAR(100) DEFAULT \'Не указано\'')
-                logger.info("✅ Колонка department добавлена")
-                
-                # Обновляем существующие записи
-                db.engine.execute('UPDATE "user" SET department = \'Не указано\' WHERE department IS NULL')
-                logger.info("✅ Существующие записи обновлены")
-            else:
-                logger.info("✅ Колонка department уже существует")
-        except Exception as e:
-            logger.error(f"❌ Ошибка при работе с колонкой department: {e}")
-            # Если не удалось добавить колонку, продолжаем работу
-            pass
-        
-        # Создание супер-админа если его нет
-        admin_user = User.query.filter_by(login='Joker').first()
-        if not admin_user:
-            admin_user = User(
-                full_name='Супер Администратор',
-                login='Joker',
-                password=generate_password_hash('19341934'),
-                user_type='midwife',
-                position='Главный администратор',
-                city='Алматы',
-                medical_institution='UMAY System',
-                department='Системное отделение'
-            )
-            db.session.add(admin_user)
-            db.session.commit()
-            logger.info("✅ Супер-админ создан: login=Joker, password=19341934")
-    except Exception as e:
-        logger.error(f"❌ Ошибка при создании таблиц: {e}")
-        print(f"❌ Ошибка при создании таблиц: {e}")
-        import traceback
-        traceback.print_exc()
+# Initialize databases on startup
+init_database()
 
 # Маршруты
 @app.route('/')
@@ -306,14 +306,44 @@ def get_departments(city, institution):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        login = request.form['login']
-        password = request.form['password']
+        login = request.form.get('login')
+        password = request.form.get('password')
         
-        user = User.query.filter_by(login=login).first()
+        # Check both databases for the user
+        user = None
+        app_type = None
+        
+        # First check UMAY Pro database
+        with app_pro.app_context():
+            user = db_pro.session.query(UserPro).filter_by(login=login).first()
+            if user:
+                app_type = 'pro'
+        
+        # Then check UMAY Mama database
+        if not user:
+            with app_mama.app_context():
+                user = db_mama.session.query(UserMama).filter_by(login=login).first()
+                if user:
+                    app_type = 'mama'
+        
         if user and check_password_hash(user.password, password):
             login_user(user)
-            flash('Успешный вход!', 'success')
-            return redirect(url_for('dashboard'))
+            
+            # Store app type in session
+            session['app_type'] = app_type
+            
+            if user.login == 'Joker':
+                flash('Добро пожаловать, Супер Администратор!', 'success')
+                return redirect(url_for('admin_panel'))
+            elif user.user_type == 'admin':
+                flash('Добро пожаловать в админ панель!', 'success')
+                return redirect(url_for('admin_panel'))
+            elif app_type == 'mama':
+                flash('Добро пожаловать в UMAY Mama!', 'success')
+                return redirect(url_for('mama_content'))
+            else:
+                flash('Добро пожаловать в UMAY Pro!', 'success')
+                return redirect(url_for('dashboard'))
         else:
             flash('Неверный логин или пароль!', 'error')
     
@@ -322,12 +352,13 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        user_type = request.form.get('user_type', 'midwife')
         full_name = request.form.get('full_name', '').strip()
         login = request.form.get('login', '').strip()
         password = request.form.get('password', '')
+        user_type = request.form.get('user_type', 'user')
+        app_type = request.form.get('app_type', 'pro')  # 'pro' or 'mama'
         
-        # Валидация данных
+        # Validation
         if not full_name:
             flash('Имя обязательно для заполнения!', 'error')
             return render_template('register.html')
@@ -340,7 +371,6 @@ def register():
             flash('Пароль должен содержать минимум 6 символов!', 'error')
             return render_template('register.html')
         
-        # Проверяем подтверждение пароля
         confirm_password = request.form.get('confirm_password', '')
         if password != confirm_password:
             flash('Пароли не совпадают!', 'error')
@@ -355,57 +385,75 @@ def register():
             flash('Логин слишком длинный! Максимум 50 символов.', 'error')
             return render_template('register.html')
         
-        # Проверяем, существует ли пользователь
-        existing_user = User.query.filter_by(login=login).first()
+        # Check if user already exists in the appropriate database
+        existing_user = None
+        if app_type == 'mama':
+            with app_mama.app_context():
+                existing_user = db_mama.session.query(UserMama).filter_by(login=login).first()
+        else:
+            with app_pro.app_context():
+                existing_user = db_pro.session.query(UserPro).filter_by(login=login).first()
+        
         if existing_user:
             flash('Пользователь с таким логином уже существует!', 'error')
             return render_template('register.html')
         
-        # Создаем нового пользователя
         hashed_password = generate_password_hash(password)
         
-        if user_type == 'user':
-            # Упрощенная регистрация для обычных пользователей
-            new_user = User(
-                full_name=full_name[:100],  # Ограничиваем длину
-                login=login[:50],  # Ограничиваем длину
-                password=hashed_password,
-                user_type='user',
-                position='Пользователь',
-                city='Не указан',
-                medical_institution='Не указано',
-                department='Не указано'
-            )
-        else:
-            # Полная регистрация для акушерок
-            position = request.form['position']
-            city = request.form['city']
-            medical_institution = request.form['medical_institution']
-            department = request.form.get('department', 'Не указано')
-            
-            new_user = User(
-                full_name=full_name[:100],  # Ограничиваем длину
-                login=login[:50],  # Ограничиваем длину
-                password=hashed_password,
-                user_type='midwife',
-                position=position[:100],  # Ограничиваем длину
-                city=city[:100],  # Ограничиваем длину
-                medical_institution=medical_institution[:200],  # Ограничиваем длину
-                department=department[:200]  # Ограничиваем длину
-            )
-        
         try:
-            db.session.add(new_user)
-            db.session.commit()
-            
-            if user_type == 'user':
-                flash('Регистрация успешна! Добро пожаловать в UMAY Mama!', 'success')
+            if user_type == 'user' and app_type == 'mama':
+                # UMAY Mama user registration
+                with app_mama.app_context():
+                    new_user = UserMama(
+                        full_name=full_name[:100],
+                        login=login[:50],
+                        password=hashed_password,
+                        user_type='user',
+                        position='Пользователь',
+                        city='Не указан',
+                        medical_institution='Не указано',
+                        department='Не указано',
+                        app_type='mama'
+                    )
+                    db_mama.session.add(new_user)
+                    db_mama.session.commit()
+                
+            elif user_type == 'midwife' and app_type == 'pro':
+                # UMAY Pro midwife registration
+                position = request.form.get('position', '').strip()
+                city = request.form.get('city', '').strip()
+                medical_institution = request.form.get('medical_institution', '').strip()
+                department = request.form.get('department', '').strip()
+                
+                with app_pro.app_context():
+                    new_user = UserPro(
+                        full_name=full_name[:100],
+                        login=login[:50],
+                        password=hashed_password,
+                        user_type='midwife',
+                        position=position[:100],
+                        city=city[:100],
+                        medical_institution=medical_institution[:200],
+                        department=department[:200],
+                        app_type='pro'
+                    )
+                    db_pro.session.add(new_user)
+                    db_pro.session.commit()
+                
             else:
-                flash('Регистрация успешна! Теперь вы можете войти в UMAY Pro.', 'success')
+                flash('Неверный тип регистрации!', 'error')
+                return render_template('register.html')
             
+            flash('Регистрация прошла успешно! Теперь вы можете войти.', 'success')
             return redirect(url_for('login'))
+            
         except Exception as e:
-            db.session.rollback()
+            if app_type == 'mama':
+                with app_mama.app_context():
+                    db_mama.session.rollback()
+            else:
+                with app_pro.app_context():
+                    db_pro.session.rollback()
             logger.error(f"Ошибка при регистрации пользователя {login}: {e}")
             flash(f'Ошибка при регистрации: {str(e)}. Попробуйте еще раз.', 'error')
             return render_template('register.html')
@@ -1712,8 +1760,19 @@ def test():
     return "Приложение работает! Пользователь Joker существует и может войти."
 
 if __name__ == '__main__':
-    # Для прямого запуска app.py (не рекомендуется)
-    # Используйте run_local.py для локального запуска
+    logger.info("=== UMAY APP STARTING - SIMPLE VERSION v5.0 ===")
+    
+    # Create data directory
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    os.makedirs(data_dir, exist_ok=True)
+    logger.info("Data directory created/verified")
+    
+    # Initialize databases
+    if init_database():
+        logger.info("✅ Both databases initialized successfully")
+    else:
+        logger.error("❌ Failed to initialize databases")
+    
     print("⚠️  Для запуска используйте: python run_local.py")
     print("📱 Или: python run_public.py для публичной ссылки")
     sys.exit(1)

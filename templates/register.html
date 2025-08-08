@@ -31,11 +31,11 @@
                 <div class="flex bg-white/5 rounded-2xl p-1">
                     <button id="userToggle" onclick="switchToUser()" 
                             class="flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-500 text-white bg-gradient-to-r from-pink-500 to-purple-500 shadow-lg">
-                        <i class="fas fa-user mr-3"></i>Пользователь
+                        <i class="fas fa-heart mr-3"></i>UMAY Mama
                     </button>
                     <button id="midwifeToggle" onclick="switchToMidwife()" 
                             class="flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-500 text-gray-300 hover:text-white">
-                        <i class="fas fa-user-md mr-3"></i>Акушерка
+                        <i class="fas fa-user-md mr-3"></i>UMAY Pro
                     </button>
                 </div>
             </div>
@@ -43,12 +43,13 @@
             <!-- User Registration Form -->
             <div id="userForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in">
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация пользователя</h2>
-                    <p class="text-gray-300">Быстрый доступ к UMAY Mama</p>
+                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация в UMAY Mama</h2>
+                    <p class="text-gray-300">Для беременных женщин - контент и советы</p>
                 </div>
                 
                 <form method="POST" class="space-y-6">
                     <input type="hidden" name="user_type" value="user">
+                    <input type="hidden" name="app_type" value="mama">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="group">
@@ -101,7 +102,7 @@
                     <button type="submit" 
                             class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
                         <i class="fas fa-heart group-hover:animate-pulse"></i>
-                        <span>Создать аккаунт</span>
+                        <span>Создать аккаунт в UMAY Mama</span>
                         <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </form>
@@ -110,12 +111,13 @@
             <!-- Midwife Registration Form -->
             <div id="midwifeForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in hidden">
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация акушерки</h2>
-                    <p class="text-gray-300">Полный доступ для медицинских специалистов</p>
+                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация в UMAY Pro</h2>
+                    <p class="text-gray-300">Для медицинских специалистов - управление пациентами</p>
                 </div>
                 
                 <form method="POST" class="space-y-6">
                     <input type="hidden" name="user_type" value="midwife">
+                    <input type="hidden" name="app_type" value="pro">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="group">
@@ -224,7 +226,7 @@
                     <button type="submit" 
                             class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
                         <i class="fas fa-user-md group-hover:animate-pulse"></i>
-                        <span>Зарегистрироваться как акушерка</span>
+                        <span>Создать аккаунт в UMAY Pro</span>
                         <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </form>
@@ -319,7 +321,7 @@ function switchToUser() {
 function switchToMidwife() {
     document.getElementById('userForm').classList.add('hidden');
     document.getElementById('midwifeForm').classList.remove('hidden');
-    document.getElementById('midwifeToggle').classList.add('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
+    document.getElementById('midwifeToggle').classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'shadow-lg');
     document.getElementById('midwifeToggle').classList.remove('text-gray-300');
     document.getElementById('userToggle').classList.remove('bg-gradient-to-r', 'from-pink-500', 'to-purple-500', 'shadow-lg');
     document.getElementById('userToggle').classList.add('text-gray-300');
