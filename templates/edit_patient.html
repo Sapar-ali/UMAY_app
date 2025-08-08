@@ -207,16 +207,23 @@
                             </div>
                             
                             <div class="checkbox-group">
-                                <input type="checkbox" id="preeclampsia" name="preeclampsia" class="checkbox-input" {{ 'checked' if patient.preeclampsia == 'Да' }}>
-                                <label for="preeclampsia" class="checkbox-label">
-                                    <i class="fas fa-exclamation-triangle mr-2 text-red-500"></i>Преэклампсия
+                                <input type="checkbox" id="pls" name="pls" class="checkbox-input" {{ 'checked' if patient.pls == 'Да' }}>
+                                <label for="pls" class="checkbox-label">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-orange-500"></i>ПЛС
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="pts" name="pts" class="checkbox-input" {{ 'checked' if patient.pts == 'Да' }}>
+                                <label for="pts" class="checkbox-label">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>ПТС
                                 </label>
                             </div>
                             
                             <div class="checkbox-group">
                                 <input type="checkbox" id="eclampsia" name="eclampsia" class="checkbox-input" {{ 'checked' if patient.eclampsia == 'Да' }}>
                                 <label for="eclampsia" class="checkbox-label">
-                                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Эклампсия
+                                    <i class="fas fa-exclamation-triangle mr-2 text-red-700"></i>Эклампсия
                                 </label>
                             </div>
                         </div>

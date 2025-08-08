@@ -281,7 +281,8 @@ class Patient(db.Model):
     placenta_pathology = db.Column(db.String(10), nullable=False)
     polyhydramnios = db.Column(db.String(10), nullable=False)
     oligohydramnios = db.Column(db.String(10), nullable=False)
-    preeclampsia = db.Column(db.String(10), nullable=False)
+    pls = db.Column(db.String(10), nullable=False)  # ПЛС - преэклампсия легкой степени
+    pts = db.Column(db.String(10), nullable=False)  # ПТС - преэклампсия тяжелой степени
     eclampsia = db.Column(db.String(10), nullable=False)
     gestational_hypertension = db.Column(db.String(10), nullable=False)
     placenta_previa = db.Column(db.String(10), nullable=False)
@@ -598,7 +599,8 @@ def add_patient():
             placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
             polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
             oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
-            preeclampsia = "Да" if 'preeclampsia' in request.form else "Нет"
+            pls = "Да" if 'pls' in request.form else "Нет"
+            pts = "Да" if 'pts' in request.form else "Нет"
             eclampsia = "Да" if 'eclampsia' in request.form else "Нет"
             gestational_hypertension = "Да" if 'gestational_hypertension' in request.form else "Нет"
             placenta_previa = "Да" if 'placenta_previa' in request.form else "Нет"
@@ -652,7 +654,8 @@ def add_patient():
                 placenta_pathology=placenta_pathology,
                 polyhydramnios=polyhydramnios,
                 oligohydramnios=oligohydramnios,
-                preeclampsia=preeclampsia,
+                pls=pls,
+                pts=pts,
                 eclampsia=eclampsia,
                 gestational_hypertension=gestational_hypertension,
                 placenta_previa=placenta_previa,
@@ -698,7 +701,8 @@ def edit_patient(patient_id):
             placenta_pathology = "Да" if 'placenta_pathology' in request.form else "Нет"
             polyhydramnios = "Да" if 'polyhydramnios' in request.form else "Нет"
             oligohydramnios = "Да" if 'oligohydramnios' in request.form else "Нет"
-            preeclampsia = "Да" if 'preeclampsia' in request.form else "Нет"
+            pls = "Да" if 'pls' in request.form else "Нет"
+            pts = "Да" if 'pts' in request.form else "Нет"
             eclampsia = "Да" if 'eclampsia' in request.form else "Нет"
             gestational_hypertension = "Да" if 'gestational_hypertension' in request.form else "Нет"
             placenta_previa = "Да" if 'placenta_previa' in request.form else "Нет"
@@ -750,7 +754,8 @@ def edit_patient(patient_id):
             patient.placenta_pathology = placenta_pathology
             patient.polyhydramnios = polyhydramnios
             patient.oligohydramnios = oligohydramnios
-            patient.preeclampsia = preeclampsia
+            patient.pls = pls
+            patient.pts = pts
             patient.eclampsia = eclampsia
             patient.gestational_hypertension = gestational_hypertension
             patient.placenta_previa = placenta_previa
@@ -2444,8 +2449,10 @@ def analytics():
                 complications['Анемия'] = complications.get('Анемия', 0) + 1
             if patient.infections == 'Да':
                 complications['Инфекции'] = complications.get('Инфекции', 0) + 1
-            if patient.preeclampsia == 'Да':
-                complications['Преэклампсия'] = complications.get('Преэклампсия', 0) + 1
+            if patient.pls == 'Да':
+                complications['ПЛС'] = complications.get('ПЛС', 0) + 1
+            if patient.pts == 'Да':
+                complications['ПТС'] = complications.get('ПТС', 0) + 1
             if patient.eclampsia == 'Да':
                 complications['Эклампсия'] = complications.get('Эклампсия', 0) + 1
             if patient.gestational_hypertension == 'Да':

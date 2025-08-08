@@ -152,13 +152,25 @@
                     Критические осложнения
                 </h3>
                 <div class="space-y-4">
-                    {% if complications.get('Преэклампсия', 0) > 0 %}
+                    {% if complications.get('ПЛС', 0) > 0 %}
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-orange-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-800">ПЛС</h4>
+                                <p class="text-orange-600">{{ complications.get('ПЛС', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПТС', 0) > 0 %}
                     <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
                         <div class="flex items-center">
                             <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
                             <div>
-                                <h4 class="font-bold text-red-800">Преэклампсия</h4>
-                                <p class="text-red-600">{{ complications.get('Преэклампсия', 0) }} случаев</p>
+                                <h4 class="font-bold text-red-800">ПТС</h4>
+                                <p class="text-red-600">{{ complications.get('ПТС', 0) }} случаев</p>
                             </div>
                         </div>
                     </div>
@@ -248,7 +260,7 @@
                     </div>
                     {% endif %}
                     
-                    {% if complications.get('Преэклампсия', 0) == 0 and complications.get('Эклампсия', 0) == 0 and complications.get('Дистоция плечиков', 0) == 0 and complications.get('Разрыв 3 степени', 0) == 0 and complications.get('Выпадение петель пуповины', 0) == 0 and complications.get('ПРК', 0) == 0 and complications.get('ПОНРП', 0) == 0 and blood_loss_stats.get('Значительная (1000+ мл)', 0) == 0 %}
+                    {% if complications.get('ПЛС', 0) == 0 and complications.get('ПТС', 0) == 0 and complications.get('Эклампсия', 0) == 0 and complications.get('Дистоция плечиков', 0) == 0 and complications.get('Разрыв 3 степени', 0) == 0 and complications.get('Выпадение петель пуповины', 0) == 0 and complications.get('ПРК', 0) == 0 and complications.get('ПОНРП', 0) == 0 and blood_loss_stats.get('Значительная (1000+ мл)', 0) == 0 %}
                     <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
                         <div class="flex items-center">
                             <i class="fas fa-check-circle text-green-500 mr-3"></i>
