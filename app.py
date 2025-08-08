@@ -285,7 +285,7 @@ class Patient(db.Model):
     pts = db.Column(db.String(10), nullable=False)  # ПТС - преэклампсия тяжелой степени
     eclampsia = db.Column(db.String(10), nullable=False)
     gestational_hypertension = db.Column(db.String(10), nullable=False)
-    placenta_previa = db.Column(db.String(10), nullable=False)
+    placenta_previa = db.Column(db.String(10), nullable=False)  # Плотное прикрепление последа
     shoulder_dystocia = db.Column(db.String(10), nullable=False)
     third_degree_tear = db.Column(db.String(10), nullable=False)
     cord_prolapse = db.Column(db.String(10), nullable=False)
@@ -2458,7 +2458,7 @@ def analytics():
             if patient.gestational_hypertension == 'Да':
                 complications['Гестационная гипертензия'] = complications.get('Гестационная гипертензия', 0) + 1
             if patient.placenta_previa == 'Да':
-                complications['Плотное лежание плаценты'] = complications.get('Плотное лежание плаценты', 0) + 1
+                complications['Плотное прикрепление последа'] = complications.get('Плотное прикрепление последа', 0) + 1
             if patient.shoulder_dystocia == 'Да':
                 complications['Дистоция плечиков'] = complications.get('Дистоция плечиков', 0) + 1
             if patient.third_degree_tear == 'Да':
