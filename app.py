@@ -144,6 +144,136 @@ def init_database():
                 db.session.commit()
                 logger.info("✅ Admin user created")
             
+            # Add test patients if table is empty
+            patient_count = db.session.query(Patient).count()
+            if patient_count == 0:
+                logger.info("📊 Adding test patients...")
+                
+                test_patients = [
+                    Patient(
+                        date='2024-01-15',
+                        patient_name='Анна Иванова',
+                        age=28,
+                        pregnancy_weeks=39,
+                        weight_before=65.5,
+                        weight_after=70.2,
+                        complications='Нет',
+                        notes='Нормальные роды',
+                        midwife='Доктор Петрова',
+                        birth_date='2024-01-15',
+                        birth_time='14:30',
+                        child_gender='Девочка',
+                        child_weight=3200,
+                        delivery_method='Естественные роды',
+                        anesthesia='Эпидуральная анестезия',
+                        blood_loss=450,
+                        labor_duration=8.5,
+                        other_diseases='Нет',
+                        gestosis='Нет',
+                        diabetes='Нет',
+                        hypertension='Нет',
+                        anemia='Нет',
+                        infections='Нет',
+                        placenta_pathology='Нет',
+                        polyhydramnios='Нет',
+                        oligohydramnios='Нет',
+                        pls='Нет',
+                        pts='Нет',
+                        eclampsia='Нет',
+                        gestational_hypertension='Нет',
+                        placenta_previa='Нет',
+                        shoulder_dystocia='Нет',
+                        third_degree_tear='Нет',
+                        cord_prolapse='Нет',
+                        postpartum_hemorrhage='Нет',
+                        placental_abruption='Нет'
+                    ),
+                    Patient(
+                        date='2024-02-20',
+                        patient_name='Мария Сидорова',
+                        age=32,
+                        pregnancy_weeks=38,
+                        weight_before=68.0,
+                        weight_after=72.5,
+                        complications='Гестоз',
+                        notes='Осложненные роды',
+                        midwife='Доктор Козлова',
+                        birth_date='2024-02-20',
+                        birth_time='16:45',
+                        child_gender='Мальчик',
+                        child_weight=3500,
+                        delivery_method='Кесарево сечение',
+                        anesthesia='Общая анестезия',
+                        blood_loss=800,
+                        labor_duration=12.0,
+                        other_diseases='Нет',
+                        gestosis='Да',
+                        diabetes='Нет',
+                        hypertension='Да',
+                        anemia='Нет',
+                        infections='Нет',
+                        placenta_pathology='Нет',
+                        polyhydramnios='Нет',
+                        oligohydramnios='Нет',
+                        pls='Да',
+                        pts='Нет',
+                        eclampsia='Нет',
+                        gestational_hypertension='Нет',
+                        placenta_previa='Нет',
+                        shoulder_dystocia='Нет',
+                        third_degree_tear='Нет',
+                        cord_prolapse='Нет',
+                        postpartum_hemorrhage='Нет',
+                        placental_abruption='Нет'
+                    ),
+                    Patient(
+                        date='2024-03-10',
+                        patient_name='Елена Петрова',
+                        age=25,
+                        pregnancy_weeks=40,
+                        weight_before=62.0,
+                        weight_after=66.8,
+                        complications='ПРК',
+                        notes='Послеродовое кровотечение',
+                        midwife='Доктор Иванова',
+                        birth_date='2024-03-10',
+                        birth_time='09:15',
+                        child_gender='Девочка',
+                        child_weight=3100,
+                        delivery_method='Естественные роды',
+                        anesthesia='Без анестезии',
+                        blood_loss=1200,
+                        labor_duration=6.5,
+                        other_diseases='Нет',
+                        gestosis='Нет',
+                        diabetes='Нет',
+                        hypertension='Нет',
+                        anemia='Нет',
+                        infections='Нет',
+                        placenta_pathology='Нет',
+                        polyhydramnios='Нет',
+                        oligohydramnios='Нет',
+                        pls='Нет',
+                        pts='Нет',
+                        eclampsia='Нет',
+                        gestational_hypertension='Нет',
+                        placenta_previa='Нет',
+                        shoulder_dystocia='Нет',
+                        third_degree_tear='Нет',
+                        cord_prolapse='Нет',
+                        postpartum_hemorrhage='Да',
+                        placental_abruption='Нет'
+                    )
+                ]
+                
+                for patient in test_patients:
+                    db.session.add(patient)
+                
+                db.session.commit()
+                logger.info(f"✅ Added {len(test_patients)} test patients")
+            else:
+                logger.info(f"✅ Database already has {patient_count} patients")
+            
     except Exception as e:
         logger.error(f"❌ Error initializing database: {e}")
 
@@ -2419,12 +2549,13 @@ def analytics():
         patients = Patient.query.all()
         
         if not patients:
+            logger.warning("⚠️ No patients found in database")
             return render_template('analytics.html', 
                                 total_patients=0,
                                 male_count=0, female_count=0, avg_age=0,
                                 delivery_methods={}, complications={}, anesthesia_types={},
                                 avg_child_weight=0, avg_pregnancy_weeks=0, avg_blood_loss=0, avg_labor_duration=0,
-                                monthly_trends={})
+                                monthly_trends={}, blood_loss_stats={})
         
         # Основная статистика
         total_patients = len(patients)
