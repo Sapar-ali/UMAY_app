@@ -1751,12 +1751,12 @@ if __name__ == '__main__':
     os.makedirs(data_dir, exist_ok=True)
     logger.info("Data directory created/verified")
     
-    # Initialize databases
-    init_database()
-    
     print("⚠️  Для запуска используйте: python run_local.py")
     print("📱 Или: python run_public.py для публичной ссылки")
     sys.exit(1)
+
+# Инициализация базы данных при импорте модуля
+init_database()
 
 # Обработчик ошибок для отладки
 @app.errorhandler(500)
