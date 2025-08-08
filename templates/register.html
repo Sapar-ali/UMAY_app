@@ -137,10 +137,11 @@
                                     required 
                                     class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
                                 <option value="" class="bg-slate-800">Выберите должность</option>
-                                <option value="Акушер-гинеколог" class="bg-slate-800">Акушер-гинеколог</option>
-                                <option value="Акушерка" class="bg-slate-800">Акушерка</option>
-                                <option value="Медсестра" class="bg-slate-800">Медсестра</option>
-                                <option value="Врач" class="bg-slate-800">Врач</option>
+                                <option value="Акушер" class="bg-slate-800">Акушер</option>
+                                <option value="Высшая категория" class="bg-slate-800">Высшая категория</option>
+                                <option value="1 категория" class="bg-slate-800">1 категория</option>
+                                <option value="2 категория" class="bg-slate-800">2 категория</option>
+                                <option value="Сертификат" class="bg-slate-800">Сертификат</option>
                             </select>
                         </div>
                     </div>
@@ -180,6 +181,19 @@
                                 disabled 
                                 class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
                             <option value="" class="bg-slate-800">Сначала выберите город</option>
+                        </select>
+                    </div>
+                    
+                    <div class="group">
+                        <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <i class="fas fa-clinic-medical mr-2"></i>Отделение
+                        </label>
+                        <select id="department" 
+                                name="department" 
+                                required 
+                                disabled 
+                                class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
+                            <option value="" class="bg-slate-800">Сначала выберите учреждение</option>
                         </select>
                     </div>
                     
@@ -315,6 +329,7 @@ function switchToMidwife() {
 document.addEventListener('DOMContentLoaded', function() {
     const citySelect = document.getElementById('city');
     const institutionSelect = document.getElementById('medical_institution');
+    const departmentSelect = document.getElementById('department');
     
     if (citySelect) {
         // Загружаем список городов
@@ -338,6 +353,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedCity = this.value;
             institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Загрузка...</option>';
             institutionSelect.disabled = true;
+            departmentSelect.innerHTML = '<option value="" class="bg-slate-800">Сначала выберите учреждение</option>';
+            departmentSelect.disabled = true;
             
             if (selectedCity) {
                 fetch(`/api/institutions/${encodeURIComponent(selectedCity)}`)
@@ -360,6 +377,37 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 institutionSelect.innerHTML = '<option value="" class="bg-slate-800">Сначала выберите город</option>';
                 institutionSelect.disabled = true;
+            }
+        });
+        
+        // Обработчик изменения учреждения
+        institutionSelect.addEventListener('change', function() {
+            const selectedCity = citySelect.value;
+            const selectedInstitution = this.value;
+            departmentSelect.innerHTML = '<option value="" class="bg-slate-800">Загрузка...</option>';
+            departmentSelect.disabled = true;
+            
+            if (selectedCity && selectedInstitution) {
+                fetch(`/api/departments/${encodeURIComponent(selectedCity)}/${encodeURIComponent(selectedInstitution)}`)
+                    .then(response => response.json())
+                    .then(departments => {
+                        departmentSelect.innerHTML = '<option value="" class="bg-slate-800">Выберите отделение</option>';
+                        departments.forEach(department => {
+                            const option = document.createElement('option');
+                            option.value = department;
+                            option.textContent = department;
+                            option.className = 'bg-slate-800';
+                            departmentSelect.appendChild(option);
+                        });
+                        departmentSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке отделений:', error);
+                        departmentSelect.innerHTML = '<option value="" class="bg-slate-800">Ошибка загрузки</option>';
+                    });
+            } else {
+                departmentSelect.innerHTML = '<option value="" class="bg-slate-800">Сначала выберите учреждение</option>';
+                departmentSelect.disabled = true;
             }
         });
     }

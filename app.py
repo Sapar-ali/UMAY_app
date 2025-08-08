@@ -88,20 +88,36 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Данные о городах и медицинских учреждениях
+# Данные о городах и медицинских учреждениях с отделениями
 CITIES_DATA = {
-    "Шымкент": [
-        "Городской перинатальный центр",
-        "ГКП на ПХВ Городской родильный дом",
-        "Городская больница - 2",
-        "Городская больница - 3"
-    ],
-    "ЮКО": [
-        "Скоро добавим..."
-    ],
-    "Астана": [
-        "Скоро добавим..."
-    ]
+    "Шымкент": {
+        "Городской перинатальный центр": [
+            "Родильное отделение",
+            "Отделение Паталогии",
+            "Отделение Физиологии"
+        ],
+        "ГКП на ПХВ Городской родильный дом": [
+            "Родильное отделение",
+            "Отделение Паталогии",
+            "Отделение Физиологии"
+        ],
+        "Городская больница - 2": [
+            "Родильное отделение",
+            "Отделение Паталогии",
+            "Отделение Физиологии"
+        ],
+        "Городская больница - 3": [
+            "Родильное отделение",
+            "Отделение Паталогии",
+            "Отделение Физиологии"
+        ]
+    },
+    "ЮКО": {
+        "Скоро добавим...": ["Скоро добавим..."]
+    },
+    "Астана": {
+        "Скоро добавим...": ["Скоро добавим..."]
+    }
 }
 
 # Инициализация базы данных
@@ -123,6 +139,7 @@ class User(UserMixin, db.Model):
     position = db.Column(db.String(50), nullable=False)
     city = db.Column(db.String(50), nullable=False)
     medical_institution = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(100), nullable=False)  # Новое поле для отделения
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # CMS Модели для контента
@@ -219,7 +236,8 @@ with app.app_context():
                 user_type='midwife',
                 position='Главный администратор',
                 city='Алматы',
-                medical_institution='UMAY System'
+                medical_institution='UMAY System',
+                department='Системное отделение'
             )
             db.session.add(admin_user)
             db.session.commit()
@@ -246,7 +264,14 @@ def get_cities():
 def get_institutions(city):
     """API для получения списка учреждений по городу"""
     if city in CITIES_DATA:
-        return jsonify(CITIES_DATA[city])
+        return jsonify(list(CITIES_DATA[city].keys()))
+    return jsonify([])
+
+@app.route('/api/departments/<city>/<institution>')
+def get_departments(city, institution):
+    """API для получения списка отделений по городу и учреждению"""
+    if city in CITIES_DATA and institution in CITIES_DATA[city]:
+        return jsonify(CITIES_DATA[city][institution])
     return jsonify([])
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -291,13 +316,15 @@ def register():
                 user_type='user',
                 position='Пользователь',
                 city='Не указан',
-                medical_institution='Не указано'
+                medical_institution='Не указано',
+                department='Не указано'
             )
         else:
             # Полная регистрация для акушерок
             position = request.form['position']
             city = request.form['city']
             medical_institution = request.form['medical_institution']
+            department = request.form.get('department', 'Не указано')
             
             new_user = User(
                 full_name=full_name,
@@ -306,7 +333,8 @@ def register():
                 user_type='midwife',
                 position=position,
                 city=city,
-                medical_institution=medical_institution
+                medical_institution=medical_institution,
+                department=department
             )
         
         try:
@@ -814,6 +842,12 @@ def export_csv():
     # Создаем данные для экспорта
     data = []
     for patient in patients:
+        # Находим информацию об акушерке
+        midwife_info = User.query.filter_by(full_name=patient.midwife).first()
+        midwife_position = midwife_info.position if midwife_info else "Не указано"
+        midwife_department = midwife_info.department if midwife_info else "Не указано"
+        midwife_institution = midwife_info.medical_institution if midwife_info else "Не указано"
+        
         data.append({
             'Дата': patient.date,
             'ФИО роженицы': patient.patient_name,
@@ -824,6 +858,9 @@ def export_csv():
             'Осложнения': patient.complications,
             'Примечания': patient.notes,
             'Акушерка': patient.midwife,
+            'Должность акушерки': midwife_position,
+            'Учреждение акушерки': midwife_institution,
+            'Отделение акушерки': midwife_department,
             'Дата родов': patient.birth_date,
             'Время родов': patient.birth_time,
             'Пол ребенка': patient.child_gender,
@@ -1067,9 +1104,14 @@ def export_pdf():
         story.append(Paragraph("👥 Детальная информация о пациентах", subtitle_style))
         
         # Создаем таблицу пациентов
-        patient_data = [['ФИО', 'Возраст', 'Срок', 'Вес ребенка', 'Пол', 'Способ родов', 'Дата родов']]
+        patient_data = [['ФИО', 'Возраст', 'Срок', 'Вес ребенка', 'Пол', 'Способ родов', 'Акушерка', 'Должность', 'Отделение']]
         
         for patient in patients:
+            # Находим информацию об акушерке
+            midwife_info = User.query.filter_by(full_name=patient.midwife).first()
+            midwife_position = midwife_info.position if midwife_info else "Не указано"
+            midwife_department = midwife_info.department if midwife_info else "Не указано"
+            
             patient_data.append([
                 patient.patient_name,
                 str(patient.age),
@@ -1077,7 +1119,9 @@ def export_pdf():
                 f'{patient.child_weight} г',
                 patient.child_gender,
                 patient.delivery_method,
-                patient.birth_date
+                patient.midwife,
+                midwife_position,
+                midwife_department
             ])
         
         patient_table = Table(patient_data)
