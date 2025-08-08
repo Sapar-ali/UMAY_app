@@ -1073,7 +1073,8 @@ def export_pdf():
             fontSize=24,
             spaceAfter=30,
             alignment=1,  # Центрирование
-            textColor=colors.HexColor('#1e40af')  # Синий цвет
+            textColor=colors.HexColor('#1e40af'),  # Синий цвет
+            fontName=font_name  # Используем наш шрифт
         )
         
         subtitle_style = ParagraphStyle(
@@ -1081,14 +1082,16 @@ def export_pdf():
             parent=styles['Heading2'],
             fontSize=16,
             spaceAfter=20,
-            textColor=colors.HexColor('#374151')  # Серый цвет
+            textColor=colors.HexColor('#374151'),  # Серый цвет
+            fontName=font_name  # Используем наш шрифт
         )
         
         normal_style = ParagraphStyle(
             'CustomNormal',
             parent=styles['Normal'],
             fontSize=10,
-            spaceAfter=6
+            spaceAfter=6,
+            fontName=font_name  # Используем наш шрифт
         )
         
         # Заголовок
