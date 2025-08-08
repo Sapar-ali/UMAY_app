@@ -28,43 +28,30 @@ logger = logging.getLogger(__name__)
 logger.info("=== UMAY APP STARTING - SIMPLE VERSION v5.0 ===")
 
 # Database configuration
-def get_database_uri(app_type='pro'):
-    """Get database URI based on application type"""
+def get_database_uri():
+    """Get database URI - use single database with different tables"""
     if os.getenv('DATABASE_URL'):
-        # Production - use PostgreSQL with different schemas
-        base_url = os.getenv('DATABASE_URL')
-        if app_type == 'mama':
-            return base_url + "?options=-csearch_path%3Dmama_schema"
-        else:
-            return base_url + "?options=-csearch_path%3Dpro_schema"
+        # Production - use PostgreSQL with single database
+        return os.getenv('DATABASE_URL')
     else:
-        # Local development - use separate SQLite files
+        # Local development - use SQLite file
         data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
         os.makedirs(data_dir, exist_ok=True)
-        
-        if app_type == 'mama':
-            return f'sqlite:///{os.path.join(data_dir, "umay_mama.db")}'
-        else:
-            return f'sqlite:///{os.path.join(data_dir, "umay_pro.db")}'
+        return f'sqlite:///{os.path.join(data_dir, "umay.db")}'
 
-# Create separate database instances
-def create_app_database(app_type='pro'):
-    """Create database instance for specific app type"""
+# Create single database instance
+def create_app_database():
+    """Create database instance"""
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
-    app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri(app_type)
+    app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     db = SQLAlchemy(app)
     return app, db
 
-# Initialize databases
-app_pro, db_pro = create_app_database('pro')
-app_mama, db_mama = create_app_database('mama')
-
-# Use the main app instance and its database
-app = app_pro
-db = db_pro
+# Initialize single database
+app, db = create_app_database()
 
 # Initialize login manager
 login_manager = LoginManager()
@@ -73,14 +60,14 @@ login_manager.login_view = 'login'
 
 # Initialize database tables
 def init_database():
-    """Initialize both databases with tables"""
+    """Initialize database with all tables"""
     try:
-        with app_pro.app_context():
-            db_pro.create_all()
-            logger.info("✅ UMAY Pro database initialized")
+        with app.app_context():
+            db.create_all()
+            logger.info("✅ UMAY database initialized")
             
             # Create admin user if not exists
-            admin_user = db_pro.session.query(UserPro).filter_by(login='Joker').first()
+            admin_user = db.session.query(UserPro).filter_by(login='Joker').first()
             if not admin_user:
                 hashed_password = generate_password_hash('19341934')
                 admin_user = UserPro(
@@ -94,16 +81,12 @@ def init_database():
                     department='Administration',
                     app_type='pro'
                 )
-                db_pro.session.add(admin_user)
-                db_pro.session.commit()
-                logger.info("✅ Admin user created in UMAY Pro")
-        
-        with app_mama.app_context():
-            db_mama.create_all()
-            logger.info("✅ UMAY Mama database initialized")
+                db.session.add(admin_user)
+                db.session.commit()
+                logger.info("✅ Admin user created")
             
     except Exception as e:
-        logger.error(f"❌ Error initializing databases: {e}")
+        logger.error(f"❌ Error initializing database: {e}")
 
 
 
@@ -142,7 +125,7 @@ CITIES_DATA = {
 
 
 # Модели базы данных - отдельные для каждой системы
-class UserPro(UserMixin, db_pro.Model):
+class UserPro(UserMixin, db.Model):
     __tablename__ = 'user_pro'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
@@ -156,7 +139,7 @@ class UserPro(UserMixin, db_pro.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='pro')
 
-class UserMama(UserMixin, db_mama.Model):
+class UserMama(UserMixin, db.Model):
     __tablename__ = 'user_mama'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
@@ -247,13 +230,13 @@ def load_user(user_id):
     user = None
     
     # First check UMAY Pro database
-    with app_pro.app_context():
-        user = db_pro.session.query(UserPro).get(int(user_id))
+    with app.app_context():
+        user = db.session.query(UserPro).get(int(user_id))
     
     # Then check UMAY Mama database
     if not user:
-        with app_mama.app_context():
-            user = db_mama.session.query(UserMama).get(int(user_id))
+        with app.app_context():
+            user = db.session.query(UserMama).get(int(user_id))
     
     return user
 
@@ -294,15 +277,15 @@ def login():
         app_type = None
         
         # First check UMAY Pro database
-        with app_pro.app_context():
-            user = db_pro.session.query(UserPro).filter_by(login=login).first()
+        with app.app_context():
+            user = db.session.query(UserPro).filter_by(login=login).first()
             if user:
                 app_type = 'pro'
         
         # Then check UMAY Mama database
         if not user:
-            with app_mama.app_context():
-                user = db_mama.session.query(UserMama).filter_by(login=login).first()
+            with app.app_context():
+                user = db.session.query(UserMama).filter_by(login=login).first()
                 if user:
                     app_type = 'mama'
         
@@ -368,11 +351,11 @@ def register():
         # Check if user already exists in the appropriate database
         existing_user = None
         if app_type == 'mama':
-            with app_mama.app_context():
-                existing_user = db_mama.session.query(UserMama).filter_by(login=login).first()
+            with app.app_context():
+                existing_user = db.session.query(UserMama).filter_by(login=login).first()
         else:
-            with app_pro.app_context():
-                existing_user = db_pro.session.query(UserPro).filter_by(login=login).first()
+            with app.app_context():
+                existing_user = db.session.query(UserPro).filter_by(login=login).first()
         
         if existing_user:
             flash('Пользователь с таким логином уже существует!', 'error')
@@ -383,7 +366,7 @@ def register():
         try:
             if user_type == 'user' and app_type == 'mama':
                 # UMAY Mama user registration
-                with app_mama.app_context():
+                with app.app_context():
                     new_user = UserMama(
                         full_name=full_name[:100],
                         login=login[:50],
@@ -395,8 +378,8 @@ def register():
                         department='Не указано',
                         app_type='mama'
                     )
-                    db_mama.session.add(new_user)
-                    db_mama.session.commit()
+                    db.session.add(new_user)
+                    db.session.commit()
                 
             elif user_type == 'midwife' and app_type == 'pro':
                 # UMAY Pro midwife registration
@@ -405,7 +388,7 @@ def register():
                 medical_institution = request.form.get('medical_institution', '').strip()
                 department = request.form.get('department', '').strip()
                 
-                with app_pro.app_context():
+                with app.app_context():
                     new_user = UserPro(
                         full_name=full_name[:100],
                         login=login[:50],
@@ -417,8 +400,8 @@ def register():
                         department=department[:200],
                         app_type='pro'
                     )
-                    db_pro.session.add(new_user)
-                    db_pro.session.commit()
+                    db.session.add(new_user)
+                    db.session.commit()
                 
             else:
                 flash('Неверный тип регистрации!', 'error')
@@ -429,11 +412,11 @@ def register():
             
         except Exception as e:
             if app_type == 'mama':
-                with app_mama.app_context():
-                    db_mama.session.rollback()
+                with app.app_context():
+                    db.session.rollback()
             else:
-                with app_pro.app_context():
-                    db_pro.session.rollback()
+                with app.app_context():
+                    db.session.rollback()
             logger.error(f"Ошибка при регистрации пользователя {login}: {e}")
             flash(f'Ошибка при регистрации: {str(e)}. Попробуйте еще раз.', 'error')
             return render_template('register.html')
@@ -1366,8 +1349,8 @@ def export_csv():
     for patient in patients:
         # Находим информацию об акушерке
         midwife_info = None
-        with app_pro.app_context():
-            midwife_info = db_pro.session.query(UserPro).filter_by(full_name=patient.midwife).first()
+        with app.app_context():
+            midwife_info = db.session.query(UserPro).filter_by(full_name=patient.midwife).first()
         midwife_position = midwife_info.position if midwife_info else "Не указано"
         midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
         midwife_institution = midwife_info.medical_institution if midwife_info else "Не указано"
@@ -1650,8 +1633,8 @@ def export_pdf():
         for patient in patients:
             # Находим информацию об акушерке
             midwife_info = None
-            with app_pro.app_context():
-                midwife_info = db_pro.session.query(UserPro).filter_by(full_name=patient.midwife).first()
+            with app.app_context():
+                midwife_info = db.session.query(UserPro).filter_by(full_name=patient.midwife).first()
             midwife_position = midwife_info.position if midwife_info else "Не указано"
             midwife_department = getattr(midwife_info, 'department', 'Не указано') if midwife_info else "Не указано"
             
