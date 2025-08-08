@@ -814,11 +814,19 @@ def admin_mama_content():
     # Последние статьи
     recent_content = MamaContent.query.order_by(MamaContent.created_at.desc()).limit(5).all()
     
+    # Преобразуем статистику категорий в словарь
+    categories_dict = {stat.category: stat.count for stat in categories_stats}
+    
+    # Создаем объект статистики
+    stats = {
+        'total': total_content,
+        'published': published_content,
+        'pending': pending_content,
+        'categories': categories_dict
+    }
+    
     return render_template('admin/mama_content_dashboard.html',
-                         total_content=total_content,
-                         published_content=published_content,
-                         pending_content=pending_content,
-                         categories_stats=categories_stats,
+                         stats=stats,
                          recent_content=recent_content)
 
 @app.route('/admin/mama-content/add', methods=['GET', 'POST'])
@@ -932,7 +940,16 @@ def admin_mama_content_moderate():
     # Получаем статьи для модерации (неопубликованные)
     pending_content = MamaContent.query.filter_by(is_published=False).order_by(MamaContent.created_at.desc()).all()
     
-    return render_template('admin/mama_content_moderate.html', pending_content=pending_content)
+    # Дополнительная статистика для шаблона
+    total_content = MamaContent.query.count()
+    published_content = MamaContent.query.filter_by(is_published=True).count()
+    categories_count = db.session.query(MamaContent.category).distinct().count()
+    
+    return render_template('admin/mama_content_moderate.html', 
+                         pending_content=pending_content,
+                         total_content=total_content,
+                         published_content=published_content,
+                         categories_count=categories_count)
 
 @app.route('/admin/mama-content/approve/<int:content_id>', methods=['POST'])
 @login_required
