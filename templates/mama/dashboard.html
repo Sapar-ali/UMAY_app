@@ -3,154 +3,286 @@
 {% block title %}UMAY Mama - Панель управления{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-heart text-danger"></i>
-                UMAY Mama - Панель управления
-            </h1>
-            <p class="text-muted">Добро пожаловать, {{ current_user.full_name }}!</p>
-        </div>
-    </div>
-
-    <!-- Статистика -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-newspaper"></i>
-                        Всего статей
-                    </h5>
-                    <h2>{{ total_content }}</h2>
+<!-- Modern UMAY Mama Dashboard -->
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <!-- Header -->
+    <div class="bg-white/80 backdrop-blur-lg border-b border-pink-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-heart text-white text-lg"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                        UMAY Mama
+                    </h1>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-dumbbell"></i>
-                        Спорт
-                    </h5>
-                    <h2>{{ sport_content }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-apple-alt"></i>
-                        Питание
-                    </h5>
-                    <h2>{{ nutrition_content }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-pills"></i>
-                        Витамины
-                    </h5>
-                    <h2>{{ vitamins_content }}</h2>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600 font-medium">Добро пожаловать, {{ current_user.full_name }}! 👋</span>
+                    <a href="{{ url_for('logout') }}" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Последние статьи -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-star"></i>
-                        Последние статьи для вас
-                    </h5>
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="text-center mb-12 animate-fade-in">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                Ваш персональный помощник
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Получите доступ к лучшим материалам для здоровой беременности и счастливого материнства
+            </p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Total Articles -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-pink-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Всего статей</p>
+                        <p class="text-3xl font-bold text-pink-600">{{ total_content }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-pink-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-newspaper text-white"></i>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if mama_content %}
-                        <div class="row">
-                            {% for content in mama_content %}
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100">
-                                    {% if content.image_url %}
-                                    <img src="{{ content.image_url }}" class="card-img-top" alt="{{ content.title }}">
-                                    {% endif %}
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ content.title }}</h6>
-                                        <p class="card-text small">{{ content.content[:100] }}...</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="badge bg-primary">{{ content.category }}</span>
-                                            {% if content.trimester %}
-                                            <span class="badge bg-secondary">{{ content.trimester }} триместр</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="card-footer">
-                                        <a href="{{ url_for('mama_content') }}#content-{{ content.id }}" class="btn btn-sm btn-outline-primary">
-                                            Читать
-                                        </a>
+            </div>
+
+            <!-- Sport -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-green-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Спорт</p>
+                        <p class="text-3xl font-bold text-green-600">{{ sport_content }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Питание</p>
+                        <p class="text-3xl font-bold text-orange-600">{{ nutrition_content }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-apple-alt text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vitamins -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-blue-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Витамины</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ vitamins_content }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-pills text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Articles Section -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-12">
+            <div class="bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-6">
+                <h3 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-star mr-3"></i>
+                    Последние статьи для вас
+                </h3>
+                <p class="text-pink-100 mt-2">Полезные материалы, подобранные специально для вас</p>
+            </div>
+            
+            <div class="p-8">
+                {% if mama_content %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for content in mama_content %}
+                        <div class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 hover:border-pink-300 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl">
+                            {% if content.image_url %}
+                            <div class="mb-4 overflow-hidden rounded-xl">
+                                <img src="{{ content.image_url }}" alt="{{ content.title }}" class="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="space-y-3">
+                                <h4 class="font-bold text-gray-800 group-hover:text-pink-600 transition-colors duration-300">
+                                    {{ content.title }}
+                                </h4>
+                                <p class="text-gray-600 text-sm line-clamp-3">
+                                    {{ content.content[:120] }}...
+                                </p>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex space-x-2">
+                                        <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
+                                            {{ content.category }}
+                                        </span>
+                                        {% if content.trimester %}
+                                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                            {{ content.trimester }} триместр
+                                        </span>
+                                        {% endif %}
                                     </div>
                                 </div>
+                                
+                                <a href="{{ url_for('mama_content') }}#content-{{ content.id }}" 
+                                   class="inline-flex items-center text-pink-600 hover:text-pink-700 font-medium text-sm group-hover:scale-105 transition-transform duration-300">
+                                    Читать статью
+                                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+                                </a>
                             </div>
-                            {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Пока нет статей. Скоро появятся полезные материалы для вас!</p>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-24 h-24 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-book-open text-white text-3xl"></i>
                         </div>
-                    {% endif %}
-                </div>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Пока нет статей</h4>
+                        <p class="text-gray-600">Скоро появятся полезные материалы для вас!</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
-    </div>
 
-    <!-- Быстрые действия -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt"></i>
-                        Быстрые действия
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('mama_content') }}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-book"></i>
-                                Все статьи
-                            </a>
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-pink-600 px-8 py-6">
+                <h3 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-bolt mr-3"></i>
+                    Быстрые действия
+                </h3>
+                <p class="text-purple-100 mt-2">Получите доступ ко всем разделам платформы</p>
+            </div>
+            
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="{{ url_for('mama_content') }}" 
+                       class="group bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl p-6 border border-pink-200 hover:border-pink-400 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-pink-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-book text-white text-xl"></i>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('news_list') }}" class="btn btn-outline-info w-100">
-                                <i class="fas fa-newspaper"></i>
-                                Новости
-                            </a>
+                        <h4 class="font-bold text-gray-800 mb-2">Все статьи</h4>
+                        <p class="text-gray-600 text-sm">Полный каталог полезных материалов</p>
+                    </a>
+
+                    <a href="{{ url_for('news_list') }}" 
+                       class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:border-blue-400 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-newspaper text-white text-xl"></i>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-user"></i>
-                                Профиль
-                            </a>
+                        <h4 class="font-bold text-gray-800 mb-2">Новости</h4>
+                        <p class="text-gray-600 text-sm">Актуальные новости медицины</p>
+                    </a>
+
+                    <a href="{{ url_for('profile') }}" 
+                       class="group bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 hover:border-green-400 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-user text-white text-xl"></i>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger w-100">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Выйти
-                            </a>
+                        <h4 class="font-bold text-gray-800 mb-2">Профиль</h4>
+                        <p class="text-gray-600 text-sm">Управление личными данными</p>
+                    </a>
+
+                    <a href="{{ url_for('logout') }}" 
+                       class="group bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-6 border border-red-200 hover:border-red-400 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-sign-out-alt text-white text-xl"></i>
                         </div>
-                    </div>
+                        <h4 class="font-bold text-gray-800 mb-2">Выйти</h4>
+                        <p class="text-gray-600 text-sm">Завершить сессию</p>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(236, 72, 153, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #ec4899, #8b5cf6);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #db2777, #7c3aed);
+}
+</style>
+
+<script>
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards
+    document.querySelectorAll('.group').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        observer.observe(card);
+    });
+
+    // Add hover effects to buttons
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+        
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
 {% endblock %}
