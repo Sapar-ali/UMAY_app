@@ -105,8 +105,7 @@ def init_database():
     except Exception as e:
         logger.error(f"❌ Error initializing databases: {e}")
 
-# Initialize databases
-init_database()
+
 
 # Данные о городах и медицинских учреждениях с отделениями
 CITIES_DATA = {
