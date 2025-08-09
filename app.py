@@ -132,15 +132,13 @@ def send_sms_infobip(phone: str, text: str) -> bool:
             'Authorization': f'App {SMS_API_KEY}',
             'Content-Type': 'application/json'
         }
-        payload = {
-            'messages': [
-                {
-                    'from': SMS_SENDER,
-                    'destinations': [{'to': phone}],
-                    'text': text
-                }
-            ]
+        message_obj = {
+            'destinations': [{'to': phone}],
+            'text': text
         }
+        if SMS_SENDER:
+            message_obj['from'] = SMS_SENDER
+        payload = {'messages': [message_obj]}
         resp = requests.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
             return True
