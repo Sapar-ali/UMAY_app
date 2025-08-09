@@ -220,6 +220,23 @@ def mama_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def pro_clinical_required(f):
+    """Доступ только медицинскому персоналу UMAY Pro (не управленцам)."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        # Должен быть пользователь UMAY Pro
+        if hasattr(current_user, 'app_type') and current_user.app_type != 'pro':
+            flash('Доступ запрещен. Эта функция доступна только для медицинского персонала UMAY Pro.', 'error')
+            return redirect(url_for('index'))
+        # Запрет для управленцев (кроме супер-админа Joker)
+        if getattr(current_user, 'user_type', '') == 'manager' and getattr(current_user, 'login', '') != 'Joker':
+            flash('Доступ запрещен. Эта функция доступна только медицинскому персоналу.', 'error')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 def admin_required(f):
     """Декоратор для доступа только администраторам"""
     @wraps(f)
@@ -763,8 +780,8 @@ def register():
                     db.session.add(new_user)
                     db.session.commit()
                 
-            elif user_type == 'midwife' and app_type == 'pro':
-                # UMAY Pro midwife registration
+            elif user_type in ('midwife', 'manager') and app_type == 'pro':
+                # UMAY Pro registration (midwife or manager)
                 position = request.form.get('position', '').strip()
                 city = request.form.get('city', '').strip()
                 medical_institution = request.form.get('medical_institution', '').strip()
@@ -775,11 +792,11 @@ def register():
                         full_name=full_name[:100],
                         login=login[:50],
                         password=hashed_password,
-                        user_type='midwife',
-                        position=position[:100],
+                        user_type=('manager' if user_type == 'manager' else 'midwife'),
+                        position=(('Управленец') if user_type == 'manager' else position[:100]),
                         city=city[:100],
                         medical_institution=medical_institution[:200],
-                        department=department[:200],
+                        department=(' ' if user_type == 'manager' else department[:200]),
                         app_type='pro',
                         phone=normalized_phone,
                         is_phone_verified=True
@@ -952,7 +969,7 @@ def mama_dashboard():
 
 @app.route('/add_patient', methods=['GET', 'POST'])
 @login_required
-@pro_required
+@pro_clinical_required
 def add_patient():
     if request.method == 'POST':
         try:
@@ -1045,7 +1062,7 @@ def add_patient():
 
 @app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
 @login_required
-@pro_required
+@pro_clinical_required
 def edit_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     
@@ -1143,7 +1160,7 @@ def edit_patient(patient_id):
 
 @app.route('/delete_patient/<int:patient_id>', methods=['POST'])
 @login_required
-@pro_required
+@pro_clinical_required
 def delete_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     

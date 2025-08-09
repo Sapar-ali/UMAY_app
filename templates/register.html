@@ -131,7 +131,7 @@
                 </form>
             </div>
             
-            <!-- Midwife Registration Form -->
+            <!-- Midwife/Manager (UMAY Pro) Registration Form -->
             <div id="midwifeForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in hidden">
                 <div class="text-center mb-8">
                     <h2 class="text-3xl font-bold text-white mb-2">Регистрация в UMAY Pro</h2>
@@ -139,8 +139,16 @@
                 </div>
                 
                 <form method="POST" class="space-y-6">
-                    <input type="hidden" name="user_type" value="midwife">
+                    <input type="hidden" name="user_type" id="pro_user_type" value="midwife">
                     <input type="hidden" name="app_type" value="pro">
+                    
+                    <!-- Role selector for UMAY Pro: Midwife or Manager -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-2">
+                        <div class="flex bg-white/5 rounded-2xl p-1">
+                            <button type="button" id="roleMidwife" class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-500 text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg">Акушерка</button>
+                            <button type="button" id="roleManager" class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-500 text-gray-300 hover:text-white">Управленец</button>
+                        </div>
+                    </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="group">
@@ -154,7 +162,7 @@
                                    placeholder="Введите полное имя">
                         </div>
                         
-                        <div class="group">
+                        <div class="group" id="position_group">
                             <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
                                 <i class="fas fa-user-md mr-2"></i>Должность
                             </label>
@@ -209,7 +217,7 @@
                         </select>
                     </div>
                     
-                    <div class="group">
+                    <div class="group" id="department_group">
                         <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
                             <i class="fas fa-clinic-medical mr-2"></i>Отделение
                         </label>
@@ -513,6 +521,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     sendOtp('user_phone', 'user_phone_hint', 'user_send_code');
     sendOtp('pro_phone', 'pro_phone_hint', 'pro_send_code');
+    
+    // Role toggle for UMAY Pro
+    const roleMidwifeBtn = document.getElementById('roleMidwife');
+    const roleManagerBtn = document.getElementById('roleManager');
+    const proUserTypeInput = document.getElementById('pro_user_type');
+    const positionGroup = document.getElementById('position_group');
+    const departmentGroup = document.getElementById('department_group');
+    const positionSelect = document.querySelector('select[name="position"]');
+    const departmentSelect = document.getElementById('department');
+
+    function setRole(role) {
+        if (!proUserTypeInput) return;
+        if (role === 'manager') {
+            proUserTypeInput.value = 'manager';
+            // Hide fields not required for manager
+            positionGroup && positionGroup.classList.add('hidden');
+            departmentGroup && departmentGroup.classList.add('hidden');
+            positionSelect && positionSelect.removeAttribute('required');
+            if (departmentSelect) {
+                departmentSelect.removeAttribute('required');
+                departmentSelect.disabled = true;
+            }
+            // Visual state
+            roleManagerBtn.classList.add('bg-gradient-to-r','from-blue-500','to-purple-500','text-white','shadow-lg');
+            roleMidwifeBtn.classList.remove('bg-gradient-to-r','from-blue-500','to-purple-500','text-white','shadow-lg');
+            roleMidwifeBtn.classList.add('text-gray-300');
+        } else {
+            proUserTypeInput.value = 'midwife';
+            positionGroup && positionGroup.classList.remove('hidden');
+            departmentGroup && departmentGroup.classList.remove('hidden');
+            positionSelect && positionSelect.setAttribute('required','true');
+            if (departmentSelect) {
+                departmentSelect.setAttribute('required','true');
+                // Разблокируем — всё равно включится после выбора учреждения
+            }
+            roleMidwifeBtn.classList.add('bg-gradient-to-r','from-blue-500','to-purple-500','text-white','shadow-lg');
+            roleManagerBtn.classList.remove('bg-gradient-to-r','from-blue-500','to-purple-500','text-white','shadow-lg');
+            roleManagerBtn.classList.add('text-gray-300');
+        }
+    }
+    roleMidwifeBtn && roleMidwifeBtn.addEventListener('click', () => setRole('midwife'));
+    roleManagerBtn && roleManagerBtn.addEventListener('click', () => setRole('manager'));
+    // Default role is midwife
+    setRole('midwife');
 });
 </script>
 {% endblock %} 

@@ -105,10 +105,12 @@
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Панель управления</span>
                         </a>
-                        <a href="{{ url_for('add_patient') }}" class="text-bmw-text hover:text-bmw-blue transition-colors duration-300 flex items-center space-x-2 font-medium">
-                            <i class="fas fa-plus"></i>
-                            <span>Добавить пациента</span>
-                        </a>
+                        {% if current_user.user_type != 'manager' %}
+                            <a href="{{ url_for('add_patient') }}" class="text-bmw-text hover:text-bmw-blue transition-colors duration-300 flex items-center space-x-2 font-medium">
+                                <i class="fas fa-plus"></i>
+                                <span>Добавить пациента</span>
+                            </a>
+                        {% endif %}
                         <a href="{{ url_for('analytics') }}" class="text-bmw-text hover:text-bmw-blue transition-colors duration-300 flex items-center space-x-2 font-medium">
                             <i class="fas fa-chart-line"></i>
                             <span>Аналитика</span>
@@ -144,10 +146,12 @@
                     <i class="fas fa-tachometer-alt text-xl mb-1"></i>
                     <span class="text-xs font-medium">Панель</span>
                 </a>
-                <a href="{{ url_for('add_patient') }}" class="flex flex-col items-center p-2 text-bmw-blue">
-                    <i class="fas fa-plus text-xl mb-1"></i>
-                    <span class="text-xs font-medium">Добавить</span>
-                </a>
+                {% if current_user.user_type != 'manager' %}
+                    <a href="{{ url_for('add_patient') }}" class="flex flex-col items-center p-2 text-bmw-blue">
+                        <i class="fas fa-plus text-xl mb-1"></i>
+                        <span class="text-xs font-medium">Добавить</span>
+                    </a>
+                {% endif %}
                 <a href="{{ url_for('search') }}" class="flex flex-col items-center p-2 text-bmw-blue">
                     <i class="fas fa-search text-xl mb-1"></i>
                     <span class="text-xs font-medium">Поиск</span>
