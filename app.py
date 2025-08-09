@@ -18,6 +18,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from functools import wraps
+import phonenumbers
 
 # ============================================================================
 # UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER И RAILWAY
@@ -63,6 +64,19 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# ======================
+# SMS/OTP Configuration
+# ======================
+SMS_PROVIDER = os.getenv('SMS_PROVIDER', 'infobip')
+SMS_BASE_URL = os.getenv('SMS_BASE_URL', '')
+SMS_API_KEY = os.getenv('SMS_API_KEY', '')
+SMS_SENDER = os.getenv('SMS_SENDER', 'UMAY')
+OTP_TTL_SEC = int(os.getenv('OTP_TTL_SEC', '300'))
+OTP_RESEND_COOLDOWN_SEC = int(os.getenv('OTP_RESEND_COOLDOWN_SEC', '60'))
+OTP_MAX_PER_DAY = int(os.getenv('OTP_MAX_PER_DAY', '5'))
+OTP_MAX_ATTEMPTS = int(os.getenv('OTP_MAX_ATTEMPTS', '3'))
+ONLY_KZ_NUMBERS = os.getenv('ONLY_KZ_NUMBERS', 'true').lower() == 'true'
+
 # Markdown filter for templates
 @app.template_filter('markdown')
 def markdown_filter(text):
@@ -70,6 +84,112 @@ def markdown_filter(text):
     if not text:
         return ""
     return markdown.markdown(text, extensions=['extra', 'codehilite'])
+
+# ======================
+# OTP helpers
+# ======================
+def normalize_phone(raw_phone: str) -> str:
+    phone = ''.join(c for c in (raw_phone or '') if c.isdigit() or c == '+')
+    try:
+        if ONLY_KZ_NUMBERS:
+            if phone.startswith('8'):
+                phone = '+7' + phone[1:]
+            parsed = phonenumbers.parse(phone, 'KZ')
+        else:
+            parsed = phonenumbers.parse(phone, None)
+        if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+            return ''
+        e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        if ONLY_KZ_NUMBERS and not e164.startswith('+7'):
+            return ''
+        return e164
+    except Exception:
+        return ''
+
+def can_resend_otp(last_sent_at: datetime) -> bool:
+    if not last_sent_at:
+        return True
+    return (datetime.utcnow() - last_sent_at).total_seconds() >= OTP_RESEND_COOLDOWN_SEC
+
+def count_otp_sent_today(phone: str, purpose: str) -> int:
+    start_of_day = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    return OTPCode.query.filter(
+        OTPCode.phone == phone,
+        OTPCode.purpose == purpose,
+        OTPCode.created_at >= start_of_day
+    ).count()
+
+def generate_otp_code() -> str:
+    return f"{random.randint(100000, 999999)}"
+
+def send_sms_infobip(phone: str, text: str) -> bool:
+    if not SMS_BASE_URL or not SMS_API_KEY:
+        logger.error('SMS config is missing')
+        return False
+    try:
+        url = SMS_BASE_URL.rstrip('/') + '/sms/2/text/advanced'
+        headers = {
+            'Authorization': f'App {SMS_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            'messages': [
+                {
+                    'from': SMS_SENDER,
+                    'destinations': [{'to': phone}],
+                    'text': text
+                }
+            ]
+        }
+        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        if resp.status_code in (200, 201):
+            return True
+        logger.error(f"Infobip send failed: {resp.status_code} {resp.text}")
+        return False
+    except Exception as e:
+        logger.error(f"Infobip send exception: {e}")
+        return False
+
+def send_otp(phone: str, purpose: str):
+    normalized = normalize_phone(phone)
+    if not normalized:
+        return False, 'Некорректный номер телефона'
+    sent_today = count_otp_sent_today(normalized, purpose)
+    if sent_today >= OTP_MAX_PER_DAY:
+        return False, 'Превышен дневной лимит отправки кодов'
+    last = OTPCode.query.filter_by(phone=normalized, purpose=purpose).order_by(OTPCode.created_at.desc()).first()
+    if last and not can_resend_otp(last.last_sent_at):
+        return False, 'Пожалуйста, подождите перед повторной отправкой'
+    code = generate_otp_code()
+    text = f"UMAY: ваш код подтверждения {code}. Никому его не сообщайте."
+    sent = send_sms_infobip(normalized, text)
+    if not sent:
+        return False, 'Не удалось отправить СМС. Попробуйте позже'
+    otp = OTPCode(phone=normalized, code=code, purpose=purpose,
+                  expires_at=datetime.utcnow() + timedelta(seconds=OTP_TTL_SEC),
+                  last_sent_at=datetime.utcnow())
+    db.session.add(otp)
+    db.session.commit()
+    return True, 'Код отправлен'
+
+def verify_otp(phone: str, code: str, purpose: str):
+    normalized = normalize_phone(phone)
+    if not normalized:
+        return False, 'Некорректный номер телефона'
+    otp = OTPCode.query.filter_by(phone=normalized, purpose=purpose, verified=False).order_by(OTPCode.created_at.desc()).first()
+    if not otp:
+        return False, 'Код не найден. Отправьте новый'
+    if datetime.utcnow() > otp.expires_at:
+        return False, 'Срок действия кода истек'
+    if otp.attempts >= OTP_MAX_ATTEMPTS:
+        return False, 'Превышено число попыток. Отправьте новый код'
+    if otp.code != (code or '').strip():
+        otp.attempts += 1
+        db.session.commit()
+        return False, 'Неверный код'
+    otp.verified = True
+    db.session.commit()
+    return True, normalized
 
 # Система ролей и ограничений доступа
 def pro_required(f):
@@ -124,6 +244,30 @@ def init_database():
         with app.app_context():
             db.create_all()
             logger.info("✅ UMAY database initialized")
+            # Ensure phone columns exist (best-effort)
+            try:
+                from sqlalchemy import inspect, text
+                inspector = inspect(db.engine)
+                def add_column_if_missing(table_name: str, column_ddl: str):
+                    columns = [col['name'] for col in inspector.get_columns(table_name)]
+                    col_name = column_ddl.split()[0]
+                    if col_name not in columns:
+                        with db.engine.connect() as conn:
+                            conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_ddl}"))
+                            conn.commit()
+                            logger.info(f"Added column {col_name} to {table_name}")
+                if 'sqlite' in db.engine.url.drivername:
+                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_pro', 'is_phone_verified BOOLEAN DEFAULT 0')
+                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_mama', 'is_phone_verified BOOLEAN DEFAULT 0')
+                else:
+                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_pro', 'is_phone_verified BOOLEAN DEFAULT FALSE')
+                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_mama', 'is_phone_verified BOOLEAN DEFAULT FALSE')
+            except Exception as e:
+                logger.warning(f"Could not ensure phone columns: {e}")
             
             # Create admin user if not exists
             admin_user = db.session.query(UserPro).filter_by(login='Joker').first()
@@ -327,6 +471,9 @@ class UserPro(UserMixin, db.Model):
     department = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='pro')
+    # Phone auth
+    phone = db.Column(db.String(20))
+    is_phone_verified = db.Column(db.Boolean, default=False)
 
 class UserMama(UserMixin, db.Model):
     __tablename__ = 'user_mama'
@@ -341,6 +488,21 @@ class UserMama(UserMixin, db.Model):
     department = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='mama')
+    # Phone auth
+    phone = db.Column(db.String(20))
+    is_phone_verified = db.Column(db.Boolean, default=False)
+
+class OTPCode(db.Model):
+    __tablename__ = 'otp_code'
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(20), index=True, nullable=False)
+    code = db.Column(db.String(10), nullable=False)
+    purpose = db.Column(db.String(20), default='register')  # register, reset
+    expires_at = db.Column(db.DateTime, nullable=False)
+    attempts = db.Column(db.Integer, default=0)
+    last_sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    verified = db.Column(db.Boolean, default=False)
 
 # CMS Модели для контента - используем основную базу данных (UMAY Pro)
 class News(db.Model):
@@ -523,6 +685,8 @@ def register():
         password = request.form.get('password', '')
         user_type = request.form.get('user_type', 'user')
         app_type = request.form.get('app_type', 'pro')  # 'pro' or 'mama'
+        phone = request.form.get('phone', '').strip()
+        otp_code = request.form.get('otp_code', '').strip()
         
         # Validation
         if not full_name:
@@ -551,14 +715,29 @@ def register():
             flash('Логин слишком длинный! Максимум 50 символов.', 'error')
             return render_template('register.html')
         
+        # Phone validation and OTP check
+        normalized_phone = normalize_phone(phone)
+        if not normalized_phone:
+            flash('Введите корректный номер телефона!', 'error')
+            return render_template('register.html')
+
+        ok, res = verify_otp(normalized_phone, otp_code, 'register')
+        if not ok:
+            flash(res, 'error')
+            return render_template('register.html')
+
         # Check if user already exists in the appropriate database
         existing_user = None
         if app_type == 'mama':
             with app.app_context():
                 existing_user = db.session.query(UserMama).filter_by(login=login).first()
+                if not existing_user:
+                    existing_user = db.session.query(UserMama).filter_by(phone=normalized_phone).first()
         else:
             with app.app_context():
                 existing_user = db.session.query(UserPro).filter_by(login=login).first()
+                if not existing_user:
+                    existing_user = db.session.query(UserPro).filter_by(phone=normalized_phone).first()
         
         if existing_user:
             flash('Пользователь с таким логином уже существует!', 'error')
@@ -579,7 +758,9 @@ def register():
                         city='Не указан',
                         medical_institution='Не указано',
                         department='Не указано',
-                        app_type='mama'
+                        app_type='mama',
+                        phone=normalized_phone,
+                        is_phone_verified=True
                     )
                     db.session.add(new_user)
                     db.session.commit()
@@ -601,7 +782,9 @@ def register():
                         city=city[:100],
                         medical_institution=medical_institution[:200],
                         department=department[:200],
-                        app_type='pro'
+                        app_type='pro',
+                        phone=normalized_phone,
+                        is_phone_verified=True
                     )
                     db.session.add(new_user)
                     db.session.commit()
@@ -625,6 +808,61 @@ def register():
             return render_template('register.html')
     
     return render_template('register.html')
+
+@app.route('/api/otp/send', methods=['POST'])
+def api_send_otp():
+    data = request.get_json() or {}
+    phone = data.get('phone', '')
+    purpose = data.get('purpose', 'register')
+    ok, msg = send_otp(phone, purpose)
+    status = 'success' if ok else 'error'
+    return jsonify({'status': status, 'message': msg}), (200 if ok else 400)
+
+@app.route('/api/otp/verify', methods=['POST'])
+def api_verify_otp():
+    data = request.get_json() or {}
+    phone = data.get('phone', '')
+    code = data.get('code', '')
+    purpose = data.get('purpose', 'register')
+    ok, msg = verify_otp(phone, code, purpose)
+    status = 'success' if ok else 'error'
+    return jsonify({'status': status, 'message': ("OK" if ok else msg)}), (200 if ok else 400)
+
+@app.route('/recover', methods=['GET', 'POST'])
+def recover():
+    if request.method == 'POST':
+        phone = request.form.get('phone', '').strip()
+        otp_code = request.form.get('otp_code', '').strip()
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        normalized_phone = normalize_phone(phone)
+        if not normalized_phone:
+            flash('Введите корректный номер телефона!', 'error')
+            return render_template('recover.html')
+
+        if new_password and (len(new_password) < 6 or new_password != confirm_password):
+            flash('Пароль некорректен или не совпадает', 'error')
+            return render_template('recover.html')
+
+        ok, res = verify_otp(normalized_phone, otp_code, 'reset')
+        if not ok:
+            flash(res, 'error')
+            return render_template('recover.html')
+
+        user = db.session.query(UserPro).filter_by(phone=normalized_phone).first()
+        if not user:
+            user = db.session.query(UserMama).filter_by(phone=normalized_phone).first()
+        if not user:
+            flash('Пользователь с таким телефоном не найден', 'error')
+            return render_template('recover.html')
+
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash('Пароль успешно обновлен. Войдите с новым паролем.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('recover.html')
 
 @app.route('/logout')
 @login_required

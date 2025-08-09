@@ -98,6 +98,29 @@
                                    placeholder="Повторите пароль">
                         </div>
                     </div>
+
+                     <!-- Phone + OTP for UMAY Mama -->
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div class="group">
+                             <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                 <i class="fas fa-phone mr-2"></i>Телефон
+                             </label>
+                             <div class="flex space-x-2">
+                                 <input type="tel" name="phone" id="user_phone" required placeholder="+7 7XX XXX XX XX"
+                                        class="flex-1 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
+                                 <button type="button" id="user_send_code" class="px-4 py-4 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl">Код</button>
+                             </div>
+                             <p id="user_phone_hint" class="text-sm text-gray-400 mt-1">Введите номер и нажмите «Код», чтобы получить SMS.</p>
+                         </div>
+
+                         <div class="group">
+                             <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                 <i class="fas fa-key mr-2"></i>Код из SMS
+                             </label>
+                             <input type="text" name="otp_code" id="user_otp" required placeholder="6 цифр"
+                                    class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
+                         </div>
+                     </div>
                     
                     <button type="submit" 
                             class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
@@ -197,6 +220,29 @@
                                 class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg">
                             <option value="" class="bg-slate-800">Сначала выберите учреждение</option>
                         </select>
+                    </div>
+                    
+                    <!-- Phone + OTP for UMAY Pro -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-phone mr-2"></i>Телефон
+                            </label>
+                            <div class="flex space-x-2">
+                                <input type="tel" name="phone" id="pro_phone" required placeholder="+7 7XX XXX XX XX"
+                                       class="flex-1 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
+                                <button type="button" id="pro_send_code" class="px-4 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl">Код</button>
+                            </div>
+                            <p id="pro_phone_hint" class="text-sm text-gray-400 mt-1">Введите номер и нажмите «Код», чтобы получить SMS.</p>
+                        </div>
+
+                        <div class="group">
+                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                                <i class="fas fa-key mr-2"></i>Код из SMS
+                            </label>
+                            <input type="text" name="otp_code" id="pro_otp" required placeholder="6 цифр"
+                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -424,6 +470,49 @@ document.querySelectorAll('input, select').forEach(input => {
     input.addEventListener('blur', function() {
         this.parentElement.classList.remove('scale-105');
     });
+});
+
+// OTP send handlers
+document.addEventListener('DOMContentLoaded', function() {
+    function sendOtp(phoneInputId, hintId, buttonId) {
+        const phoneInput = document.getElementById(phoneInputId);
+        const hint = document.getElementById(hintId);
+        const button = document.getElementById(buttonId);
+        if (!phoneInput || !button) return;
+        button.addEventListener('click', async function() {
+            const phone = phoneInput.value.trim();
+            if (!phone) {
+                hint && (hint.textContent = 'Введите номер телефона');
+                return;
+            }
+            button.disabled = true;
+            const prevText = button.textContent;
+            button.textContent = 'Отправка...';
+            try {
+                const resp = await fetch('/api/otp/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone, purpose: 'register' })
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    hint && (hint.textContent = 'Код отправлен. Проверьте SMS.');
+                    button.textContent = 'Отправлено';
+                    setTimeout(() => { button.disabled = false; button.textContent = prevText; }, 60000);
+                } else {
+                    hint && (hint.textContent = data.message || 'Ошибка отправки');
+                    button.disabled = false;
+                    button.textContent = prevText;
+                }
+            } catch (e) {
+                hint && (hint.textContent = 'Ошибка сети');
+                button.disabled = false;
+                button.textContent = prevText;
+            }
+        });
+    }
+    sendOtp('user_phone', 'user_phone_hint', 'user_send_code');
+    sendOtp('pro_phone', 'pro_phone_hint', 'pro_send_code');
 });
 </script>
 {% endblock %} 

@@ -72,11 +72,17 @@
                     </button>
                 </form>
                 
-                <div class="mt-8 text-center">
+                <div class="mt-8 text-center space-y-2">
                     <p class="text-gray-300 text-lg">
                         Нет аккаунта? 
                         <a href="{{ url_for('register') }}" class="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300 underline">
                             Зарегистрироваться
+                        </a>
+                    </p>
+                    <p class="text-gray-300 text-lg">
+                        Забыли пароль? 
+                        <a href="{{ url_for('recover') }}" class="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300 underline">
+                            Восстановить по телефону
                         </a>
                     </p>
                 </div>
