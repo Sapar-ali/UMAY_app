@@ -61,6 +61,28 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Global subtle doodle background */
+        .umay-bg {
+            /* Layer 1: full wallpaper (optional, will 404 if file absent but page still works) */
+            /* Layer 2: subtle repeating pattern */
+            background-color: #f7fbff;
+            background-image:
+                url("{{ url_for('static', filename='assets/first.png') }}"),
+                url("{{ url_for('static', filename='assets/umay-pattern.svg') }}");
+            background-repeat: no-repeat, repeat;
+            background-size: cover, 240px 240px; /* wallpaper covers; pattern tiles */
+            background-position: center center, top left;
+            background-attachment: fixed, scroll;
+            position: relative;
+        }
+        /* Soft overlay to keep content readable over busy wallpapers */
+        .umay-bg::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.75);
+        }
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -85,7 +107,7 @@
         }
     </style>
 </head>
-<body class="bg-bmw-gray min-h-screen font-inter">
+<body class="bg-bmw-gray min-h-screen font-inter umay-bg">
     <!-- Desktop Navigation -->
     <nav class="desktop-nav bg-bmw-white shadow-lg border-b border-bmw-light-blue sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
