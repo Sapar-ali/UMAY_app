@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Новости{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Новости</li>
+                </ol>
+            </nav>
+
+            <header class="mb-4">
+                <h1>Новости</h1>
+                <p class="lead">Актуальные новости и события в области акушерства и гинекологии</p>
+            </header>
+
+            {% if news %}
+            <div class="news-grid">
+                {% for item in news %}
+                <div class="card mb-4">
+                    <div class="row no-gutters">
+                        {% if item.image_url %}
+                        <div class="col-md-4">
+                            <img src="{{ item.image_url }}" class="card-img h-100" alt="{{ item.title }}">
+                        </div>
+                        <div class="col-md-8">
+                        {% else %}
+                        <div class="col-12">
+                        {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="{{ url_for('news_detail', news_id=item.id) }}" class="text-decoration-none">
+                                        {{ item.title }}
+                                    </a>
+                                </h5>
+                                <p class="card-text">{{ item.short_description }}</p>
+                                
+                                <div class="meta-info">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ item.published_at.strftime('%d.%m.%Y') }}
+                                        {% if item.author %}
+                                        <i class="fas fa-user ml-2"></i> {{ item.author }}
+                                        {% endif %}
+                                        <i class="fas fa-eye ml-2"></i> {{ item.views }} просмотров
+                                    </small>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <a href="{{ url_for('news_detail', news_id=item.id) }}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        Читать далее
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="empty-state">
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    <h4>Новости пока не добавлены</h4>
+                    <p class="text-muted">Скоро здесь появятся актуальные новости!</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.news-grid .card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.news-grid .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-img {
+    object-fit: cover;
+}
+
+.meta-info {
+    border-top: 1px solid #eee;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.empty-state {
+    color: #6c757d;
+}
+</style>
+{% endblock %}

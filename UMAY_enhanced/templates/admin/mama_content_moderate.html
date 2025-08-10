@@ -1,0 +1,537 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Модерация контента{% endblock %}
+
+{% block content %}
+<style>
+/* Apple/BMW стиль дизайн */
+.moderate-page {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.back-button {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.stats-bar {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #007bff;
+    display: block;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.mass-actions {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.mass-actions .card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.mass-actions .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mass-actions .card-body {
+    padding: 2rem;
+}
+
+.btn-mass {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+}
+
+.btn-mass:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+    color: white;
+}
+
+.btn-mass.danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.btn-mass.danger:hover {
+    box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4);
+}
+
+.content-list {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+}
+
+.content-list .card-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.content-list .card-header h5 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.content-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid transparent;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 1rem;
+    transition: all 0.3s ease;
+}
+
+.content-item:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.2);
+}
+
+.content-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.content-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #495057;
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.content-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.content-category {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.content-trimester {
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.content-difficulty {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.content-description {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.content-author {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.content-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-approve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+    color: white;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-reject:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+    color: white;
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(23, 162, 184, 0.4);
+    color: white;
+}
+
+.btn-preview {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-preview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-bar,
+.mass-actions,
+.content-list {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.content-item {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.content-item:nth-child(1) { animation-delay: 0.1s; }
+.content-item:nth-child(2) { animation-delay: 0.2s; }
+.content-item:nth-child(3) { animation-delay: 0.3s; }
+.content-item:nth-child(4) { animation-delay: 0.4s; }
+.content-item:nth-child(5) { animation-delay: 0.5s; }
+</style>
+
+<div class="moderate-page">
+    <div class="container-fluid">
+        <!-- Заголовок -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-eye"></i> Модерация контента</h1>
+                <a href="{{ url_for('admin_mama_content') }}" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Назад к панели
+                </a>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-bar">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">{{ pending_content|length }}</span>
+                    <span class="stat-label">Ожидают модерации</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_content }}</span>
+                    <span class="stat-label">Всего статей</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ published_content }}</span>
+                    <span class="stat-label">Опубликовано</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ categories_count }}</span>
+                    <span class="stat-label">Категорий</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Массовые действия -->
+        {% if pending_content %}
+        <div class="mass-actions">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Массовые действия</h5>
+            </div>
+            <div class="card-body">
+                <a href="#" onclick="approveAll()" class="btn btn-mass">
+                    <i class="fas fa-check"></i> Одобрить все
+                </a>
+                <a href="#" onclick="rejectAll()" class="btn btn-mass danger">
+                    <i class="fas fa-times"></i> Отклонить все
+                </a>
+                <a href="#" onclick="exportData()" class="btn btn-mass">
+                    <i class="fas fa-download"></i> Экспорт данных
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Список контента -->
+        <div class="content-list">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Статьи на модерации</h5>
+            </div>
+            <div class="card-body">
+                {% if pending_content %}
+                    {% for content in pending_content %}
+                    <div class="content-item">
+                        <div class="content-header">
+                            <div class="content-title">{{ content.title }}</div>
+                        </div>
+                        
+                        <div class="content-meta">
+                            <span class="content-category">
+                                {% if content.category == 'sport' %}🏃 Спорт
+                                {% elif content.category == 'nutrition' %}🍎 Питание
+                                {% elif content.category == 'vitamins' %}💊 Витамины
+                                {% elif content.category == 'body_care' %}💅 Уход за телом
+                                {% elif content.category == 'baby_care' %}👶 Уход за малышом
+                                {% elif content.category == 'doctor_advice' %}👨‍⚕️ Советы врачей
+                                {% else %}{{ content.category }}
+                                {% endif %}
+                            </span>
+                            <span class="content-trimester">
+                                {% if content.trimester == '1' %}1 триместр
+                                {% elif content.trimester == '2' %}2 триместр
+                                {% elif content.trimester == '3' %}3 триместр
+                                {% else %}Любой триместр
+                                {% endif %}
+                            </span>
+                            <span class="content-difficulty">
+                                {% if content.difficulty == 'easy' %}Легкая сложность
+                                {% elif content.difficulty == 'medium' %}Средняя сложность
+                                {% elif content.difficulty == 'hard' %}Сложная
+                                {% else %}{{ content.difficulty }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="content-description">
+                            {{ content.content[:200] }}{% if content.content|length > 200 %}...{% endif %}
+                        </div>
+                        
+                        <div class="content-author">
+                            <i class="fas fa-user"></i> Автор: {{ content.author or 'ИИ-Помощник' }}
+                            <span class="ml-3">
+                                <i class="fas fa-clock"></i> {{ content.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </span>
+                        </div>
+                        
+                        <div class="content-actions">
+                            <form method="POST" action="{{ url_for('admin_mama_content_approve', content_id=content.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-approve">
+                                    <i class="fas fa-check"></i> Одобрить
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="{{ url_for('admin_mama_content_reject', content_id=content.id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите отклонить эту статью?')">
+                                <button type="submit" class="btn btn-reject">
+                                    <i class="fas fa-times"></i> Отклонить
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="{{ url_for('admin_mama_content_delete', content_id=content.id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите УДАЛИТЬ эту статью? Это действие нельзя отменить!')">
+                                <button type="submit" class="btn btn-danger" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border: none; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </form>
+                            
+                            <a href="{{ url_for('admin_mama_content_edit', content_id=content.id) }}" 
+                               class="btn btn-edit">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                            
+                            <a href="{{ url_for('mama_article_detail', content_id=content.id) }}" 
+                               target="_blank"
+                               class="btn btn-preview">
+                                <i class="fas fa-eye"></i> Предпросмотр
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Отлично! Нет статей для модерации</h4>
+                        <p>Все статьи уже одобрены или нет новых статей для проверки.</p>
+                        <a href="{{ url_for('admin_mama_content_generate') }}" class="btn btn-mass">
+                            <i class="fas fa-magic"></i> Сгенерировать новые статьи
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function approveAll() {
+    if (confirm('Одобрить все статьи на модерации?')) {
+        // Здесь будет логика для массового одобрения
+        alert('Функция массового одобрения будет добавлена');
+    }
+}
+
+function rejectAll() {
+    if (confirm('Отклонить все статьи на модерации?')) {
+        // Здесь будет логика для массового отклонения
+        alert('Функция массового отклонения будет добавлена');
+    }
+}
+
+function exportData() {
+    // Здесь будет логика для экспорта данных
+    alert('Функция экспорта данных будет добавлена');
+}
+
+function previewContent(contentId) {
+    // Здесь будет логика для предпросмотра контента
+    alert('Предпросмотр статьи ID: ' + contentId);
+}
+</script>
+{% endblock %}

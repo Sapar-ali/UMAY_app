@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY - Аналитика{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-6 shadow-lg border border-gray-200">
+                <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="w-10 h-10 object-contain">
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">📊 Аналитика UMAY</h1>
+            <p class="text-xl text-gray-600">Детальная статистика и интерактивные графики</p>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Всего пациентов</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ total_patients }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Мальчики</p>
+                        <p class="text-3xl font-bold text-blue-500">{{ male_count }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-mars text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Девочки</p>
+                        <p class="text-3xl font-bold text-pink-500">{{ female_count }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-venus text-pink-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Средний возраст</p>
+                        <p class="text-3xl font-bold text-green-600">{{ avg_age }} лет</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-calendar text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Delivery Methods Chart -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-3"></i>
+                    Способ родоразрешения
+                </h3>
+                <div class="space-y-4">
+                    {% for method, count in delivery_methods.items() %}
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700">{{ method }}</span>
+                            <span class="text-sm text-gray-500">{{ count }} ({{ "%.1f"|format(count/total_patients*100) }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                 style="width: {{ count/total_patients*100 }}%"
+                                 data-count="{{ count }}"
+                                 data-total="{{ total_patients }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Complications Chart -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-orange-600 mr-3"></i>
+                    Осложнения
+                </h3>
+                <div class="space-y-4">
+                    {% for complication, count in complications.items() %}
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700">{{ complication }}</span>
+                            <span class="text-sm text-gray-500">{{ count }} ({{ "%.1f"|format(count/total_patients*100) }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-orange-500 to-red-600 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                 style="width: {{ count/total_patients*100 }}%"
+                                 data-count="{{ count }}"
+                                 data-total="{{ total_patients }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Loss Statistics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Blood Loss Chart -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-tint text-red-600 mr-3"></i>
+                    Статистика кровопотери
+                </h3>
+                <div class="space-y-4">
+                    {% for category, count in blood_loss_stats.items() %}
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700">{{ category }}</span>
+                            <span class="text-sm text-gray-500">{{ count }} ({{ "%.1f"|format(count/total_patients*100) }}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-red-500 to-pink-600 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                 style="width: {{ count/total_patients*100 }}%"
+                                 data-count="{{ count }}"
+                                 data-total="{{ total_patients }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Critical Complications -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
+                    Критические осложнения
+                </h3>
+                <div class="space-y-4">
+                    {% if complications.get('ПЛС', 0) > 0 %}
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-orange-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-800">ПЛС</h4>
+                                <p class="text-orange-600">{{ complications.get('ПЛС', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПТС', 0) > 0 %}
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-800">ПТС</h4>
+                                <p class="text-red-600">{{ complications.get('ПТС', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Эклампсия', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Эклампсия</h4>
+                                <p class="text-red-700">{{ complications.get('Эклампсия', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Дистоция плечиков', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Дистоция плечиков</h4>
+                                <p class="text-red-700">{{ complications.get('Дистоция плечиков', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Разрыв 3 степени', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Разрыв 3 степени</h4>
+                                <p class="text-red-700">{{ complications.get('Разрыв 3 степени', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('Выпадение петель пуповины', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">Выпадение петель пуповины</h4>
+                                <p class="text-red-700">{{ complications.get('Выпадение петель пуповины', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПРК', 0) > 0 %}
+                    <div class="bg-orange-100 border-l-4 border-orange-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tint text-orange-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-900">Послеродовое кровотечение</h4>
+                                <p class="text-orange-700">{{ complications.get('ПРК', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПОНРП', 0) > 0 %}
+                    <div class="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-red-900">ПОНРП</h4>
+                                <p class="text-red-700">{{ complications.get('ПОНРП', 0) }} случаев</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if blood_loss_stats.get('Значительная (1000+ мл)', 0) > 0 %}
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tint text-orange-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-orange-800">Значительная кровопотеря</h4>
+                                <p class="text-orange-600">{{ blood_loss_stats.get('Значительная (1000+ мл)', 0) }} случаев (1000+ мл)</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complications.get('ПЛС', 0) == 0 and complications.get('ПТС', 0) == 0 and complications.get('Эклампсия', 0) == 0 and complications.get('Дистоция плечиков', 0) == 0 and complications.get('Разрыв 3 степени', 0) == 0 and complications.get('Выпадение петель пуповины', 0) == 0 and complications.get('ПРК', 0) == 0 and complications.get('ПОНРП', 0) == 0 and blood_loss_stats.get('Значительная (1000+ мл)', 0) == 0 %}
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-green-800">Отличные показатели!</h4>
+                                <p class="text-green-600">Критических осложнений не зарегистрировано</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Animated Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Anesthesia Types -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-fade-in">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-syringe text-purple-600 mr-3"></i>
+                    Типы анестезии
+                </h3>
+                <div class="space-y-3">
+                    {% for anesthesia, count in anesthesia_types.items() %}
+                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                        <span class="font-medium text-gray-700">{{ anesthesia }}</span>
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Average Statistics -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-fade-in">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-calculator text-green-600 mr-3"></i>
+                    Средние показатели
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Вес ребенка:</span>
+                        <span class="font-bold text-green-600">{{ avg_child_weight }} г</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Срок беременности:</span>
+                        <span class="font-bold text-green-600">{{ avg_pregnancy_weeks }} нед.</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Кровопотеря:</span>
+                        <span class="font-bold text-green-600">{{ avg_blood_loss }} мл</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Длительность родов:</span>
+                        <span class="font-bold text-green-600">{{ avg_labor_duration }} ч</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Trends -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-fade-in">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                    Тренды по месяцам
+                </h3>
+                <div class="space-y-3">
+                    {% for month, count in monthly_trends.items() %}
+                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                        <span class="font-medium text-gray-700">{{ month }}</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+            <a href="{{ url_for('dashboard') }}" 
+               class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Назад к дашборду
+            </a>
+            <button onclick="openExportModal('pdf')" 
+               class="btn-primary">
+                <i class="fas fa-file-pdf mr-2"></i>Экспорт в PDF
+            </button>
+            <button onclick="openExportModal('csv')" 
+               class="btn-primary">
+                <i class="fas fa-download mr-2"></i>Экспорт в CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-download text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">Экспорт данных</h3>
+                <p class="text-gray-600">Выберите период для экспорта</p>
+            </div>
+
+            <form id="exportForm" method="GET">
+                <div class="space-y-6">
+                    <!-- Quick Periods -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="setPeriod('all')" class="period-btn bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-infinity mr-2"></i>Все время
+                        </button>
+                        <button type="button" onclick="setPeriod('month')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar mr-2"></i>Этот месяц
+                        </button>
+                        <button type="button" onclick="setPeriod('quarter')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar-alt mr-2"></i>Этот квартал
+                        </button>
+                        <button type="button" onclick="setPeriod('year')" class="period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-calendar-day mr-2"></i>Этот год
+                        </button>
+                    </div>
+
+                    <!-- Custom Date Range -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Или укажите период:</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">От</label>
+                                <input type="date" id="startDate" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">До</label>
+                                <input type="date" id="endDate" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeExportModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                            Отмена
+                        </button>
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-download mr-2"></i>Экспорт
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Animations */
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.6s ease-out;
+}
+
+.animate-slide-in {
+    animation: slideIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Buttons */
+.btn-primary {
+    @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2 text-lg;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2 text-lg;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .btn-primary, .btn-secondary {
+        @apply w-full;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #3b82f6, #6366f1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #2563eb, #4f46e5);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate progress bars
+    const progressBars = document.querySelectorAll('.bg-gradient-to-r');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = entry.target;
+                const count = parseInt(bar.dataset.count);
+                const total = parseInt(bar.dataset.total);
+                const percentage = (count / total) * 100;
+                
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = percentage + '%';
+                }, 200);
+            }
+        });
+    });
+    
+    progressBars.forEach(bar => {
+        observer.observe(bar);
+    });
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.bg-white\\/80');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Animate counters
+    const counters = document.querySelectorAll('.text-3xl');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        let current = 0;
+        const increment = target / 50;
+        
+        const updateCounter = () => {
+            if (current < target) {
+                current += increment;
+                counter.textContent = Math.ceil(current);
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.textContent = target;
+            }
+        };
+        
+        updateCounter();
+    });
+});
+
+// Export Modal Functions
+let currentExportType = '';
+
+function openExportModal(type) {
+    currentExportType = type;
+    const modal = document.getElementById('exportModal');
+    const title = document.getElementById('modalTitle');
+    
+    if (type === 'csv') {
+        title.textContent = 'Экспорт CSV';
+    } else if (type === 'pdf') {
+        title.textContent = 'Экспорт PDF';
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeExportModal() {
+    const modal = document.getElementById('exportModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('exportForm').reset();
+    resetPeriodButtons();
+}
+
+function setPeriod(period) {
+    // Reset all buttons
+    resetPeriodButtons();
+    
+    // Highlight selected button
+    const buttons = document.querySelectorAll('.period-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes(period === 'all' ? 'Все время' : 
+                                   period === 'month' ? 'Этот месяц' :
+                                   period === 'quarter' ? 'Этот квартал' : 'Этот год')) {
+            btn.className = 'period-btn bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105';
+        }
+    });
+    
+    // Set date range based on period
+    const today = new Date();
+    const startDate = document.getElementById('startDate');
+    const endDate = document.getElementById('endDate');
+    
+    endDate.value = today.toISOString().split('T')[0];
+    
+    switch(period) {
+        case 'all':
+            startDate.value = '';
+            break;
+        case 'month':
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            startDate.value = firstDay.toISOString().split('T')[0];
+            break;
+        case 'quarter':
+            const quarter = Math.floor(today.getMonth() / 3);
+            const quarterStart = new Date(today.getFullYear(), quarter * 3, 1);
+            startDate.value = quarterStart.toISOString().split('T')[0];
+            break;
+        case 'year':
+            const yearStart = new Date(today.getFullYear(), 0, 1);
+            startDate.value = yearStart.toISOString().split('T')[0];
+            break;
+    }
+}
+
+function resetPeriodButtons() {
+    const buttons = document.querySelectorAll('.period-btn');
+    buttons.forEach(btn => {
+        btn.className = 'period-btn bg-gray-100 text-gray-700 p-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105';
+    });
+}
+
+// Handle form submission
+document.getElementById('exportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    let url = '';
+    if (currentExportType === 'csv') {
+        url = '{{ url_for("export_csv") }}';
+    } else if (currentExportType === 'pdf') {
+        url = '{{ url_for("export_pdf") }}';
+    }
+    
+    // Add date parameters
+    if (startDate) url += `?start_date=${startDate}`;
+    if (endDate) url += `${startDate ? '&' : '?'}end_date=${endDate}`;
+    
+    // Close modal and redirect
+    closeExportModal();
+    window.location.href = url;
+});
+</script>
+{% endblock %}
