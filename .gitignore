@@ -145,4 +145,5 @@ Thumbs.db
 
 # Project specific
 data/umay.db
-instance/ 
+instance/
+UMAY_enhanced/ 
