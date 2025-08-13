@@ -20,6 +20,16 @@ from reportlab.pdfbase.ttfonts import TTFont
 from functools import wraps
 import phonenumbers
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Environment variables loaded from .env file")
+except ImportError:
+    print("⚠️  python-dotenv not installed, using system environment variables")
+except Exception as e:
+    print(f"⚠️  Error loading .env file: {e}")
+
 # ============================================================================
 # UMAY APP - ПРОСТАЯ ВЕРСИЯ ДЛЯ RENDER И RAILWAY
 # Версия: 5.1 - Поддержка Render и Railway

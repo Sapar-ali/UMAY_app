@@ -1,0 +1,9 @@
+# SMS Configuration - Скопируйте этот файл в .env и настройте
+SMS_PROVIDER=infobip
+SMS_BASE_URL=https://api.infobip.com
+SMS_API_KEY=YOUR_INFOBIP_API_KEY_HERE
+SMS_SENDER=UMAY
+
+# Other settings
+SECRET_KEY=your-secret-key-here
+FLASK_ENV=development

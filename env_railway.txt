@@ -1,0 +1,14 @@
+# SMS Configuration - Скопировано из Railway
+SMS_PROVIDER=infobip
+SMS_BASE_URL=https://1g4g91.api.infobip.com
+SMS_API_KEY=323369c0bb1c26848e9e00332ec8263-3f3779c7-53b8-4f2a-b563-dcff7a9b53ec
+SMS_SENDER=UMAY
+
+# Other settings
+SECRET_KEY=e431f47d64597e343f1b04ba99f142c20df071cc7ccf8848ba9cc1f63980bf12
+FLASK_ENV=development
+
+# Инструкция:
+# 1. Скопируйте этот файл в .env: cp env_railway.txt .env
+# 2. Перезапустите приложение
+# 3. SMS должен заработать!
