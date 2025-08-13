@@ -1,5 +1,5 @@
 // UMAY Service Worker - PWA функциональность
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.2';
 const CACHE_NAME = `umay-${CACHE_VERSION}`;
 const STATIC_CACHE = `umay-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `umay-dynamic-${CACHE_VERSION}`;
@@ -9,6 +9,9 @@ const DYNAMIC_CACHE = `umay-dynamic-${CACHE_VERSION}`;
 // Кэшируем только реально доступные по HTTP файлы
 const STATIC_FILES = [
   '/',
+  '/pwa/dashboard',
+  '/pwa/login',
+  '/pwa/patients',
   '/static/css/style.css',
   '/static/css/mobile.css',
   '/static/js/main.js',
