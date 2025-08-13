@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}UMAY - Медицинская цифровая платформа{% endblock %}>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0066cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UMAY">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#0066cc">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='assets/new-logo.png') }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    
+    <!-- Styles -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+    
+    <!-- PWA Scripts -->
+    <script src="{{ url_for('static', filename='js/mobile.js') }}" defer></script>
+</head>
+<body class="mobile-body">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <nav class="mobile-nav">
+            <div class="mobile-nav-left">
+                <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Открыть меню">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="mobile-logo">
+                    <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="mobile-logo-img">
+                    <span class="mobile-logo-text">UMAY</span>
+                </div>
+            </div>
+            
+            <div class="mobile-nav-right">
+                <div class="mobile-online-status" id="online-status">
+                    🟢 Онлайн
+                </div>
+                {% if current_user.is_authenticated %}
+                <div class="mobile-user-menu">
+                    <button class="mobile-user-btn" id="mobile-user-btn" aria-label="Меню пользователя">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    <nav class="mobile-nav-menu" id="mobile-nav-menu">
+        <div class="mobile-nav-header">
+            <div class="mobile-nav-user">
+                {% if current_user.is_authenticated %}
+                <div class="mobile-user-avatar">
+                    <i class="fas fa-user-circle fa-2x"></i>
+                </div>
+                <div class="mobile-user-info">
+                    <div class="mobile-user-name">{{ current_user.username }}</div>
+                    <div class="mobile-user-role">
+                        {% if session.get('app_type') == 'pro' %}Врач{% else %}Пациент{% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="mobile-user-avatar">
+                    <i class="fas fa-user fa-2x"></i>
+                </div>
+                <div class="mobile-user-info">
+                    <div class="mobile-user-name">Гость</div>
+                    <div class="mobile-user-role">Не авторизован</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <ul class="mobile-nav-list">
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('index') }}" class="mobile-nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Главная</span>
+                </a>
+            </li>
+            
+            {% if current_user.is_authenticated %}
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('dashboard') }}" class="mobile-nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Панель управления</span>
+                </a>
+            </li>
+            
+            {% if session.get('app_type') == 'pro' %}
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('add_patient') }}" class="mobile-nav-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Добавить пациента</span>
+                </a>
+            </li>
+            
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('analytics') }}" class="mobile-nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Аналитика</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('profile') }}" class="mobile-nav-link">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Профиль</span>
+                </a>
+            </li>
+            
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('logout') }}" class="mobile-nav-link mobile-nav-link-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Выйти</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('login') }}" class="mobile-nav-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Войти</span>
+                </a>
+            </li>
+            
+            <li class="mobile-nav-item">
+                <a href="{{ url_for('register') }}" class="mobile-nav-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Регистрация</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                    <span>Темная тема</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="mobile-nav-footer">
+            <div class="mobile-pwa-info">
+                <div class="mobile-pwa-version">Версия 1.0.0</div>
+                <div class="mobile-pwa-status" id="pwa-status">
+                    <i class="fas fa-check-circle"></i>
+                    PWA готово
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="mobile-main">
+        <div class="mobile-container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- PWA Install Prompt -->
+    <div class="mobile-pwa-install" id="install-pwa-btn">
+        <i class="fas fa-download"></i>
+        <span>Установить UMAY</span>
+    </div>
+
+    <!-- Mobile Footer -->
+    <footer class="mobile-footer">
+        <div class="mobile-footer-content">
+            <div class="mobile-footer-links">
+                <a href="#" class="mobile-footer-link">О нас</a>
+                <a href="#" class="mobile-footer-link">Поддержка</a>
+                <a href="#" class="mobile-footer-link">Конфиденциальность</a>
+            </div>
+            <div class="mobile-footer-copyright">
+                © 2024 UMAY. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Scripts -->
+    <script>
+        // Mobile Navigation Toggle
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileNavMenu = document.getElementById('mobile-nav-menu');
+        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+        
+        function toggleMobileNav() {
+            mobileNavMenu.classList.toggle('active');
+            mobileNavOverlay.classList.toggle('active');
+            document.body.classList.toggle('nav-open');
+        }
+        
+        mobileNavToggle.addEventListener('click', toggleMobileNav);
+        mobileNavOverlay.addEventListener('click', toggleMobileNav);
+        
+        // Close nav on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileNavMenu.classList.contains('active')) {
+                toggleMobileNav();
+            }
+        });
+        
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('umay-theme', isDark ? 'dark' : 'light');
+            
+            // Update theme icon
+            const themeIcon = document.querySelector('.mobile-nav-link i.fas.fa-moon');
+            if (themeIcon) {
+                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('umay-theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            const themeIcon = document.querySelector('.mobile-nav-link i.fas.fa-moon');
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+        
+        // PWA Status Check
+        function updatePWAStatus() {
+            const pwaStatus = document.getElementById('pwa-status');
+            if (pwaStatus && window.umayPWA) {
+                const info = window.umayPWA.getPWAInfo();
+                if (info.supportsPWA) {
+                    pwaStatus.innerHTML = '<i class="fas fa-check-circle"></i> PWA готово';
+                    pwaStatus.className = 'mobile-pwa-status mobile-pwa-status-success';
+                } else {
+                    pwaStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> PWA не поддерживается';
+                    pwaStatus.className = 'mobile-pwa-status mobile-pwa-status-warning';
+                }
+            }
+        }
+        
+        // Update PWA status when ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updatePWAStatus, 1000);
+        });
+        
+        // Handle online/offline status
+        function updateOnlineStatus() {
+            const statusElement = document.getElementById('online-status');
+            if (statusElement) {
+                if (navigator.onLine) {
+                    statusElement.innerHTML = '🟢 Онлайн';
+                    statusElement.className = 'mobile-online-status mobile-online';
+                } else {
+                    statusElement.innerHTML = '🔴 Офлайн';
+                    statusElement.className = 'mobile-online-status mobile-offline';
+                }
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+    </script>
+</body>
+</html>

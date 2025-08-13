@@ -1,0 +1,53 @@
+{
+  "name": "UMAY - Медицинская цифровая платформа",
+  "short_name": "UMAY",
+  "description": "Забота, знание, технология - медицинская платформа для врачей и пациентов",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066cc",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ru",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    {
+      "src": "/static/assets/new-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/assets/new-logo.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Войти в систему",
+      "short_name": "Вход",
+      "description": "Быстрый вход в UMAY",
+      "url": "/login",
+      "icons": [
+        {
+          "src": "/static/assets/new-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Панель управления",
+      "short_name": "Панель",
+      "description": "Основная панель UMAY",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/static/assets/new-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

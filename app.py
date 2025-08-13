@@ -18,7 +18,12 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from functools import wraps
-import phonenumbers
+try:
+    import phonenumbers
+    PHONENUMBERS_AVAILABLE = True
+except ImportError:
+    PHONENUMBERS_AVAILABLE = False
+    print("⚠️  phonenumbers не доступен, используем упрощенную валидацию")
 
 # Load environment variables from .env file
 try:
@@ -95,26 +100,71 @@ def markdown_filter(text):
         return ""
     return markdown.markdown(text, extensions=['extra', 'codehilite'])
 
+# Mobile device detection
+def is_mobile_device():
+    """Detect if user is on mobile device"""
+    user_agent = request.headers.get('User-Agent', '').lower()
+    mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'windows phone']
+    return any(keyword in user_agent for keyword in mobile_keywords)
+
+# PWA routes
+@app.route('/mobile/<path:subpath>')
+def mobile_routes(subpath):
+    """Mobile-specific routes for PWA"""
+    if subpath == 'index':
+        return render_template('mobile/index.html')
+    elif subpath == 'login':
+        return render_template('mobile/login.html')
+    elif subpath == 'register':
+        return render_template('mobile/register.html')
+    elif subpath == 'dashboard':
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        return render_template('mobile/dashboard.html')
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve PWA manifest"""
+    return send_file('static/manifest.json', mimetype='application/json')
+
+@app.route('/sw.js')
+def service_worker():
+    """Serve Service Worker"""
+    return send_file('static/js/sw.js', mimetype='application/javascript')
+
 # ======================
 # OTP helpers
 # ======================
 def normalize_phone(raw_phone: str) -> str:
     phone = ''.join(c for c in (raw_phone or '') if c.isdigit() or c == '+')
-    try:
-        if ONLY_KZ_NUMBERS:
-            if phone.startswith('8'):
-                phone = '+7' + phone[1:]
-            parsed = phonenumbers.parse(phone, 'KZ')
-        else:
-            parsed = phonenumbers.parse(phone, None)
-        if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+    
+    if PHONENUMBERS_AVAILABLE:
+        try:
+            if ONLY_KZ_NUMBERS:
+                if phone.startswith('8'):
+                    phone = '+7' + phone[1:]
+                parsed = phonenumbers.parse(phone, 'KZ')
+            else:
+                parsed = phonenumbers.parse(phone, None)
+            if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+                return ''
+            e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+            if ONLY_KZ_NUMBERS and not e164.startswith('+7'):
+                return ''
+            return e164
+        except Exception:
             return ''
-        e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
-        if ONLY_KZ_NUMBERS and not e164.startswith('+7'):
-            return ''
-        return e164
-    except Exception:
-        return ''
+    else:
+        # Упрощенная валидация без phonenumbers
+        if phone.startswith('8'):
+            phone = '+7' + phone[1:]
+        elif phone.startswith('7'):
+            phone = '+7' + phone[1:]
+        elif not phone.startswith('+'):
+            phone = '+7' + phone
+        return phone if len(phone) >= 10 else ''
 
 def can_resend_otp(last_sent_at: datetime) -> bool:
     if not last_sent_at:

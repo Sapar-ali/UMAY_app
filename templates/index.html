@@ -3,6 +3,25 @@
 {% block title %}UMAY - Медицинская цифровая платформа{% endblock %}
 
 {% block content %}
+<!-- Mobile Detection and Redirect -->
+<script>
+    // Detect mobile device and redirect to mobile version
+    function detectMobileAndRedirect() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isPWA = window.navigator.serviceWorker && window.navigator.serviceWorker.controller;
+        
+        // If mobile device and not already on mobile route, redirect
+        if (isMobile && !window.location.pathname.startsWith('/mobile') && !isStandalone) {
+            const currentPath = window.location.pathname;
+            const mobilePath = currentPath === '/' ? '/mobile/index' : `/mobile${currentPath}`;
+            window.location.href = mobilePath;
+        }
+    }
+    
+    // Run detection on page load
+    document.addEventListener('DOMContentLoaded', detectMobileAndRedirect);
+</script>
 <!-- SECTION START: Full Screen Hero -->
 <div class="relative min-h-screen bg-gradient-to-br from-gray-200 via-gray-100 to-white flex items-center justify-center overflow-hidden">
     <!-- IMAGE PLACEHOLDER 1: Full Screen Background -->
