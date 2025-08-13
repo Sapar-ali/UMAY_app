@@ -1,9 +1,12 @@
 // UMAY Service Worker - PWA функциональность
-const CACHE_NAME = 'umay-v1.0.0';
-const STATIC_CACHE = 'umay-static-v1.0.0';
-const DYNAMIC_CACHE = 'umay-dynamic-v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
+const CACHE_NAME = `umay-${CACHE_VERSION}`;
+const STATIC_CACHE = `umay-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `umay-dynamic-${CACHE_VERSION}`;
 
 // Файлы для кэширования при установке
+// ВНИМАНИЕ: нельзя кэшировать серверные шаблоны по путям /templates/*.html
+// Кэшируем только реально доступные по HTTP файлы
 const STATIC_FILES = [
   '/',
   '/static/css/style.css',
@@ -12,11 +15,7 @@ const STATIC_FILES = [
   '/static/js/mobile.js',
   '/static/assets/new-logo.png',
   '/static/assets/umay-pattern.svg',
-  '/templates/base.html',
-  '/templates/index.html',
-  '/templates/login.html',
-  '/templates/register.html',
-  '/templates/dashboard.html'
+  '/static/manifest.json'
 ];
 
 // Установка Service Worker
@@ -75,7 +74,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Стратегия кэширования: Cache First для статики, Network First для динамики
+  // Стратегия кэширования: Cache First для статики, Network First для HTML/API
   if (isStaticFile(request.url)) {
     event.respondWith(cacheFirst(request));
   } else {
@@ -124,8 +123,9 @@ async function networkFirst(request) {
     }
     
     // Fallback для HTML страниц
-    if (request.headers.get('accept').includes('text/html')) {
-      return caches.match('/templates/error.html');
+    if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
+      // Возвращаем базовую заглушку HTML, чтобы избежать белого экрана
+      return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>UMAY</title></head><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px;"><h1>UMAY</h1><p>Нет сети. Попробуйте еще раз, когда подключение восстановится.</p><p><a href="/">На главную</a></p></body></html>`, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
     
     return new Response('Offline - проверьте подключение к интернету', {
@@ -138,7 +138,7 @@ async function networkFirst(request) {
 
 // Проверка, является ли файл статическим
 function isStaticFile(url) {
-  const staticExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf'];
+  const staticExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.webp'];
   return staticExtensions.some(ext => url.includes(ext));
 }
 

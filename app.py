@@ -130,7 +130,8 @@ def mobile_login():
     """Mobile login page"""
     logger.info("📱 Mobile login page requested")
     try:
-        return render_template('mobile/login.html')
+        # Use the primary login page to avoid missing mobile-specific template
+        return redirect(url_for('login'))
     except Exception as e:
         logger.error(f"❌ Error rendering mobile login: {e}")
         return f"Error: {e}", 500
