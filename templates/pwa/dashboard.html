@@ -42,6 +42,19 @@
             padding: 20px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: 'UMAY';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.1);
+            z-index: 0;
         }
         
         .header-content {
@@ -50,6 +63,8 @@
             justify-content: space-between;
             max-width: 400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .menu-btn {
@@ -75,8 +90,13 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 10px;
-            font-size: 24px;
-            font-weight: bold;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         .user-name {
@@ -103,175 +123,189 @@
         .container {
             max-width: 400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
         }
         
-        /* Balance Card */
-        .balance-card {
+        /* Hero Cards */
+        .hero-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .hero-card {
             background: white;
             border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
         
-        .balance-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 50%;
         }
         
-        .balance-amount {
-            font-size: 32px;
-            font-weight: 700;
-            color: #0066cc;
-            margin-bottom: 20px;
-        }
-        
-        .action-btn {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
+        .hero-card-title {
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            color: #333;
+            margin-bottom: 8px;
         }
         
-        .action-btn:hover {
-            background: #0052a3;
-            transform: translateY(-2px);
+        .hero-card-desc {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
         }
         
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+        /* Services Section */
+        .services-section {
+            background: white;
+            padding: 20px;
             margin-bottom: 20px;
         }
         
-        .action-item {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .service-item {
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
         }
         
-        .action-item:hover {
+        .service-item:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
         }
         
-        .action-icon {
+        .service-icon {
             width: 50px;
             height: 50px;
-            background: #f0f8ff;
-            border-radius: 12px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 12px;
-            font-size: 24px;
-            color: #0066cc;
+            margin: 0 auto 8px;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
         }
         
-        .action-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
+        .service-icon.red { background: #dc3545; }
+        .service-icon.blue { background: #0066cc; }
+        .service-icon.green { background: #28a745; }
+        .service-icon.orange { background: #fd7e14; }
+        .service-icon.grey { background: #6c757d; }
         
-        .action-subtitle {
+        .service-name {
             font-size: 12px;
-            color: #666;
+            color: #333;
+            font-weight: 500;
+            line-height: 1.3;
         }
         
-        /* Recent Activity */
-        .recent-section {
+        /* Popular Services */
+        .popular-section {
             background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
         }
         
-        .section-header {
+        .popular-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
         
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
+        .popular-title {
+            font-size: 20px;
+            font-weight: 700;
             color: #333;
         }
         
-        .more-link {
+        .view-all {
             color: #0066cc;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
         }
         
-        .activity-item {
+        .popular-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .popular-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f0f0;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        .activity-item:last-child {
-            border-bottom: none;
+        .popular-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
         
-        .activity-icon {
+        .popular-icon {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 16px;
             font-size: 18px;
             color: white;
+            background: #0066cc;
         }
         
-        .activity-icon.blue { background: #0066cc; }
-        .activity-icon.green { background: #28a745; }
-        .activity-icon.orange { background: #fd7e14; }
-        .activity-icon.red { background: #dc3545; }
-        
-        .activity-content {
+        .popular-content {
             flex: 1;
         }
         
-        .activity-title {
+        .popular-text {
             font-size: 14px;
-            font-weight: 600;
             color: #333;
-            margin-bottom: 4px;
+            font-weight: 500;
+            line-height: 1.4;
         }
         
-        .activity-description {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .activity-amount {
-            font-size: 14px;
+        .popular-tag {
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 600;
-            color: #333;
+            text-transform: uppercase;
         }
         
         /* Bottom Navigation */
@@ -346,9 +380,9 @@
             </button>
             
             <div class="user-info">
-                <div class="user-avatar">
-                    <div class="placeholder-img">Картинка-1</div>
-                </div>
+                            <div class="user-avatar">
+                <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY">
+            </div>
                 <div class="user-name">{{ user.name }}</div>
                 <div class="user-email">{{ user.email }}</div>
             </div>
@@ -361,99 +395,81 @@
     
     <!-- Main Content -->
     <div class="container">
-        <!-- Balance Card -->
-        <div class="balance-card">
-            <div class="balance-label">Всего пациентов</div>
-            <div class="balance-amount">1,247</div>
-            <button class="action-btn" onclick="goToPatients()">
-                <i class="fas fa-plus"></i> Добавить пациента
-            </button>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <div class="action-item" onclick="goToPatients()">
-                <div class="action-icon">
-                    <div class="placeholder-img">Картинка-2</div>
-                </div>
-                <div class="action-title">Пациенты</div>
-                <div class="action-subtitle">Управление</div>
+        <!-- Hero Cards -->
+        <div class="hero-cards">
+            <div class="hero-card">
+                <div class="hero-card-title">Цифровые документы</div>
+                <div class="hero-card-desc">Управление медицинскими картами и документами</div>
             </div>
-            
-            <div class="action-item" onclick="goToAnalytics()">
-                <div class="action-icon">
-                    <div class="placeholder-img">Картинка-3</div>
-                </div>
-                <div class="action-title">Аналитика</div>
-                <div class="action-subtitle">Статистика</div>
-            </div>
-            
-            <div class="action-item" onclick="goToProfile()">
-                <div class="action-icon">
-                    <div class="placeholder-img">Картинка-4</div>
-                </div>
-                <div class="action-title">Профиль</div>
-                <div class="action-subtitle">Настройки</div>
-            </div>
-            
-            <div class="action-item" onclick="goToSettings()">
-                <div class="action-icon">
-                    <div class="placeholder-img">Картинка-5</div>
-                </div>
-                <div class="action-title">Система</div>
-                <div class="action-subtitle">Конфигурация</div>
+            <div class="hero-card">
+                <div class="hero-card-title">UMAY QR</div>
+                <div class="hero-card-desc">Сканируйте QR для авторизации и проверки документов</div>
             </div>
         </div>
         
-        <!-- Recent Activity -->
-        <div class="recent-section">
-            <div class="section-header">
-                <div class="section-title">Последние записи</div>
-                <a href="#" class="more-link">все >></a>
+        <!-- Services Section -->
+        <div class="services-section">
+            <div class="section-title">Сервисы</div>
+            <div class="services-grid">
+                <div class="service-item" onclick="goToPatients()">
+                    <div class="service-icon red">П</div>
+                    <div class="service-name">Пациенты</div>
+                </div>
+                <div class="service-item" onclick="goToAnalytics()">
+                    <div class="service-icon blue">А</div>
+                    <div class="service-name">Аналитика</div>
+                </div>
+                <div class="service-item" onclick="goToProfile()">
+                    <div class="service-icon green">П</div>
+                    <div class="service-name">Профиль</div>
+                </div>
+                <div class="service-item" onclick="goToSettings()">
+                    <div class="service-icon orange">Н</div>
+                    <div class="service-name">Настройки</div>
+                </div>
+                <div class="service-item" onclick="goToPatients()">
+                    <div class="service-icon blue">Д</div>
+                    <div class="service-name">Документы</div>
+                </div>
+                <div class="service-item" onclick="goToAnalytics()">
+                    <div class="service-icon green">С</div>
+                    <div class="service-name">Статистика</div>
+                </div>
+                <div class="service-item" onclick="goToProfile()">
+                    <div class="service-icon grey">У</div>
+                    <div class="service-name">Уведомления</div>
+                </div>
+                <div class="service-item" onclick="goToSettings()">
+                    <div class="service-icon orange">+</div>
+                    <div class="service-name">Другие</div>
+                </div>
             </div>
-            
-            <div class="activity-item">
-                <div class="activity-icon blue">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">Новый пациент</div>
-                    <div class="activity-description">Елена Петрова, 25 лет</div>
-                </div>
-                <div class="activity-amount">+1</div>
+        </div>
+        
+        <!-- Popular Services -->
+        <div class="popular-section">
+            <div class="popular-header">
+                <div class="popular-title">Популярные услуги</div>
+                <a href="#" class="view-all">Смотреть все ></a>
             </div>
-            
-            <div class="activity-item">
-                <div class="activity-icon green">
-                    <i class="fas fa-check-circle"></i>
+            <div class="popular-cards">
+                <div class="popular-card" onclick="goToPatients()">
+                    <div class="popular-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="popular-content">
+                        <div class="popular-text">Вопросы по постановке на учет беременных</div>
+                    </div>
+                    <div class="popular-tag">АКТУАЛЬНО</div>
                 </div>
-                <div class="activity-content">
-                    <div class="activity-title">Роды завершены</div>
-                    <div class="activity-description">Мария Сидорова, 28 лет</div>
+                <div class="popular-card" onclick="goToAnalytics()">
+                    <div class="popular-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="popular-content">
+                        <div class="popular-text">Добровольный отказ от медицинских услуг</div>
+                    </div>
                 </div>
-                <div class="activity-amount">✅</div>
-            </div>
-            
-            <div class="activity-item">
-                <div class="activity-icon orange">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">Осложнения</div>
-                    <div class="activity-description">Анна Козлова, 32 года</div>
-                </div>
-                <div class="activity-amount">⚠️</div>
-            </div>
-            
-            <div class="activity-item">
-                <div class="activity-icon red">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">Назначен приём</div>
-                    <div class="activity-description">Ольга Новикова, 26 лет</div>
-                </div>
-                <div class="activity-amount">📅</div>
             </div>
         </div>
     </div>
