@@ -1,0 +1,48 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}UMAY - Панель управления{% endblock %}
+
+{% block content %}
+<div class="mobile-p-4">
+    <div class="mobile-card">
+        <div class="mobile-card-header">
+            <i class="fas fa-tachometer-alt fa-2x"></i>
+        </div>
+        <div class="mobile-card-body">
+            <h2 class="mobile-card-title">Панель управления</h2>
+            <p class="mobile-card-text">Добро пожаловать, {{ current_user.username }}!</p>
+            
+            <div class="mobile-grid mobile-mt-3">
+                <div class="mobile-card">
+                    <div class="mobile-card-body">
+                        <h3 class="mobile-card-title">Пациенты</h3>
+                        <p class="mobile-card-text">Управление пациентами</p>
+                        <a href="{{ url_for('add_patient') }}" class="mobile-btn mobile-btn-primary mobile-btn-full">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Добавить пациента</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="mobile-card">
+                    <div class="mobile-card-body">
+                        <h3 class="mobile-card-title">Аналитика</h3>
+                        <p class="mobile-card-text">Статистика и отчеты</p>
+                        <a href="{{ url_for('analytics') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Просмотреть</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mobile-mt-3">
+                <a href="{{ url_for('profile') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Профиль</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

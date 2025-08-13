@@ -108,21 +108,33 @@ def is_mobile_device():
     return any(keyword in user_agent for keyword in mobile_keywords)
 
 # PWA routes
+@app.route('/mobile/')
+@app.route('/mobile/index')
+def mobile_index():
+    """Mobile home page"""
+    return render_template('mobile/index.html')
+
+@app.route('/mobile/login')
+def mobile_login():
+    """Mobile login page"""
+    return render_template('mobile/login.html')
+
+@app.route('/mobile/register')
+def mobile_register():
+    """Mobile register page"""
+    return render_template('mobile/register.html')
+
+@app.route('/mobile/dashboard')
+def mobile_dashboard():
+    """Mobile dashboard page"""
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template('mobile/dashboard.html')
+
 @app.route('/mobile/<path:subpath>')
 def mobile_routes(subpath):
-    """Mobile-specific routes for PWA"""
-    if subpath == 'index':
-        return render_template('mobile/index.html')
-    elif subpath == 'login':
-        return render_template('mobile/login.html')
-    elif subpath == 'register':
-        return render_template('mobile/register.html')
-    elif subpath == 'dashboard':
-        if not current_user.is_authenticated:
-            return redirect(url_for('login'))
-        return render_template('mobile/dashboard.html')
-    else:
-        return redirect(url_for('index'))
+    """Catch-all mobile routes"""
+    return redirect(url_for('mobile_index'))
 
 @app.route('/manifest.json')
 def manifest():

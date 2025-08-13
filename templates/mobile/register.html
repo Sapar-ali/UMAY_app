@@ -1,0 +1,51 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}UMAY - Регистрация{% endblock %}
+
+{% block content %}
+<div class="mobile-p-4">
+    <div class="mobile-card">
+        <div class="mobile-card-header">
+            <i class="fas fa-user-plus fa-2x"></i>
+        </div>
+        <div class="mobile-card-body">
+            <h2 class="mobile-card-title">Регистрация в UMAY</h2>
+            <p class="mobile-card-text">Создайте новую учетную запись</p>
+            
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Имя пользователя</label>
+                    <input type="text" name="username" class="mobile-input" required>
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Email</label>
+                    <input type="email" name="email" class="mobile-input" required>
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Пароль</label>
+                    <input type="password" name="password" class="mobile-input" required>
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Подтвердите пароль</label>
+                    <input type="password" name="confirm_password" class="mobile-input" required>
+                </div>
+                
+                <button type="submit" class="mobile-btn mobile-btn-primary mobile-btn-full">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Создать аккаунт</span>
+                </button>
+            </form>
+            
+            <div class="mobile-mt-3">
+                <a href="{{ url_for('login') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Уже есть аккаунт?</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -13,14 +13,16 @@
         
         // If mobile device and not already on mobile route, redirect
         if (isMobile && !window.location.pathname.startsWith('/mobile') && !isStandalone) {
-            const currentPath = window.location.pathname;
-            const mobilePath = currentPath === '/' ? '/mobile/index' : `/mobile${currentPath}`;
-            window.location.href = mobilePath;
+            console.log('📱 Мобильное устройство обнаружено, перенаправляем на мобильную версию...');
+            window.location.href = '/mobile/index';
         }
     }
     
     // Run detection on page load
     document.addEventListener('DOMContentLoaded', detectMobileAndRedirect);
+    
+    // Also check on window load for better reliability
+    window.addEventListener('load', detectMobileAndRedirect);
 </script>
 <!-- SECTION START: Full Screen Hero -->
 <div class="relative min-h-screen bg-gradient-to-br from-gray-200 via-gray-100 to-white flex items-center justify-center overflow-hidden">

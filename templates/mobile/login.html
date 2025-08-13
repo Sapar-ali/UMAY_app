@@ -1,0 +1,41 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}UMAY - Вход{% endblock %}
+
+{% block content %}
+<div class="mobile-p-4">
+    <div class="mobile-card">
+        <div class="mobile-card-header">
+            <i class="fas fa-sign-in-alt fa-2x"></i>
+        </div>
+        <div class="mobile-card-body">
+            <h2 class="mobile-card-title">Вход в UMAY</h2>
+            <p class="mobile-card-text">Войдите в свою учетную запись</p>
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Имя пользователя</label>
+                    <input type="text" name="username" class="mobile-input" required>
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">Пароль</label>
+                    <input type="password" name="password" class="mobile-input" required>
+                </div>
+                
+                <button type="submit" class="mobile-btn mobile-btn-primary mobile-btn-full">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Войти</span>
+                </button>
+            </form>
+            
+            <div class="mobile-mt-3">
+                <a href="{{ url_for('register') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Создать аккаунт</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
