@@ -16,14 +16,14 @@
     <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-4xl">
             <!-- Header -->
-            <div class="text-center mb-12 animate-fade-in">
-                <div class="w-32 h-32 rounded-full mx-auto mb-8 flex items-center justify-center bg-white backdrop-blur-lg border border-gray-200 shadow-2xl">
-                    <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="w-20 h-20 object-contain">
+            <div class="text-center mb-8 animate-fade-in">
+                <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center bg-white backdrop-blur-lg border border-gray-200 shadow-2xl">
+                    <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="w-16 h-16 object-contain">
                 </div>
-                <h1 class="text-6xl font-bold text-white mb-4 tracking-tight">
+                <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">
                     Присоединяйтесь к <span class="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">UMAY</span>
                 </h1>
-                <p class="text-xl text-gray-300 font-light">Создайте аккаунт и откройте мир возможностей</p>
+                <p class="text-lg text-gray-300 font-light">Создайте аккаунт и откройте мир возможностей</p>
             </div>
 
             <!-- Registration Type Selector -->
@@ -41,89 +41,89 @@
             </div>
 
             <!-- User Registration Form -->
-            <div id="userForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl animate-scale-in">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-2">Регистрация в UMAY Mama</h2>
+            <div id="userForm" class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 shadow-2xl animate-scale-in">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-2">Регистрация в UMAY Mama</h2>
                     <p class="text-gray-300">Для беременных женщин - контент и советы</p>
                 </div>
                 
-                <form method="POST" class="space-y-6">
+                <form method="POST" class="space-y-4">
                     <input type="hidden" name="user_type" value="user">
                     <input type="hidden" name="app_type" value="mama">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="group">
-                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                 <i class="fas fa-user mr-2"></i>Полное имя
                             </label>
                             <input type="text" 
                                    name="full_name" 
                                    required 
-                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg"
                                    placeholder="Введите ваше имя">
                         </div>
                         
                         <div class="group">
-                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                 <i class="fas fa-user-circle mr-2"></i>Логин
                             </label>
                             <input type="text" 
                                    name="login" 
                                    required 
-                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg"
                                    placeholder="Создайте логин">
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="group">
-                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                 <i class="fas fa-lock mr-2"></i>Пароль
                             </label>
                             <input type="password" 
                                    name="password" 
                                    required 
-                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg"
                                    placeholder="Минимум 8 символов">
                         </div>
                         
                         <div class="group">
-                            <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                 <i class="fas fa-lock mr-2"></i>Подтвердите пароль
                             </label>
                             <input type="password" 
                                    name="confirm_password" 
                                    required 
-                                   class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg"
+                                   class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg"
                                    placeholder="Повторите пароль">
                         </div>
                     </div>
 
                      <!-- Phone + OTP for UMAY Mama -->
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div class="group">
-                             <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                             <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                  <i class="fas fa-phone mr-2"></i>Телефон
                              </label>
                              <div class="flex space-x-2">
                                  <input type="tel" name="phone" id="user_phone" required placeholder="+7 7XX XXX XX XX"
-                                        class="flex-1 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
-                                 <button type="button" id="user_send_code" class="px-4 py-4 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl">Код</button>
+                                        class="flex-1 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg" />
+                                 <button type="button" id="user_send_code" class="px-3 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-sm font-medium min-w-[60px]">Код</button>
                              </div>
-                             <p id="user_phone_hint" class="text-sm text-gray-400 mt-1">Введите номер и нажмите «Код», чтобы получить SMS.</p>
+                             <p id="user_phone_hint" class="text-xs text-gray-400 mt-1">Введите номер и нажмите «Код», чтобы получить SMS.</p>
                          </div>
 
                          <div class="group">
-                             <label class="block text-sm font-semibold text-gray-300 mb-3 group-focus-within:text-pink-400 transition-colors">
+                             <label class="block text-sm font-semibold text-gray-300 mb-2 group-focus-within:text-pink-400 transition-colors">
                                  <i class="fas fa-key mr-2"></i>Код из SMS
                              </label>
                              <input type="text" name="otp_code" id="user_otp" required placeholder="6 цифр"
-                                    class="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-lg backdrop-blur-lg" />
+                                    class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-gray-400 focus:border-pink-400 focus:bg-white/20 transition-all duration-300 text-base backdrop-blur-lg" />
                          </div>
                      </div>
                     
                     <button type="submit" 
-                            class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-xl group">
+                            class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-lg group">
                         <i class="fas fa-heart group-hover:animate-pulse"></i>
                         <span>Создать аккаунт в UMAY Mama</span>
                         <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
