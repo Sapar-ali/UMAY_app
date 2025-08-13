@@ -92,7 +92,18 @@
             background-position: center center, top left;
             background-attachment: fixed, scroll;
             position: relative;
+            transition: all 0.3s ease;
         }
+        
+        /* Dark theme background */
+        [data-theme="dark"] .umay-bg {
+            background-color: #1a1a1a;
+        }
+        
+        [data-theme="dark"] .umay-bg::before {
+            background: rgba(0, 0, 0, 0.75);
+        }
+        
         /* Soft overlay to keep content readable over busy wallpapers */
         .umay-bg::before {
             content: "";
@@ -100,12 +111,65 @@
             inset: 0;
             pointer-events: none;
             background: rgba(255, 255, 255, 0.75);
+            transition: all 0.3s ease;
         }
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
         }
+        
+        /* Dark theme styles */
+        [data-theme="dark"] {
+            color-scheme: dark;
+        }
+        
+        [data-theme="dark"] body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .bg-bmw-white {
+            background-color: #2d2d2d;
+        }
+        
+        [data-theme="dark"] .text-gray-800 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .text-gray-600 {
+            color: #cccccc;
+        }
+        
+        [data-theme="dark"] .border-bmw-light-blue {
+            border-color: #404040;
+        }
+        
+        [data-theme="dark"] .bg-gray-100 {
+            background-color: #404040;
+        }
+        
+        [data-theme="dark"] .hover\:bg-gray-200:hover {
+            background-color: #505050;
+        }
+        
+        [data-theme="dark"] .bg-gray-700 {
+            background-color: #2d2d2d;
+        }
+        
+        [data-theme="dark"] .hover\:bg-gray-600:hover {
+            background-color: #404040;
+        }
+        
+        [data-theme="dark"] .text-gray-600 {
+            color: #cccccc;
+        }
+        
+        [data-theme="dark"] .dark\:text-gray-300 {
+            color: #ffffff;
+        }
+        
         .mobile-nav {
             display: none;
         }
