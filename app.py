@@ -112,29 +112,193 @@ def is_mobile_device():
 @app.route('/mobile/index')
 def mobile_index():
     """Mobile home page"""
-    return render_template('mobile/index.html')
+    logger.info("📱 Mobile index page requested")
+    try:
+        # First try the simple version for debugging
+        return render_template('mobile/simple.html')
+    except Exception as e:
+        logger.error(f"❌ Error rendering mobile simple: {e}")
+        try:
+            # Fallback to original index
+            return render_template('mobile/index.html')
+        except Exception as e2:
+            logger.error(f"❌ Error rendering mobile index fallback: {e2}")
+            return f"Mobile Error: {e2}", 500
 
 @app.route('/mobile/login')
 def mobile_login():
     """Mobile login page"""
-    return render_template('mobile/login.html')
+    logger.info("📱 Mobile login page requested")
+    try:
+        return render_template('mobile/login.html')
+    except Exception as e:
+        logger.error(f"❌ Error rendering mobile login: {e}")
+        return f"Error: {e}", 500
 
 @app.route('/mobile/register')
 def mobile_register():
     """Mobile register page"""
-    return render_template('mobile/register.html')
+    logger.info("📱 Mobile register page requested")
+    try:
+        return render_template('mobile/register.html')
+    except Exception as e:
+        logger.error(f"❌ Error rendering mobile register: {e}")
+        return f"Error: {e}", 500
 
 @app.route('/mobile/dashboard')
 def mobile_dashboard():
     """Mobile dashboard page"""
+    logger.info("📱 Mobile dashboard page requested")
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
-    return render_template('mobile/dashboard.html')
+    try:
+        return render_template('mobile/dashboard.html')
+    except Exception as e:
+        logger.error(f"❌ Error rendering mobile dashboard: {e}")
+        return f"Error: {e}", 500
+
+@app.route('/mobile/test')
+def mobile_test():
+    """Mobile test page"""
+    logger.info("📱 Mobile test page requested")
+    return render_template('mobile/test.html')
+
+@app.route('/mobile/simple')
+def mobile_simple():
+    """Simple mobile page for testing"""
+    logger.info("📱 Simple mobile page requested")
+    return render_template('mobile/simple.html')
+
+@app.route('/mobile/debug')
+def mobile_debug():
+    """Debug mobile routes"""
+    logger.info("📱 Mobile debug page requested")
+    import os
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'mobile')
+    templates = []
+    if os.path.exists(template_dir):
+        templates = [f for f in os.listdir(template_dir) if f.endswith('.html')]
+    
+    debug_info = f"""
+    <html>
+    <head><title>UMAY Mobile Debug</title></head>
+    <body style="font-family: monospace; padding: 20px;">
+        <h1>UMAY Mobile Debug Info</h1>
+        <h2>Available Templates:</h2>
+        <ul>
+            {''.join(f'<li>{t}</li>' for t in templates)}
+        </ul>
+        <h2>Current Routes:</h2>
+        <ul>
+            <li><a href="/mobile/">/mobile/</a></li>
+            <li><a href="/mobile/index">/mobile/index</a></li>
+            <li><a href="/mobile/simple">/mobile/simple</a></li>
+            <li><a href="/mobile/test">/mobile/test</a></li>
+            <li><a href="/mobile/hello">/mobile/hello</a></li>
+            <li><a href="/mobile/login">/mobile/login</a></li>
+            <li><a href="/mobile/register">/mobile/register</a></li>
+            <li><a href="/mobile/status">/mobile/status</a></li>
+            <li><a href="/mobile/resources">/mobile/resources</a></li>
+            <li><a href="/mobile/debug">/mobile/debug</a></li>
+        </ul>
+        <h2>Server Info:</h2>
+        <p>Python: {os.sys.version}</p>
+        <p>Flask: {app.config.get('ENV', 'unknown')}</p>
+        <p>Debug: {app.debug}</p>
+    </body>
+    </html>
+    """
+    return debug_info
+
+@app.route('/mobile/status')
+def mobile_status():
+    """Simple mobile status check"""
+    logger.info("📱 Mobile status check requested")
+    return "UMAY Mobile is working! ✅"
+
+@app.route('/mobile/resources')
+def mobile_resources():
+    """Check mobile resources"""
+    logger.info("📱 Mobile resources check requested")
+    import os
+    
+    # Check if static files exist
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    css_exists = os.path.exists(os.path.join(static_dir, 'css', 'mobile.css'))
+    js_exists = os.path.exists(os.path.join(static_dir, 'js', 'mobile.js'))
+    sw_exists = os.path.exists(os.path.join(static_dir, 'js', 'sw.js'))
+    manifest_exists = os.path.exists(os.path.join(static_dir, 'manifest.json'))
+    
+    return f"""
+    <html>
+    <head><title>UMAY Mobile Resources</title></head>
+    <body style="font-family: monospace; padding: 20px;">
+        <h1>UMAY Mobile Resources Status</h1>
+        <h2>Static Files:</h2>
+        <ul>
+            <li>CSS: {'✅' if css_exists else '❌'} mobile.css</li>
+            <li>JS: {'✅' if js_exists else '❌'} mobile.js</li>
+            <li>SW: {'✅' if sw_exists else '❌'} sw.js</li>
+            <li>Manifest: {'✅' if manifest_exists else '❌'} manifest.json</li>
+        </ul>
+        <h2>Test Links:</h2>
+        <ul>
+            <li><a href="/static/css/mobile.css">CSS File</a></li>
+            <li><a href="/static/js/mobile.js">JS File</a></li>
+            <li><a href="/static/js/sw.js">Service Worker</a></li>
+            <li><a href="/static/manifest.json">Manifest</a></li>
+        </ul>
+        <p><a href="/mobile/">← Вернуться на мобильную главную</a></p>
+    </body>
+    </html>
+    """
+
+@app.route('/mobile/hello')
+def mobile_hello():
+    """Simple hello world for mobile"""
+    logger.info("📱 Mobile hello page requested")
+    from datetime import datetime
+    return """
+    <html>
+    <head><title>UMAY Mobile Hello</title></head>
+    <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+        <h1>👋 Hello from UMAY Mobile!</h1>
+        <p>Если вы видите эту страницу, значит Flask работает!</p>
+        <p>Время: """ + str(datetime.utcnow()) + """</p>
+        <p><a href="/mobile/">← На главную</a></p>
+    </body>
+    </html>
+    """
 
 @app.route('/mobile/<path:subpath>')
 def mobile_routes(subpath):
     """Catch-all mobile routes"""
-    return redirect(url_for('mobile_index'))
+    logger.info(f"📱 Mobile catch-all route requested: /mobile/{subpath}")
+    try:
+        # Try to render a simple fallback page
+        return f"""
+        <html>
+        <head><title>UMAY Mobile - {subpath}</title></head>
+        <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+            <h1>UMAY Mobile</h1>
+            <p>Страница <strong>{subpath}</strong> не найдена</p>
+            <p>Доступные страницы:</p>
+            <ul style="list-style: none; padding: 0;">
+                <li><a href="/mobile/">Главная</a></li>
+                <li><a href="/mobile/simple">Простая версия</a></li>
+                <li><a href="/mobile/test">Тест</a></li>
+                <li><a href="/mobile/hello">Hello</a></li>
+                <li><a href="/mobile/status">Статус</a></li>
+                <li><a href="/mobile/resources">Ресурсы</a></li>
+                <li><a href="/mobile/debug">Отладка</a></li>
+            </ul>
+            <p><a href="/">← Вернуться на главную</a></p>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"❌ Error in mobile catch-all: {e}")
+        return f"Mobile Error: {e}", 500
 
 @app.route('/manifest.json')
 def manifest():

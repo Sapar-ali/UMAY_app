@@ -29,8 +29,22 @@
     
     <!-- PWA Scripts -->
     <script src="{{ url_for('static', filename='js/mobile.js') }}" defer></script>
+    
+    <!-- Debug Script -->
+    <script>
+        console.log('📱 Mobile base.html loaded');
+        console.log('🔍 Current URL:', window.location.href);
+        console.log('🔍 User Agent:', navigator.userAgent);
+        console.log('🔍 Viewport:', window.innerWidth + 'x' + window.innerHeight);
+    </script>
 </head>
 <body class="mobile-body">
+    <!-- Debug Info -->
+    <script>
+        console.log('📱 Mobile body loaded');
+        console.log('🔍 DOM ready state:', document.readyState);
+    </script>
+    
     <!-- Mobile Header -->
     <header class="mobile-header">
         <nav class="mobile-nav">
@@ -276,6 +290,10 @@
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
         updateOnlineStatus();
+        
+        // Final debug log
+        console.log('📱 Mobile base.html scripts loaded');
+        console.log('🔍 PWA status check completed');
     </script>
 </body>
 </html>

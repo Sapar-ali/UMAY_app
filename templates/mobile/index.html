@@ -3,6 +3,13 @@
 {% block title %}UMAY - Медицинская цифровая платформа{% endblock %}
 
 {% block content %}
+<!-- Debug Script -->
+<script>
+    console.log('📱 Mobile index.html content loaded');
+    console.log('🔍 Current user authenticated:', {{ 'true' if current_user.is_authenticated else 'false' }});
+    console.log('🔍 Current user:', {{ current_user.username if current_user.is_authenticated else 'null' }});
+</script>
+
 <!-- Mobile Hero Section -->
 <section class="mobile-hero mobile-animate-fade-in">
     <div class="mobile-hero-background">
@@ -607,4 +614,10 @@
         }
     }
 </style>
+
+<!-- Final Debug Script -->
+<script>
+    console.log('📱 Mobile index.html fully loaded');
+    console.log('🔍 All animations and styles applied');
+</script>
 {% endblock %}

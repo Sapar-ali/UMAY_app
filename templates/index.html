@@ -11,10 +11,20 @@
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         const isPWA = window.navigator.serviceWorker && window.navigator.serviceWorker.controller;
         
+        console.log('🔍 Device detection:', {
+            userAgent: navigator.userAgent,
+            isMobile: isMobile,
+            isStandalone: isStandalone,
+            isPWA: isPWA,
+            currentPath: window.location.pathname
+        });
+        
         // If mobile device and not already on mobile route, redirect
         if (isMobile && !window.location.pathname.startsWith('/mobile') && !isStandalone) {
             console.log('📱 Мобильное устройство обнаружено, перенаправляем на мобильную версию...');
             window.location.href = '/mobile/index';
+        } else {
+            console.log('💻 Desktop device or already on mobile route');
         }
     }
     
