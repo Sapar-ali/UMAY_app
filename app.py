@@ -114,12 +114,12 @@ def mobile_index():
     """Mobile home page"""
     logger.info("📱 Mobile index page requested")
     try:
-        # Use the full mobile landing with install CTA
-        return render_template('mobile/index.html')
+        # Показываем обычную красивую главную страницу
+        return redirect(url_for('index'))
     except Exception as e:
         logger.error(f"❌ Error rendering mobile simple: {e}")
         try:
-            # Fallback to original index
+            # Fallback: простая страница (на крайний случай)
             return render_template('mobile/simple.html')
         except Exception as e2:
             logger.error(f"❌ Error rendering mobile index fallback: {e2}")

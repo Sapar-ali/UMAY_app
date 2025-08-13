@@ -125,7 +125,7 @@ class UMAYPWA {
     }
 
     // Android: кнопку показываем при beforeinstallprompt (обработано в showInstallPrompt)
-    // iOS: собственного события нет — показываем кнопку всегда и открываем подсказку
+    // iOS: собственного промпта нет — показываем кнопку, по клику даём нативную инструкцию
     if (isIOS) {
       if (baseInstallBtn) {
         baseInstallBtn.classList.remove('hidden');
@@ -259,15 +259,12 @@ class UMAYPWA {
 
   // Подсказка для установки на iOS
   showiOSInstallHelp(isChromeIOS = false) {
-    // Если в шаблоне определена функция с инструкциями — используем её
-    if (typeof window.showInstallInstructions === 'function') {
-      window.showInstallInstructions();
+    // Показать компактное понятное объяснение вместо большого баннера
+    if (isChromeIOS) {
+      this.showWarningMessage('Установка iOS возможна только через Safari. Откройте сайт в Safari.');
       return;
     }
-    const text = isChromeIOS
-      ? 'На iOS установка возможна только через Safari. Откройте сайт в Safari и выберите Поделиться → На экран «Домой».'
-      : 'Откройте меню Поделиться (квадрат со стрелкой вверх) → На экран «Домой» → Добавить.';
-    this.showWarningMessage(text);
+    this.showWarningMessage('Safari → Поделиться → На экран «Домой». Это ограничение iOS для всех PWA.');
   }
   
   // Запрос разрешения на уведомления
