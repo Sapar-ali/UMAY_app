@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>UMAY PWA - Дашборд</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0066cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UMAY">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0066cc 0%, #00a0e9 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+        
+        .user-info {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .settings-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Balance Card */
+        .balance-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0066cc;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .action-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            background: #f0f8ff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 24px;
+            color: #0066cc;
+        }
+        
+        .action-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .action-subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Recent Activity */
+        .recent-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .more-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .activity-icon.blue { background: #0066cc; }
+        .activity-icon.green { background: #28a745; }
+        .activity-icon.orange { background: #fd7e14; }
+        .activity-icon.red { background: #dc3545; }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .activity-description {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .activity-amount {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-around;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #0066cc;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        /* Placeholder Images */
+        .placeholder-img {
+            width: 100%;
+            height: 100%;
+            background: #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 400px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .balance-card,
+            .action-item,
+            .recent-section {
+                border-radius: 12px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="menu-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <div class="placeholder-img">Картинка-1</div>
+                </div>
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-email">{{ user.email }}</div>
+            </div>
+            
+            <button class="settings-btn" onclick="goToSettings()">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="balance-label">Всего пациентов</div>
+            <div class="balance-amount">1,247</div>
+            <button class="action-btn" onclick="goToPatients()">
+                <i class="fas fa-plus"></i> Добавить пациента
+            </button>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-item" onclick="goToPatients()">
+                <div class="action-icon">
+                    <div class="placeholder-img">Картинка-2</div>
+                </div>
+                <div class="action-title">Пациенты</div>
+                <div class="action-subtitle">Управление</div>
+            </div>
+            
+            <div class="action-item" onclick="goToAnalytics()">
+                <div class="action-icon">
+                    <div class="placeholder-img">Картинка-3</div>
+                </div>
+                <div class="action-title">Аналитика</div>
+                <div class="action-subtitle">Статистика</div>
+            </div>
+            
+            <div class="action-item" onclick="goToProfile()">
+                <div class="action-icon">
+                    <div class="placeholder-img">Картинка-4</div>
+                </div>
+                <div class="action-title">Профиль</div>
+                <div class="action-subtitle">Настройки</div>
+            </div>
+            
+            <div class="action-item" onclick="goToSettings()">
+                <div class="action-icon">
+                    <div class="placeholder-img">Картинка-5</div>
+                </div>
+                <div class="action-title">Система</div>
+                <div class="action-subtitle">Конфигурация</div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="recent-section">
+            <div class="section-header">
+                <div class="section-title">Последние записи</div>
+                <a href="#" class="more-link">все >></a>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon blue">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Новый пациент</div>
+                    <div class="activity-description">Елена Петрова, 25 лет</div>
+                </div>
+                <div class="activity-amount">+1</div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Роды завершены</div>
+                    <div class="activity-description">Мария Сидорова, 28 лет</div>
+                </div>
+                <div class="activity-amount">✅</div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon orange">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Осложнения</div>
+                    <div class="activity-description">Анна Козлова, 32 года</div>
+                </div>
+                <div class="activity-amount">⚠️</div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon red">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Назначен приём</div>
+                    <div class="activity-description">Ольга Новикова, 26 лет</div>
+                </div>
+                <div class="activity-amount">📅</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/pwa/dashboard" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </a>
+        <a href="/pwa/patients" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Пациенты</span>
+        </a>
+        <a href="/pwa/analytics" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Аналитика</span>
+        </a>
+        <a href="/pwa/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+    </nav>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        // Navigation functions
+        function goToPatients() {
+            window.location.href = '/pwa/patients';
+        }
+        
+        function goToAnalytics() {
+            window.location.href = '/pwa/analytics';
+        }
+        
+        function goToProfile() {
+            window.location.href = '/pwa/profile';
+        }
+        
+        function goToSettings() {
+            window.location.href = '/pwa/settings';
+        }
+        
+        function toggleMenu() {
+            // TODO: Implement side menu
+            alert('Меню в разработке!');
+        }
+        
+        // PWA detection
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('🚀 UMAY PWA запущен в standalone режиме!');
+        }
+    </script>
+</body>
+</html>

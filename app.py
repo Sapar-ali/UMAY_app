@@ -3535,3 +3535,102 @@ def internal_error(error):
 def not_found_error(error):
     logger.error(f"Not Found Error: {error}")
     return render_template('error.html', error_code=404, error_message="Страница не найдена"), 404 
+
+# ======================
+# PWA ROUTES - КРУТОЕ МОБИЛЬНОЕ ПРИЛОЖЕНИЕ
+# ======================
+@app.route('/pwa/')
+@app.route('/pwa/dashboard')
+def pwa_dashboard():
+    """PWA Dashboard - главная страница приложения"""
+    logger.info("🚀 PWA Dashboard requested")
+    try:
+        if current_user.is_authenticated:
+            # Получаем данные для дашборда
+            user_data = {
+                'name': current_user.full_name,
+                'email': current_user.login,
+                'app_type': session.get('app_type', 'pro')
+            }
+            return render_template('pwa/dashboard.html', user=user_data)
+        else:
+            return redirect(url_for('pwa_login'))
+    except Exception as e:
+        logger.error(f"❌ Error in PWA dashboard: {e}")
+        return f"PWA Error: {e}", 500
+
+@app.route('/pwa/login')
+def pwa_login():
+    """PWA Login - красивая форма входа"""
+    logger.info("🚀 PWA Login requested")
+    return render_template('pwa/login.html')
+
+@app.route('/pwa/patients')
+def pwa_patients():
+    """PWA Patients - список пациентов"""
+    logger.info("🚀 PWA Patients requested")
+    if not current_user.is_authenticated:
+        return redirect(url_for('pwa_login'))
+    try:
+        # Получаем список пациентов
+        patients = []
+        if session.get('app_type') == 'pro':
+            # Здесь будет логика получения пациентов
+            pass
+        return render_template('pwa/patients.html', patients=patients)
+    except Exception as e:
+        logger.error(f"❌ Error in PWA patients: {e}")
+        return f"PWA Error: {e}", 500
+
+@app.route('/pwa/analytics')
+def pwa_analytics():
+    """PWA Analytics - аналитика и графики"""
+    logger.info("🚀 PWA Analytics requested")
+    if not current_user.is_authenticated:
+        return redirect(url_for('pwa_login'))
+    try:
+        # Данные для аналитики
+        analytics_data = {
+            'total_patients': 0,
+            'new_this_month': 0,
+            'complications_rate': 0
+        }
+        return render_template('pwa/analytics.html', data=analytics_data)
+    except Exception as e:
+        logger.error(f"❌ Error in PWA analytics: {e}")
+        return f"PWA Error: {e}", 500
+
+@app.route('/pwa/settings')
+def pwa_settings():
+    """PWA Settings - настройки приложения"""
+    logger.info("🚀 PWA Settings requested")
+    if not current_user.is_authenticated:
+        return redirect(url_for('pwa_login'))
+    try:
+        user_data = {
+            'name': current_user.full_name,
+            'email': current_user.login,
+            'phone': getattr(current_user, 'phone', 'Не указан')
+        }
+        return render_template('pwa/settings.html', user=user_data)
+    except Exception as e:
+        logger.error(f"❌ Error in PWA settings: {e}")
+        return f"PWA Error: {e}", 500
+
+@app.route('/pwa/profile')
+def pwa_profile():
+    """PWA Profile - профиль пользователя"""
+    logger.info("🚀 PWA Profile requested")
+    if not current_user.is_authenticated:
+        return redirect(url_for('pwa_login'))
+    try:
+        user_data = {
+            'name': current_user.full_name,
+            'email': current_user.login,
+            'position': getattr(current_user, 'position', 'Пользователь'),
+            'city': getattr(current_user, 'city', 'Не указан')
+        }
+        return render_template('pwa/profile.html', user=user_data)
+    except Exception as e:
+        logger.error(f"❌ Error in PWA profile: {e}")
+        return f"PWA Error: {e}", 500

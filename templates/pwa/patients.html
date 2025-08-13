@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>UMAY PWA - Пациенты</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0066cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UMAY">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='assets/new-logo.png') }}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0066cc 0%, #00a0e9 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .add-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .search-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #adb5bd;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stats-container {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0066cc;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Patients List */
+        .patients-section {
+            padding: 20px;
+        }
+        
+        .patients-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .filter-btn {
+            background: none;
+            border: 1px solid #0066cc;
+            color: #0066cc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .patient-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .patient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .patient-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .patient-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .patient-avatar.blue { background: #0066cc; }
+        .patient-avatar.green { background: #28a745; }
+        .patient-avatar.orange { background: #fd7e14; }
+        .patient-avatar.purple { background: #6f42c1; }
+        
+        .patient-info {
+            flex: 1;
+        }
+        
+        .patient-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .patient-details {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .patient-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .patient-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .meta-icon {
+            color: #0066cc;
+        }
+        
+        .patient-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid #e9ecef;
+            color: #666;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-around;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #0066cc;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 400px) {
+            .header,
+            .search-section,
+            .stats-section,
+            .patients-section {
+                padding: 16px;
+            }
+            
+            .patient-item {
+                padding: 16px;
+                border-radius: 12px;
+            }
+        }
+        
+        /* Animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .patient-item {
+            animation: slideInUp 0.4s ease-out;
+        }
+        
+        .patient-item:nth-child(1) { animation-delay: 0.1s; }
+        .patient-item:nth-child(2) { animation-delay: 0.2s; }
+        .patient-item:nth-child(3) { animation-delay: 0.3s; }
+        .patient-item:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
+            <div class="page-title">Пациенты</div>
+            
+            <button class="add-btn" onclick="addPatient()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="search-container">
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="🔍 Поиск пациентов..."
+                   id="searchInput">
+        </div>
+    </section>
+    
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">1,247</div>
+                <div class="stat-label">Всего</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">89</div>
+                <div class="stat-label">Активные</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Новые</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Patients List -->
+    <section class="patients-section">
+        <div class="patients-container">
+            <div class="section-header">
+                <div class="section-title">Список пациентов</div>
+                <button class="filter-btn" onclick="toggleFilter()">
+                    <i class="fas fa-filter"></i> Фильтр
+                </button>
+            </div>
+            
+            <!-- Patient Items -->
+            <div class="patient-item" onclick="openPatient(1)">
+                <div class="patient-header">
+                    <div class="patient-avatar blue">ЕП</div>
+                    <div class="patient-info">
+                        <div class="patient-name">Елена Петрова</div>
+                        <div class="patient-details">25 лет • 40 недель</div>
+                    </div>
+                    <div class="patient-status status-active">Активна</div>
+                </div>
+                
+                <div class="patient-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar meta-icon"></i>
+                        <span>Приём: 15.01.2025</span>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="action-btn" onclick="editPatient(1)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="viewPatient(1)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="patient-item" onclick="openPatient(2)">
+                <div class="patient-header">
+                    <div class="patient-avatar green">МС</div>
+                    <div class="patient-info">
+                        <div class="patient-name">Мария Сидорова</div>
+                        <div class="patient-details">28 лет • Роды завершены</div>
+                    </div>
+                    <div class="patient-status status-completed">Завершено</div>
+                </div>
+                
+                <div class="patient-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-baby meta-icon"></i>
+                        <span>Роды: 10.01.2025</span>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="action-btn" onclick="editPatient(2)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="viewPatient(2)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="patient-item" onclick="openPatient(3)">
+                <div class="patient-header">
+                    <div class="patient-avatar orange">АК</div>
+                    <div class="patient-info">
+                        <div class="patient-name">Анна Козлова</div>
+                        <div class="patient-details">32 года • 38 недель</div>
+                    </div>
+                    <div class="patient-status status-warning">Осложнения</div>
+                </div>
+                
+                <div class="patient-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-exclamation-triangle meta-icon"></i>
+                        <span>Требует внимания</span>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="action-btn" onclick="editPatient(3)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="viewPatient(3)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="patient-item" onclick="openPatient(4)">
+                <div class="patient-header">
+                    <div class="patient-avatar purple">ОН</div>
+                    <div class="patient-info">
+                        <div class="patient-name">Ольга Новикова</div>
+                        <div class="patient-details">26 лет • 36 недель</div>
+                    </div>
+                    <div class="patient-status status-active">Активна</div>
+                </div>
+                
+                <div class="patient-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-check meta-icon"></i>
+                        <span>Следующий приём: 20.01.2025</span>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="action-btn" onclick="editPatient(4)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="viewPatient(4)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/pwa/dashboard" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </a>
+        <a href="/pwa/patients" class="nav-item active">
+            <i class="fas fa-users"></i>
+            <span>Пациенты</span>
+        </a>
+        <a href="/pwa/analytics" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Аналитика</span>
+        </a>
+        <a href="/pwa/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+    </nav>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const patientItems = document.querySelectorAll('.patient-item');
+            
+            patientItems.forEach(item => {
+                const patientName = item.querySelector('.patient-name').textContent.toLowerCase();
+                const patientDetails = item.querySelector('.patient-details').textContent.toLowerCase();
+                
+                if (patientName.includes(searchTerm) || patientDetails.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Navigation functions
+        function goBack() {
+            window.history.back();
+        }
+        
+        function addPatient() {
+            window.location.href = '/add_patient';
+        }
+        
+        function openPatient(id) {
+            // TODO: Implement patient detail view
+            alert(`Открыть пациента ${id}`);
+        }
+        
+        function editPatient(id) {
+            // TODO: Implement patient edit
+            alert(`Редактировать пациента ${id}`);
+        }
+        
+        function viewPatient(id) {
+            // TODO: Implement patient view
+            alert(`Просмотр пациента ${id}`);
+        }
+        
+        function toggleFilter() {
+            // TODO: Implement filter modal
+            alert('Фильтр в разработке!');
+        }
+        
+        // PWA detection
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('🚀 UMAY PWA Patients в standalone режиме!');
+        }
+    </script>
+</body>
+</html>
