@@ -20,6 +20,9 @@ class UMAYPWA {
     // Настройка событий
     this.setupEventListeners();
     
+    // Настроить кнопку установки для iOS/Android
+    this.setupInstallCTA();
+    
     // Проверка установки
     this.checkInstallation();
     
@@ -104,6 +107,34 @@ class UMAYPWA {
     
     // Swipe события
     this.setupSwipeGestures();
+  }
+
+  // Показать кнопку установки и поведение для разных платформ
+  setupInstallCTA() {
+    const baseInstallBtn = document.getElementById('install-pwa-btn');
+    const pageInstallBtn = document.getElementById('mobile-install-btn');
+
+    const isInStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isChromeIOS = /CriOS/.test(navigator.userAgent);
+
+    // Если уже установлено — ничего не показываем
+    if (isInStandalone) {
+      if (baseInstallBtn) baseInstallBtn.classList.add('hidden');
+      return;
+    }
+
+    // Android: кнопку показываем при beforeinstallprompt (обработано в showInstallPrompt)
+    // iOS: собственного события нет — показываем кнопку всегда и открываем подсказку
+    if (isIOS) {
+      if (baseInstallBtn) {
+        baseInstallBtn.classList.remove('hidden');
+        baseInstallBtn.addEventListener('click', () => this.showiOSInstallHelp(isChromeIOS));
+      }
+      if (pageInstallBtn) {
+        pageInstallBtn.addEventListener('click', () => this.showiOSInstallHelp(isChromeIOS));
+      }
+    }
   }
   
   // Настройка touch жестов
@@ -194,7 +225,7 @@ class UMAYPWA {
     if (this.deferredPrompt) {
       const installButton = document.getElementById('install-pwa-btn');
       if (installButton) {
-        installButton.style.display = 'block';
+        installButton.classList.remove('hidden');
         installButton.addEventListener('click', () => {
           this.installPWA();
         });
@@ -224,6 +255,19 @@ class UMAYPWA {
       
       this.deferredPrompt = null;
     }
+  }
+
+  // Подсказка для установки на iOS
+  showiOSInstallHelp(isChromeIOS = false) {
+    // Если в шаблоне определена функция с инструкциями — используем её
+    if (typeof window.showInstallInstructions === 'function') {
+      window.showInstallInstructions();
+      return;
+    }
+    const text = isChromeIOS
+      ? 'На iOS установка возможна только через Safari. Откройте сайт в Safari и выберите Поделиться → На экран «Домой».'
+      : 'Откройте меню Поделиться (квадрат со стрелкой вверх) → На экран «Домой» → Добавить.';
+    this.showWarningMessage(text);
   }
   
   // Запрос разрешения на уведомления
