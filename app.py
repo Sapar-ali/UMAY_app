@@ -1215,6 +1215,10 @@ def add_patient():
     # Server-side fallback: if no param but user-agent is mobile, serve mobile template
     if not mobile_requested and is_mobile_device():
         mobile_requested = True
+
+    # Lightweight debug endpoint (safe): /add_patient?debug=1
+    if request.args.get('debug') == '1':
+        return f"ADD_PATIENT_DEBUG: mobile_requested={mobile_requested}, user={getattr(current_user, 'login', 'anon')}"
     
     if request.method == 'POST':
         try:
@@ -1305,7 +1309,12 @@ def add_patient():
     
     # Render appropriate template based on mobile request
     template_name = 'mobile/add_patient.html' if mobile_requested else 'add_patient.html'
-    return render_template(template_name)
+    try:
+        logger.info(f"Rendering add_patient template: {template_name}, mobile={mobile_requested}")
+        return render_template(template_name)
+    except Exception as e:
+        logger.error(f"Add patient GET render failed: {e}")
+        return f"Render error: {e}", 500
 
 @app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
 @login_required
