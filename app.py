@@ -932,6 +932,9 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # Lightweight debug
+    if request.args.get('debug') == '1':
+        return f"REGISTER_DEBUG: method={request.method}, user={getattr(current_user, 'login', 'anon')}"
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
         login = request.form.get('login', '').strip()
@@ -1060,7 +1063,12 @@ def register():
             flash(f'Ошибка при регистрации: {str(e)}. Попробуйте еще раз.', 'error')
             return render_template('register.html')
     
-    return render_template('register.html')
+    try:
+        logger.info("Rendering register.html")
+        return render_template('register.html')
+    except Exception as e:
+        logger.error(f"Register GET render failed: {e}")
+        return f"Register render error: {e}", 500
 
 @app.route('/api/otp/send', methods=['POST'])
 def api_send_otp():
