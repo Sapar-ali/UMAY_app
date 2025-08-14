@@ -1208,8 +1208,11 @@ def mama_dashboard():
 @app.route('/add_patient', methods=['GET', 'POST'])
 @app.route('/добавить_пациента', methods=['GET', 'POST'])  # alias for Russian URL to avoid 404/blank
 @login_required
-@pro_clinical_required
 def add_patient():
+    # Allow all авторизованные пользователи, кроме управленцев (кроме Joker)
+    if getattr(current_user, 'user_type', '') == 'manager' and getattr(current_user, 'login', '') != 'Joker':
+        flash('Доступ запрещен. Эта функция доступна только медицинскому персоналу.', 'error')
+        return redirect(url_for('index'))
     # Check if mobile version is requested
     mobile_requested = request.args.get('mobile') == '1'
     # Server-side fallback: if no param but user-agent is mobile, serve mobile template
