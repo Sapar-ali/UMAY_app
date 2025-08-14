@@ -26,11 +26,46 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        
+        /* Mobile sidebar styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 100%;
+                max-width: 280px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .overlay.open {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobile-menu-btn" class="bg-blue-600 text-white p-2 rounded-lg shadow-lg" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="overlay"></div>
+    
     <!-- Sidebar -->
-    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg sidebar">
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg sidebar">
         <!-- Logo -->
         <div class="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 to-blue-700">
             <div class="flex items-center space-x-3">
@@ -141,13 +176,14 @@
     <script>
         // Toggle sidebar on mobile
         function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const content = document.querySelector('.content-area');
-            
-            if (window.innerWidth < 768) {
-                sidebar.classList.toggle('-translate-x-full');
-                content.classList.toggle('ml-0');
-            }
+            const sidebar = document.querySelector('#sidebar');
+            const overlay = document.querySelector('#overlay');
+            const mobileMenuBtn = document.querySelector('#mobile-menu-btn');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            mobileMenuBtn.classList.toggle('fa-bars', !sidebar.classList.contains('open'));
+            mobileMenuBtn.classList.toggle('fa-times', sidebar.classList.contains('open'));
         }
         
         // Auto-hide flash messages
@@ -160,6 +196,29 @@
                 }, 300);
             });
         }, 5000);
+
+        // Close sidebar on overlay click
+        document.querySelector('#overlay').addEventListener('click', function() {
+            document.querySelector('#sidebar').classList.remove('open');
+            document.querySelector('#overlay').classList.remove('open');
+            document.querySelector('#mobile-menu-btn').classList.remove('fa-times');
+            document.querySelector('#mobile-menu-btn').classList.add('fa-bars');
+        });
+
+        // Initial sidebar state
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.querySelector('#mobile-menu-btn');
+            const sidebar = document.querySelector('#sidebar');
+            const overlay = document.querySelector('#overlay');
+
+            // On mobile, sidebar should be hidden by default
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                mobileMenuBtn.classList.add('fa-bars');
+                mobileMenuBtn.classList.remove('fa-times');
+            }
+        });
     </script>
     
     {% block scripts %}{% endblock %}

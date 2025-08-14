@@ -1,0 +1,646 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}Добавить пациента - UMAY{% endblock %}
+
+{% block content %}
+<!-- Apple/BMW Style Mobile Form -->
+<div class="mobile-patient-form">
+    <!-- Header Section -->
+    <div class="mobile-form-header">
+        <div class="mobile-form-logo">
+            <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="mobile-form-logo-img">
+        </div>
+        <h1 class="mobile-form-title">Добавить пациента</h1>
+        <p class="mobile-form-subtitle">Введите данные роженицы</p>
+    </div>
+
+    <!-- Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mobile-alert mobile-alert-{{ 'error' if category == 'error' else 'success' }}">
+                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }}"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Form -->
+    <form method="POST" class="mobile-form">
+        <!-- Basic Information Section -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2>Основная информация</h2>
+            </div>
+            
+            <div class="mobile-form-group">
+                <label class="mobile-label">
+                    <i class="fas fa-user-circle"></i>
+                    ФИО роженицы *
+                </label>
+                <input type="text" 
+                       name="patient_name" 
+                       required 
+                       class="mobile-input"
+                       placeholder="Введите полное имя">
+            </div>
+            
+            <div class="mobile-form-row">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-birthday-cake"></i>
+                        Возраст *
+                    </label>
+                    <input type="number" 
+                           name="age" 
+                           min="14" max="60" 
+                           value="25" 
+                           required 
+                           class="mobile-input"
+                           placeholder="25">
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-calendar-week"></i>
+                        Срок беременности *
+                    </label>
+                    <input type="number" 
+                           name="pregnancy_weeks" 
+                           min="20" max="42" 
+                           value="38" 
+                           required 
+                           class="mobile-input"
+                           placeholder="38">
+                </div>
+            </div>
+        </div>
+
+        <!-- Weight Section -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-weight"></i>
+                </div>
+                <h2>Показатели веса</h2>
+            </div>
+            
+            <div class="mobile-form-row">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-weight-hanging"></i>
+                        Вес до родов (кг) *
+                    </label>
+                    <input type="number" 
+                           name="weight_before" 
+                           min="40" max="150" 
+                           step="0.1" 
+                           value="70.0" 
+                           required 
+                           class="mobile-input"
+                           placeholder="70.0">
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-weight-hanging"></i>
+                        Вес после родов (кг) *
+                    </label>
+                    <input type="number" 
+                           name="weight_after" 
+                           min="40" max="150" 
+                           step="0.1" 
+                           value="65.0" 
+                           required 
+                           class="mobile-input"
+                           placeholder="65.0">
+                </div>
+            </div>
+        </div>
+
+        <!-- Diseases Section -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h2>Сопутствующие заболевания</h2>
+            </div>
+            
+            <div class="mobile-checkbox-grid">
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="gestosis" name="gestosis" class="mobile-checkbox">
+                    <label for="gestosis" class="mobile-checkbox-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Гестоз
+                    </label>
+                </div>
+                
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="diabetes" name="diabetes" class="mobile-checkbox">
+                    <label for="diabetes" class="mobile-checkbox-label">
+                        <i class="fas fa-tint"></i>
+                        Сахарный диабет
+                    </label>
+                </div>
+                
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="hypertension" name="hypertension" class="mobile-checkbox">
+                    <label for="hypertension" class="mobile-checkbox-label">
+                        <i class="fas fa-heart"></i>
+                        Гипертония
+                    </label>
+                </div>
+                
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="anemia" name="anemia" class="mobile-checkbox">
+                    <label for="anemia" class="mobile-checkbox-label">
+                        <i class="fas fa-droplet"></i>
+                        Анемия
+                    </label>
+                </div>
+                
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="infections" name="infections" class="mobile-checkbox">
+                    <label for="infections" class="mobile-checkbox-label">
+                        <i class="fas fa-virus"></i>
+                        Инфекции
+                    </label>
+                </div>
+                
+                <div class="mobile-checkbox-item">
+                    <input type="checkbox" id="placenta_pathology" name="placenta_pathology" class="mobile-checkbox">
+                    <label for="placenta_pathology" class="mobile-checkbox-label">
+                        <i class="fas fa-baby"></i>
+                        Патология плаценты
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Birth Information Section -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-baby"></i>
+                </div>
+                <h2>Информация о родах</h2>
+            </div>
+            
+            <div class="mobile-form-group">
+                <label class="mobile-label">
+                    <i class="fas fa-calendar"></i>
+                    Дата родов *
+                </label>
+                <input type="date" 
+                       name="birth_date" 
+                       required 
+                       class="mobile-input">
+            </div>
+            
+            <div class="mobile-form-row">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-clock"></i>
+                        Время родов *
+                    </label>
+                    <input type="time" 
+                           name="birth_time" 
+                           required 
+                           class="mobile-input">
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-venus-mars"></i>
+                        Пол ребенка *
+                    </label>
+                    <select name="child_gender" required class="mobile-select">
+                        <option value="">Выберите пол</option>
+                        <option value="Мальчик">👶 Мальчик</option>
+                        <option value="Девочка">👧 Девочка</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mobile-form-row">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-weight-hanging"></i>
+                        Вес ребенка (г) *
+                    </label>
+                    <input type="number" 
+                           name="child_weight" 
+                           min="500" max="6000" 
+                           value="3500" 
+                           step="50" 
+                           required 
+                           class="mobile-input"
+                           placeholder="3500">
+                </div>
+                
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-baby-carriage"></i>
+                        Способ родоразрешения *
+                    </label>
+                    <select name="delivery_method" required class="mobile-select">
+                        <option value="">Выберите способ</option>
+                        <option value="Естественные роды">🟢 Естественные роды</option>
+                        <option value="Кесарево сечение">🔴 Кесарево сечение</option>
+                        <option value="Вакуум-экстракция">🟡 Вакуум-экстракция</option>
+                        <option value="Акушерские щипцы">🟠 Акушерские щипцы</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-notes-medical"></i>
+                </div>
+                <h2>Дополнительная информация</h2>
+            </div>
+            
+            <div class="mobile-form-group">
+                <label class="mobile-label">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Осложнения в родах
+                </label>
+                <textarea name="complications" 
+                          class="mobile-textarea" 
+                          rows="3" 
+                          placeholder="Опишите осложнения во время родов, если были..."></textarea>
+            </div>
+            
+            <div class="mobile-form-group">
+                <label class="mobile-label">
+                    <i class="fas fa-sticky-note"></i>
+                    Примечания
+                </label>
+                <textarea name="notes" 
+                          class="mobile-textarea" 
+                          rows="3" 
+                          placeholder="Дополнительные заметки..."></textarea>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mobile-form-actions">
+            <a href="{{ url_for('dashboard') }}" class="mobile-btn mobile-btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Отмена
+            </a>
+            <button type="submit" class="mobile-btn mobile-btn-primary">
+                <i class="fas fa-save"></i>
+                Сохранить
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Mobile Patient Form Styles */
+.mobile-patient-form {
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.mobile-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 102, 204, 0.3);
+}
+
+.mobile-form-logo {
+    margin-bottom: 1rem;
+}
+
+.mobile-form-logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.mobile-form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.mobile-form-section {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mobile-section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.mobile-section-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.mobile-section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.mobile-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.mobile-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.mobile-label i {
+    color: #0066cc;
+    width: 16px;
+}
+
+.mobile-input, .mobile-select, .mobile-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    color: #333;
+}
+
+.mobile-input:focus, .mobile-select:focus, .mobile-textarea:focus {
+    outline: none;
+    border-color: #0066cc;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    transform: translateY(-1px);
+}
+
+.mobile-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.mobile-checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.mobile-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.mobile-checkbox-item:hover {
+    background: #e3f2fd;
+    border-color: #0066cc;
+    transform: translateX(4px);
+}
+
+.mobile-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: #0066cc;
+}
+
+.mobile-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    flex: 1;
+}
+
+.mobile-checkbox-label i {
+    color: #0066cc;
+    width: 16px;
+}
+
+.mobile-form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.mobile-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 48px;
+}
+
+.mobile-btn-primary {
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+}
+
+.mobile-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+}
+
+.mobile-btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e1e8ed;
+}
+
+.mobile-btn-secondary:hover {
+    background: #e9ecef;
+    border-color: #0066cc;
+    color: #0066cc;
+}
+
+.mobile-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.mobile-alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mobile-alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .mobile-form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .mobile-form-actions {
+        flex-direction: column;
+    }
+    
+    .mobile-form-section {
+        padding: 1rem;
+    }
+    
+    .mobile-section-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set current date as default
+    const today = new Date().toISOString().split('T')[0];
+    const birthDateInput = document.querySelector('input[name="birth_date"]');
+    if (birthDateInput) {
+        birthDateInput.value = today;
+    }
+    
+    // Set current time as default
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5);
+    const birthTimeInput = document.querySelector('input[name="birth_time"]');
+    if (birthTimeInput) {
+        birthTimeInput.value = currentTime;
+    }
+    
+    // Form validation
+    const form = document.querySelector('.mobile-form');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('error');
+                isValid = false;
+            } else {
+                field.classList.remove('error');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Show error message
+            const existingAlert = document.querySelector('.mobile-alert-error');
+            if (!existingAlert) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'mobile-alert mobile-alert-error';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Пожалуйста, заполните все обязательные поля</span>
+                `;
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+        }
+    });
+    
+    // Checkbox animations
+    document.querySelectorAll('.mobile-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const item = this.closest('.mobile-checkbox-item');
+            if (this.checked) {
+                item.style.background = '#e3f2fd';
+                item.style.borderColor = '#0066cc';
+            } else {
+                item.style.background = '#f8f9fa';
+                item.style.borderColor = 'transparent';
+            }
+        });
+    });
+    
+    // Input focus effects
+    document.querySelectorAll('.mobile-input, .mobile-select, .mobile-textarea').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

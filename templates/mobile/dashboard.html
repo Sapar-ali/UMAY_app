@@ -1,48 +1,515 @@
 {% extends "mobile/base.html" %}
 
-{% block title %}UMAY - Панель управления{% endblock %}
+{% block title %}Панель управления - UMAY{% endblock %}
 
 {% block content %}
-<div class="mobile-p-4">
-    <div class="mobile-card">
-        <div class="mobile-card-header">
-            <i class="fas fa-tachometer-alt fa-2x"></i>
+<!-- Apple/BMW Style Mobile Dashboard -->
+<div class="mobile-dashboard">
+    <!-- Welcome Header -->
+    <div class="mobile-dashboard-header">
+        <div class="mobile-dashboard-greeting">
+            <h1 class="mobile-dashboard-title">Добро пожаловать!</h1>
+            <p class="mobile-dashboard-subtitle">Панель управления UMAY</p>
         </div>
-        <div class="mobile-card-body">
-            <h2 class="mobile-card-title">Панель управления</h2>
-            <p class="mobile-card-text">Добро пожаловать, {{ current_user.username }}!</p>
-            
-            <div class="mobile-grid mobile-mt-3">
-                <div class="mobile-card">
-                    <div class="mobile-card-body">
-                        <h3 class="mobile-card-title">Пациенты</h3>
-                        <p class="mobile-card-text">Управление пациентами</p>
-                        <a href="{{ url_for('add_patient') }}" class="mobile-btn mobile-btn-primary mobile-btn-full">
-                            <i class="fas fa-user-plus"></i>
-                            <span>Добавить пациента</span>
-                        </a>
-                    </div>
+        <div class="mobile-dashboard-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="mobile-stats-grid">
+        <div class="mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="mobile-stat-content">
+                <div class="mobile-stat-number">1</div>
+                <div class="mobile-stat-label">Пациентов</div>
+            </div>
+        </div>
+        
+        <div class="mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="mobile-stat-content">
+                <div class="mobile-stat-number">3</div>
+                <div class="mobile-stat-label">Новостей</div>
+            </div>
+        </div>
+        
+        <div class="mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="mobile-stat-content">
+                <div class="mobile-stat-number">6</div>
+                <div class="mobile-stat-label">UMAY Mama</div>
+            </div>
+        </div>
+        
+        <div class="mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="fas fa-images"></i>
+            </div>
+            <div class="mobile-stat-content">
+                <div class="mobile-stat-number">0</div>
+                <div class="mobile-stat-label">Медиафайлов</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mobile-section">
+        <div class="mobile-section-header">
+            <h2 class="mobile-section-title">Быстрые действия</h2>
+            <div class="mobile-section-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+        </div>
+        
+        <div class="mobile-actions-grid">
+            <a href="{{ url_for('add_patient') }}?mobile=1" class="mobile-action-card">
+                <div class="mobile-action-icon">
+                    <i class="fas fa-user-plus"></i>
                 </div>
-                
-                <div class="mobile-card">
-                    <div class="mobile-card-body">
-                        <h3 class="mobile-card-title">Аналитика</h3>
-                        <p class="mobile-card-text">Статистика и отчеты</p>
-                        <a href="{{ url_for('analytics') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Просмотреть</span>
-                        </a>
-                    </div>
+                <div class="mobile-action-content">
+                    <h3>Добавить пациента</h3>
+                    <p>Новая запись о роженице</p>
+                </div>
+                <div class="mobile-action-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('analytics') }}" class="mobile-action-card">
+                <div class="mobile-action-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="mobile-action-content">
+                    <h3>Аналитика</h3>
+                    <p>Статистика и отчеты</p>
+                </div>
+                <div class="mobile-action-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('search') }}" class="mobile-action-card">
+                <div class="mobile-action-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="mobile-action-content">
+                    <h3>Поиск</h3>
+                    <p>Найти пациента</p>
+                </div>
+                <div class="mobile-action-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mobile-section">
+        <div class="mobile-section-header">
+            <h2 class="mobile-section-title">Последняя активность</h2>
+            <div class="mobile-section-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+        
+        <div class="mobile-activity-list">
+            <div class="mobile-activity-item">
+                <div class="mobile-activity-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="mobile-activity-content">
+                    <h4>Добавлен новый пациент</h4>
+                    <p>Сегодня в 14:30</p>
+                </div>
+                <div class="mobile-activity-status">
+                    <i class="fas fa-check-circle"></i>
                 </div>
             </div>
             
-            <div class="mobile-mt-3">
-                <a href="{{ url_for('profile') }}" class="mobile-btn mobile-btn-secondary mobile-btn-full">
-                    <i class="fas fa-user-cog"></i>
-                    <span>Профиль</span>
-                </a>
+            <div class="mobile-activity-item">
+                <div class="mobile-activity-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="mobile-activity-content">
+                    <h4>Обновлены данные пациента</h4>
+                    <p>Вчера в 16:45</p>
+                </div>
+                <div class="mobile-activity-status">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="mobile-section">
+        <div class="mobile-section-header">
+            <h2 class="mobile-section-title">Статус системы</h2>
+            <div class="mobile-section-icon">
+                <i class="fas fa-server"></i>
+            </div>
+        </div>
+        
+        <div class="mobile-status-grid">
+            <div class="mobile-status-item">
+                <div class="mobile-status-indicator mobile-status-online"></div>
+                <span>База данных</span>
+            </div>
+            
+            <div class="mobile-status-item">
+                <div class="mobile-status-indicator mobile-status-online"></div>
+                <span>API сервисы</span>
+            </div>
+            
+            <div class="mobile-status-item">
+                <div class="mobile-status-indicator mobile-status-online"></div>
+                <span>Файловое хранилище</span>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Mobile Dashboard Styles */
+.mobile-dashboard {
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.mobile-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    padding: 1.5rem;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 102, 204, 0.3);
+}
+
+.mobile-dashboard-greeting h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.mobile-dashboard-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.mobile-dashboard-avatar {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Stats Grid */
+.mobile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.mobile-stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.mobile-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-stat-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.mobile-stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Sections */
+.mobile-section {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mobile-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.mobile-section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.mobile-section-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+/* Actions Grid */
+.mobile-actions-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.mobile-action-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.mobile-action-card:hover {
+    background: #e3f2fd;
+    border-color: #0066cc;
+    transform: translateX(4px);
+}
+
+.mobile-action-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.mobile-action-content {
+    flex: 1;
+}
+
+.mobile-action-content h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 0.25rem 0;
+}
+
+.mobile-action-content p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}
+
+.mobile-action-arrow {
+    color: #0066cc;
+    font-size: 0.9rem;
+}
+
+/* Activity List */
+.mobile-activity-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.mobile-activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.mobile-activity-item:hover {
+    background: #e3f2fd;
+    transform: translateX(4px);
+}
+
+.mobile-activity-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0066cc, #00a0e9);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.mobile-activity-content {
+    flex: 1;
+}
+
+.mobile-activity-content h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 0.25rem 0;
+}
+
+.mobile-activity-content p {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+}
+
+.mobile-activity-status {
+    color: #27ae60;
+    font-size: 1rem;
+}
+
+/* Status Grid */
+.mobile-status-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.mobile-status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.mobile-status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.mobile-status-online {
+    background: #27ae60;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .mobile-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mobile-dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .mobile-section {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to stat cards
+    document.querySelectorAll('.mobile-stat-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Add click effects to action cards
+    document.querySelectorAll('.mobile-action-card').forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+    });
+    
+    // Animate stats on load
+    const statNumbers = document.querySelectorAll('.mobile-stat-number');
+    statNumbers.forEach((number, index) => {
+        setTimeout(() => {
+            number.style.opacity = '0';
+            number.style.transform = 'translateY(20px)';
+            number.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+                number.style.opacity = '1';
+                number.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 200);
+    });
+});
+</script>
 {% endblock %}
