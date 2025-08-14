@@ -33,7 +33,8 @@ class UMAYPWA {
   async registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/static/js/sw.js');
+        // Регистрируем SW на корне, чтобы охватывал все страницы
+        const registration = await navigator.serviceWorker.register('/sw.js');
         console.log('✅ UMAY PWA: Service Worker зарегистрирован:', registration);
         
         // Обработка обновлений
