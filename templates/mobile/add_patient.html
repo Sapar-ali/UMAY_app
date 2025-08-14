@@ -3,28 +3,6 @@
 {% block title %}Добавить пациента - UMAY{% endblock %}
 
 {% block content %}
-<!-- Debug Info -->
-<script>
-console.log('📱 Mobile add_patient.html loaded');
-console.log('🔍 Current URL:', window.location.href);
-console.log('🔍 User Agent:', navigator.userAgent);
-console.log('🔍 Viewport:', window.innerWidth + 'x' + window.innerHeight);
-
-// Show loading indicator
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📱 DOM loaded in mobile template');
-    document.body.style.backgroundColor = '#f0f0f0';
-});
-</script>
-
-<!-- Loading Indicator -->
-<div id="mobile-loading" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0066cc; color: white; display: flex; align-items: center; justify-content: center; z-index: 9999;">
-    <div style="text-align: center;">
-        <h2>UMAY Mobile</h2>
-        <p>Загрузка...</p>
-    </div>
-</div>
-
 <!-- Apple/BMW Style Mobile Form -->
 <div class="mobile-patient-form">
     <!-- Header Section -->
@@ -663,12 +641,6 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentElement.style.transform = 'scale(1)';
         });
     });
-
-    // Hide loading indicator
-    const loadingIndicator = document.getElementById('mobile-loading');
-    if (loadingIndicator) {
-        loadingIndicator.style.display = 'none';
-    }
 });
 </script>
 {% endblock %}
