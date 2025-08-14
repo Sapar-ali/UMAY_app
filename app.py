@@ -373,8 +373,9 @@ def send_sms_infobip(phone: str, text: str) -> bool:
             'destinations': [{'to': phone}],
             'text': text
         }
-        if SMS_SENDER:
-            message_obj['from'] = SMS_SENDER
+        # Временно убираем отправителя, пока не зарегистрируем в Infobip
+        # if SMS_SENDER:
+        #     message_obj['from'] = SMS_SENDER
         payload = {'messages': [message_obj]}
         resp = requests.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
