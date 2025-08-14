@@ -1212,6 +1212,9 @@ def mama_dashboard():
 def add_patient():
     # Check if mobile version is requested
     mobile_requested = request.args.get('mobile') == '1'
+    # Server-side fallback: if no param but user-agent is mobile, serve mobile template
+    if not mobile_requested and is_mobile_device():
+        mobile_requested = True
     
     if request.method == 'POST':
         try:
