@@ -1236,7 +1236,7 @@ def add_patient():
 
     # Lightweight debug endpoint (safe): /add_patient?debug=1
     if request.args.get('debug') == '1':
-        return f"ADD_PATIENT_DEBUG: mobile_requested={mobile_requested}, user={getattr(current_user, 'login', 'anon')}"
+        return f"ADD_PATIENT_DEBUG: mobile_requested={mobile_requested}, ios={is_ios_device()}, user={getattr(current_user, 'login', 'anon')}"
     
     if request.method == 'POST':
         try:
@@ -1326,7 +1326,13 @@ def add_patient():
             flash('Ошибка при добавлении пациента. Проверьте данные.', 'error')
     
     # Render appropriate template based on mobile request
-    template_name = 'mobile/add_patient.html' if mobile_requested else 'add_patient.html'
+    prefer_mobile = mobile_requested
+    # iOS fallback to avoid potential blank screen
+    if prefer_mobile and is_ios_device() and request.args.get('force') != 'mobile':
+        logger.info('iOS detected -> fallback to desktop add_patient; use ?force=mobile to override')
+        prefer_mobile = False
+
+    template_name = 'mobile/add_patient.html' if prefer_mobile else 'add_patient.html'
     try:
         logger.info(f"Rendering add_patient template: {template_name}, mobile={mobile_requested}")
         return render_template(template_name)
