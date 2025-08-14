@@ -1206,6 +1206,7 @@ def mama_dashboard():
         return redirect(url_for('index'))
 
 @app.route('/add_patient', methods=['GET', 'POST'])
+@app.route('/добавить_пациента', methods=['GET', 'POST'])  # alias for Russian URL to avoid 404/blank
 @login_required
 @pro_clinical_required
 def add_patient():
