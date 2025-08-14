@@ -362,6 +362,18 @@
 </style>
 
 <script>
+// iOS safe-mode: reduce animations if iOS Safari detected
+try {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  if (isIOS) {
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.animate-blob, .animate-fade-in, .animate-scale-in').forEach(el => {
+        el.classList.remove('animate-blob','animate-fade-in','animate-scale-in');
+      });
+    });
+  }
+} catch (e) {}
 // Form switching functionality
 function switchToUser() {
     document.getElementById('userForm').classList.remove('hidden');

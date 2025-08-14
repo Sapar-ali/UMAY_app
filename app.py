@@ -107,6 +107,11 @@ def is_mobile_device():
     mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'windows phone']
     return any(keyword in user_agent for keyword in mobile_keywords)
 
+# iOS detection for Safari-specific fallbacks
+def is_ios_device():
+    user_agent = request.headers.get('User-Agent', '').lower()
+    return any(keyword in user_agent for keyword in ['iphone', 'ipad', 'ipod'])
+
 # PWA routes
 @app.route('/mobile/')
 @app.route('/mobile/index')
@@ -934,7 +939,7 @@ def login():
 def register():
     # Lightweight debug
     if request.args.get('debug') == '1':
-        return f"REGISTER_DEBUG: method={request.method}, user={getattr(current_user, 'login', 'anon')}"
+        return f"REGISTER_DEBUG: method={request.method}, user={getattr(current_user, 'login', 'anon')}, ios={is_ios_device()}"
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
         login = request.form.get('login', '').strip()
@@ -1065,7 +1070,9 @@ def register():
     
     try:
         logger.info("Rendering register.html")
-        return render_template('register.html')
+        # iOS Safari fallback: avoid heavy animations if needed
+        template_name = 'register.html'
+        return render_template(template_name)
     except Exception as e:
         logger.error(f"Register GET render failed: {e}")
         return f"Register render error: {e}", 500
