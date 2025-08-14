@@ -3,7 +3,8 @@
 {% block title %}Добавить пациента - UMAY{% endblock %}
 
 {% block content %}
-<!-- Mobile Detection and Redirect -->
+<!-- Mobile Detection and Redirect - TEMPORARILY DISABLED -->
+<!-- 
 <script>
 // Detect mobile device and redirect to mobile version
 function isMobile() {
@@ -16,6 +17,7 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
     window.location.href = "{{ url_for('add_patient') }}?mobile=1";
 }
 </script>
+-->
 
 <!-- Desktop Version -->
 <!-- Modern Apple/BMW Style Form -->

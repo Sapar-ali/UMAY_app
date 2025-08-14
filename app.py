@@ -1209,8 +1209,9 @@ def mama_dashboard():
 @login_required
 @pro_clinical_required
 def add_patient():
-    # Check if mobile version is requested
-    mobile_requested = request.args.get('mobile') == '1'
+    # Check if mobile version is requested - TEMPORARILY DISABLED
+    # mobile_requested = request.args.get('mobile') == '1'
+    mobile_requested = False  # TEMPORARILY DISABLED
     
     if request.method == 'POST':
         try:
@@ -1237,19 +1238,19 @@ def add_patient():
             # Валидация обязательных полей
             if not request.form['patient_name'] or request.form['patient_name'].strip() == "":
                 flash('ФИО роженицы обязательно для заполнения', 'error')
-                return render_template('mobile/add_patient.html' if mobile_requested else 'add_patient.html')
+                return render_template('add_patient.html')
             
             if not request.form['child_gender'] or request.form['child_gender'] == "":
                 flash('Необходимо выбрать пол ребенка', 'error')
-                return render_template('mobile/add_patient.html' if mobile_requested else 'add_patient.html')
+                return render_template('add_patient.html')
             
             if not request.form['delivery_method'] or request.form['delivery_method'] == "":
                 flash('Необходимо выбрать способ родоразрешения', 'error')
-                return render_template('mobile/add_patient.html' if mobile_requested else 'add_patient.html')
+                return render_template('add_patient.html')
             
             if not request.form['anesthesia'] or request.form['anesthesia'] == "":
                 flash('Необходимо выбрать тип анестезии', 'error')
-                return render_template('mobile/add_patient.html' if mobile_requested else 'add_patient.html')
+                return render_template('add_patient.html')
             
             new_patient = Patient(
                 date=datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -1299,8 +1300,9 @@ def add_patient():
             logger.error(f"Ошибка при добавлении пациента: {e}")
             flash('Ошибка при добавлении пациента. Проверьте данные.', 'error')
     
-    # Render appropriate template based on mobile request
-    template_name = 'mobile/add_patient.html' if mobile_requested else 'add_patient.html'
+    # Render appropriate template based on mobile request - TEMPORARILY DISABLED
+    # template_name = 'mobile/add_patient.html' if mobile_requested else 'add_patient.html'
+    template_name = 'add_patient.html'  # TEMPORARILY DISABLED
     return render_template(template_name)
 
 @app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
