@@ -39,8 +39,8 @@ def test_sms_config():
     
     if sms_provider == 'NOT_SET':
         issues.append("❌ SMS_PROVIDER не установлен")
-    elif sms_provider != 'infobip':
-        issues.append(f"⚠️  SMS_PROVIDER установлен как '{sms_provider}', рекомендуется 'infobip'")
+    elif sms_provider not in ('infobip', 'mobizon'):
+        issues.append(f"⚠️  SMS_PROVIDER установлен как '{sms_provider}', поддерживаются: 'infobip' или 'mobizon'")
     
     if sms_base_url == 'NOT_SET':
         issues.append("❌ SMS_BASE_URL не установлен")
@@ -81,12 +81,12 @@ def test_sms_import():
     try:
         # Пытаемся импортировать app
         sys.path.append('.')
-        from app import send_sms_infobip, send_otp
+        from app import send_sms, send_otp, SMS_PROVIDER
         
         print("✅ SMS функции импортированы успешно")
         
         # Тестируем функцию отправки SMS
-        print("\n📱 Тестирование функции send_sms_infobip...")
+        print("\n📱 Тестирование функции send_sms (провайдер: {} )...".format(SMS_PROVIDER))
         
         # Проверяем, есть ли настройки
         from app import SMS_BASE_URL, SMS_API_KEY

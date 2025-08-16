@@ -391,6 +391,48 @@ def send_sms_infobip(phone: str, text: str) -> bool:
         logger.error(f"Infobip send exception: {e}")
         return False
 
+def send_sms_mobizon(phone: str, text: str) -> bool:
+    if not SMS_BASE_URL or not SMS_API_KEY:
+        logger.error('SMS config is missing')
+        return False
+    try:
+        # Mobizon API: https://api.mobizon.kz/service/message/sendSmsMessage
+        url = SMS_BASE_URL.rstrip('/') + '/service/message/sendSmsMessage'
+        data = {
+            'apiKey': SMS_API_KEY,
+            'recipient': phone,
+            'text': text
+        }
+        if SMS_SENDER:
+            data['from'] = SMS_SENDER
+        resp = requests.post(url, data=data, timeout=10)
+        if resp.status_code in (200, 201):
+            # Typical Mobizon success payload contains code == 0 and data.messageId
+            try:
+                payload = resp.json()
+                code_val = str(payload.get('code', '')).lower()
+                message_val = str(payload.get('message', '')).lower()
+                has_id = isinstance(payload.get('data', {}), dict) and (
+                    'messageId' in payload.get('data', {}) or 'messages' in payload.get('data', {})
+                )
+                if code_val in ('0', 'success') or message_val in ('ok', 'success') or has_id:
+                    return True
+            except Exception:
+                # If response is not JSON but HTTP 200, consider failure with details
+                pass
+        logger.error(f"Mobizon send failed: {resp.status_code} {resp.text}")
+        return False
+    except Exception as e:
+        logger.error(f"Mobizon send exception: {e}")
+        return False
+
+def send_sms(phone: str, text: str) -> bool:
+    provider = (SMS_PROVIDER or 'infobip').lower()
+    if provider == 'mobizon':
+        return send_sms_mobizon(phone, text)
+    # default to infobip for backward compatibility
+    return send_sms_infobip(phone, text)
+
 def send_otp(phone: str, purpose: str):
     normalized = normalize_phone(phone)
     if not normalized:
@@ -403,7 +445,7 @@ def send_otp(phone: str, purpose: str):
         return False, 'Пожалуйста, подождите перед повторной отправкой'
     code = generate_otp_code()
     text = f"UMAY: ваш код подтверждения {code}. Никому его не сообщайте."
-    sent = send_sms_infobip(normalized, text)
+    sent = send_sms(normalized, text)
     if not sent:
         return False, 'Не удалось отправить СМС. Попробуйте позже'
     otp = OTPCode(phone=normalized, code=code, purpose=purpose,
