@@ -395,6 +395,12 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
     if not SMS_BASE_URL or not SMS_API_KEY:
         logger.error('SMS config is missing')
         return False
+    
+    logger.info(f"🔧 Начинаем отправку SMS через Mobizon")
+    logger.info(f"🔧 SMS_PROVIDER: {SMS_PROVIDER}")
+    logger.info(f"🔧 SMS_BASE_URL: {SMS_BASE_URL}")
+    logger.info(f"🔧 SMS_API_KEY: {'*' * 10 if SMS_API_KEY else 'НЕ_УСТАНОВЛЕН'}")
+    
     try:
         # Mobizon API: https://api.mobizon.kz/service/message/sendSmsMessage
         url = SMS_BASE_URL.rstrip('/') + '/service/message/sendSmsMessage'
@@ -410,9 +416,19 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
         #     data['from'] = SMS_SENDER
         
         logger.info(f"📱 Данные для отправки: recipient={phone}, from=НЕ_УКАЗАН (подпись не одобрена), text_length={len(text)}")
+        logger.info(f"📱 Полный URL: {url}")
+        logger.info(f"📱 Данные запроса: {data}")
         
-        resp = requests.post(url, data=data, timeout=30)
+        # Добавляем заголовки для лучшей совместимости
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'UMAY-App/1.0'
+        }
+        
+        logger.info(f"📤 Отправляем POST запрос...")
+        resp = requests.post(url, data=data, headers=headers, timeout=30)
         logger.info(f"📡 Mobizon ответ: статус={resp.status_code}, размер={len(resp.text)}")
+        logger.info(f"📡 Заголовки ответа: {dict(resp.headers)}")
         
         if resp.status_code in (200, 201):
             # Typical Mobizon success payload contains code == 0 and data.messageId
@@ -431,15 +447,17 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
                     return True
                 else:
                     logger.error(f"❌ Mobizon вернул ошибку: code={code_val}, message={message_val}")
+                    logger.error(f"❌ Полный ответ: {payload}")
                     return False
                     
             except Exception as json_error:
                 logger.error(f"❌ Ошибка парсинга JSON ответа Mobizon: {json_error}")
                 # If response is not JSON but HTTP 200, consider failure with details
-                logger.error(f"📄 Сырой ответ: {resp.text[:200]}")
+                logger.error(f"📄 Сырой ответ: {resp.text[:500]}")
                 return False
         else:
-            logger.error(f"❌ Mobizon HTTP ошибка: {resp.status_code} {resp.text}")
+            logger.error(f"❌ Mobizon HTTP ошибка: {resp.status_code}")
+            logger.error(f"❌ Текст ошибки: {resp.text[:500]}")
             return False
     except requests.exceptions.Timeout:
         logger.error("⏰ Mobizon timeout - сервер не ответил за 30 секунд")
@@ -449,13 +467,25 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
         return False
     except Exception as e:
         logger.error(f"❌ Mobizon общая ошибка: {e}")
+        import traceback
+        logger.error(f"❌ Stack trace: {traceback.format_exc()}")
         return False
 
 def send_sms(phone: str, text: str) -> bool:
     provider = (SMS_PROVIDER or 'infobip').lower()
+    logger.info(f"📱 Отправка SMS через провайдера: {provider}")
+    
     if provider == 'mobizon':
-        return send_sms_mobizon(phone, text)
+        logger.info("📱 Пробуем Mobizon...")
+        result = send_sms_mobizon(phone, text)
+        if result:
+            return True
+        else:
+            logger.warning("⚠️ Mobizon не сработал, пробуем Infobip как fallback...")
+            return send_sms_infobip(phone, text)
+    
     # default to infobip for backward compatibility
+    logger.info("📱 Используем Infobip...")
     return send_sms_infobip(phone, text)
 
 def send_otp(phone: str, purpose: str):
