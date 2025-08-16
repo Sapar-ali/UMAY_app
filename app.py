@@ -398,6 +398,8 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
     try:
         # Mobizon API: https://api.mobizon.kz/service/message/sendSmsMessage
         url = SMS_BASE_URL.rstrip('/') + '/service/message/sendSmsMessage'
+        logger.info(f"🔧 Отправка SMS через Mobizon: {url}")
+        
         data = {
             'apiKey': SMS_API_KEY,
             'recipient': phone,
@@ -405,25 +407,47 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
         }
         if SMS_SENDER:
             data['from'] = SMS_SENDER
-        resp = requests.post(url, data=data, timeout=10)
+        
+        logger.info(f"📱 Данные для отправки: recipient={phone}, from={SMS_SENDER}, text_length={len(text)}")
+        
+        resp = requests.post(url, data=data, timeout=30)
+        logger.info(f"📡 Mobizon ответ: статус={resp.status_code}, размер={len(resp.text)}")
+        
         if resp.status_code in (200, 201):
             # Typical Mobizon success payload contains code == 0 and data.messageId
             try:
                 payload = resp.json()
+                logger.info(f"📋 Mobizon JSON ответ: {payload}")
+                
                 code_val = str(payload.get('code', '')).lower()
                 message_val = str(payload.get('message', '')).lower()
                 has_id = isinstance(payload.get('data', {}), dict) and (
                     'messageId' in payload.get('data', {}) or 'messages' in payload.get('data', {})
                 )
+                
                 if code_val in ('0', 'success') or message_val in ('ok', 'success') or has_id:
+                    logger.info("✅ Mobizon SMS отправлен успешно")
                     return True
-            except Exception:
+                else:
+                    logger.error(f"❌ Mobizon вернул ошибку: code={code_val}, message={message_val}")
+                    return False
+                    
+            except Exception as json_error:
+                logger.error(f"❌ Ошибка парсинга JSON ответа Mobizon: {json_error}")
                 # If response is not JSON but HTTP 200, consider failure with details
-                pass
-        logger.error(f"Mobizon send failed: {resp.status_code} {resp.text}")
+                logger.error(f"📄 Сырой ответ: {resp.text[:200]}")
+                return False
+        else:
+            logger.error(f"❌ Mobizon HTTP ошибка: {resp.status_code} {resp.text}")
+            return False
+    except requests.exceptions.Timeout:
+        logger.error("⏰ Mobizon timeout - сервер не ответил за 30 секунд")
+        return False
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"🔌 Mobizon connection error: {e}")
         return False
     except Exception as e:
-        logger.error(f"Mobizon send exception: {e}")
+        logger.error(f"❌ Mobizon общая ошибка: {e}")
         return False
 
 def send_sms(phone: str, text: str) -> bool:
@@ -434,26 +458,41 @@ def send_sms(phone: str, text: str) -> bool:
     return send_sms_infobip(phone, text)
 
 def send_otp(phone: str, purpose: str):
-    normalized = normalize_phone(phone)
-    if not normalized:
-        return False, 'Некорректный номер телефона'
-    sent_today = count_otp_sent_today(normalized, purpose)
-    if sent_today >= OTP_MAX_PER_DAY:
-        return False, 'Превышен дневной лимит отправки кодов'
-    last = OTPCode.query.filter_by(phone=normalized, purpose=purpose).order_by(OTPCode.created_at.desc()).first()
-    if last and not can_resend_otp(last.last_sent_at):
-        return False, 'Пожалуйста, подождите перед повторной отправкой'
-    code = generate_otp_code()
-    text = f"UMAY: ваш код подтверждения {code}. Никому его не сообщайте."
-    sent = send_sms(normalized, text)
-    if not sent:
-        return False, 'Не удалось отправить СМС. Попробуйте позже'
-    otp = OTPCode(phone=normalized, code=code, purpose=purpose,
-                  expires_at=datetime.utcnow() + timedelta(seconds=OTP_TTL_SEC),
-                  last_sent_at=datetime.utcnow())
-    db.session.add(otp)
-    db.session.commit()
-    return True, 'Код отправлен'
+    try:
+        normalized = normalize_phone(phone)
+        if not normalized:
+            return False, 'Некорректный номер телефона'
+        
+        sent_today = count_otp_sent_today(normalized, purpose)
+        if sent_today >= OTP_MAX_PER_DAY:
+            return False, 'Превышен дневной лимит отправки кодов'
+        
+        last = OTPCode.query.filter_by(phone=normalized, purpose=purpose).order_by(OTPCode.created_at.desc()).first()
+        if last and not can_resend_otp(last.last_sent_at):
+            return False, 'Пожалуйста, подождите перед повторной отправкой'
+        
+        code = generate_otp_code()
+        text = f"UMAY: ваш код подтверждения {code}. Никому его не сообщайте."
+        
+        logger.info(f"📱 Попытка отправки OTP: phone={normalized}, purpose={purpose}, provider={SMS_PROVIDER}")
+        
+        sent = send_sms(normalized, text)
+        if not sent:
+            logger.error(f"❌ Не удалось отправить SMS для {normalized}")
+            return False, 'Не удалось отправить СМС. Попробуйте позже'
+        
+        logger.info(f"✅ SMS отправлен успешно для {normalized}")
+        
+        otp = OTPCode(phone=normalized, code=code, purpose=purpose,
+                      expires_at=datetime.utcnow() + timedelta(seconds=OTP_TTL_SEC),
+                      last_sent_at=datetime.utcnow())
+        db.session.add(otp)
+        db.session.commit()
+        return True, 'Код отправлен'
+        
+    except Exception as e:
+        logger.error(f"❌ Критическая ошибка в send_otp: {e}")
+        return False, 'Внутренняя ошибка сервера. Попробуйте позже'
 
 def verify_otp(phone: str, code: str, purpose: str):
     normalized = normalize_phone(phone)
@@ -721,7 +760,21 @@ def init_database():
     except Exception as e:
         logger.error(f"❌ Error initializing database: {e}")
 
+# Global error handlers
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"❌ 500 Internal Server Error: {error}")
+    return render_template('error.html', error="Внутренняя ошибка сервера"), 500
 
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.warning(f"⚠️ 404 Not Found: {request.url}")
+    return render_template('error.html', error="Страница не найдена"), 404
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logger.error(f"❌ Необработанное исключение: {e}")
+    return render_template('error.html', error="Произошла ошибка"), 500
 
 # Данные о городах и медицинских учреждениях с отделениями
 CITIES_DATA = {
@@ -1121,22 +1174,56 @@ def register():
 
 @app.route('/api/otp/send', methods=['POST'])
 def api_send_otp():
-    data = request.get_json() or {}
-    phone = data.get('phone', '')
-    purpose = data.get('purpose', 'register')
-    ok, msg = send_otp(phone, purpose)
-    status = 'success' if ok else 'error'
-    return jsonify({'status': status, 'message': msg}), (200 if ok else 400)
+    try:
+        data = request.get_json() or {}
+        phone = data.get('phone', '')
+        purpose = data.get('purpose', 'register')
+        
+        if not phone:
+            logger.warning("⚠️ API OTP: пустой номер телефона")
+            return jsonify({'status': 'error', 'message': 'Номер телефона обязателен'}), 400
+        
+        logger.info(f"📱 API запрос на отправку OTP: phone={phone}, purpose={purpose}, provider={SMS_PROVIDER}")
+        
+        ok, msg = send_otp(phone, purpose)
+        
+        if ok:
+            logger.info(f"✅ OTP API успешно: {phone}")
+            return jsonify({'status': 'success', 'message': msg})
+        else:
+            logger.warning(f"⚠️ OTP API ошибка: {phone} - {msg}")
+            return jsonify({'status': 'error', 'message': msg}), 400
+            
+    except Exception as e:
+        logger.error(f"❌ Критическая ошибка в API OTP: {e}")
+        return jsonify({'status': 'error', 'message': 'Внутренняя ошибка сервера'}), 500
 
 @app.route('/api/otp/verify', methods=['POST'])
 def api_verify_otp():
-    data = request.get_json() or {}
-    phone = data.get('phone', '')
-    code = data.get('code', '')
-    purpose = data.get('purpose', 'register')
-    ok, msg = verify_otp(phone, code, purpose)
-    status = 'success' if ok else 'error'
-    return jsonify({'status': status, 'message': ("OK" if ok else msg)}), (200 if ok else 400)
+    try:
+        data = request.get_json() or {}
+        phone = data.get('phone', '')
+        code = data.get('code', '')
+        purpose = data.get('purpose', 'register')
+        
+        if not phone or not code:
+            logger.warning("⚠️ API OTP verify: пустые данные")
+            return jsonify({'status': 'error', 'message': 'Номер телефона и код обязательны'}), 400
+        
+        logger.info(f"🔐 API запрос на проверку OTP: phone={phone}, purpose={purpose}")
+        
+        ok, msg = verify_otp(phone, code, purpose)
+        
+        if ok:
+            logger.info(f"✅ OTP verify API успешно: {phone}")
+            return jsonify({'status': 'success', 'message': 'OK'})
+        else:
+            logger.warning(f"⚠️ OTP verify API ошибка: {phone} - {msg}")
+            return jsonify({'status': 'error', 'message': msg}), 400
+            
+    except Exception as e:
+        logger.error(f"❌ Критическая ошибка в API OTP verify: {e}")
+        return jsonify({'status': 'error', 'message': 'Внутренняя ошибка сервера'}), 500
 
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
