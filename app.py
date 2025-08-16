@@ -405,10 +405,11 @@ def send_sms_mobizon(phone: str, text: str) -> bool:
             'recipient': phone,
             'text': text
         }
-        if SMS_SENDER:
-            data['from'] = SMS_SENDER
+        # Временно отключаем from, пока подпись не одобрена
+        # if SMS_SENDER:
+        #     data['from'] = SMS_SENDER
         
-        logger.info(f"📱 Данные для отправки: recipient={phone}, from={SMS_SENDER}, text_length={len(text)}")
+        logger.info(f"📱 Данные для отправки: recipient={phone}, from=НЕ_УКАЗАН (подпись не одобрена), text_length={len(text)}")
         
         resp = requests.post(url, data=data, timeout=30)
         logger.info(f"📡 Mobizon ответ: статус={resp.status_code}, размер={len(resp.text)}")
