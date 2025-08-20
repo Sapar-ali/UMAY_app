@@ -1006,7 +1006,7 @@ def init_database():
 # Global error handlers
 @app.errorhandler(500)
 def internal_error(error):
-    logger.error(f"❌ 500 Internal Server Error: {error}")
+    logger.exception(f"❌ 500 Internal Server Error: {error}")
     return render_template('error.html', error="Внутренняя ошибка сервера"), 500
 
 @app.errorhandler(404)
@@ -1016,7 +1016,7 @@ def not_found_error(error):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    logger.error(f"❌ Необработанное исключение: {e}")
+    logger.exception(f"❌ Необработанное исключение: {e}")
     return render_template('error.html', error="Произошла ошибка"), 500
 
 # Данные о городах и медицинских учреждениях с отделениями
@@ -1482,7 +1482,7 @@ def register():
             return redirect(url_for('login'))
             
         except Exception as e:
-            logger.error(f"Registration error: {e}")
+            logger.exception(f"Registration error: {e}")
             flash('Ошибка при регистрации. Попробуйте позже.', 'error')
             return render_template('register.html')
     
