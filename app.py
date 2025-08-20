@@ -1185,19 +1185,20 @@ class Patient(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Check both databases for the user
-    user = None
-    
-    # First check UMAY Pro database
-    with app.app_context():
-        user = db.session.query(UserPro).get(int(user_id))
-    
-    # Then check UMAY Mama database
-    if not user:
+    # Check both databases for the user with safe error handling
+    try:
+        user = None
+        # First check UMAY Pro database
         with app.app_context():
-            user = db.session.query(UserMama).get(int(user_id))
-    
-    return user
+            user = db.session.query(UserPro).get(int(user_id))
+        # Then check UMAY Mama database
+        if not user:
+            with app.app_context():
+                user = db.session.query(UserMama).get(int(user_id))
+        return user
+    except Exception as e:
+        logger.warning(f"load_user failed: {e}")
+        return None
 
 # Маршруты
 @app.route('/')
