@@ -1342,26 +1342,26 @@ def register():
             flash('Email слишком длинный! Максимум 120 символов.', 'error')
             return render_template('register.html')
 
-        # Check if user already exists in the appropriate database
-        existing_user = None
-        if app_type == 'mama':
-            with app.app_context():
-                existing_user = db.session.query(UserMama).filter_by(login=login).first()
-                if not existing_user:
-                    existing_user = db.session.query(UserMama).filter_by(email=email).first()
-        else:
-            with app.app_context():
-                existing_user = db.session.query(UserPro).filter_by(login=login).first()
-                if not existing_user:
-                    existing_user = db.session.query(UserPro).filter_by(email=email).first()
-        
-        if existing_user:
-            flash('Пользователь с таким логином или email уже существует!', 'error')
-            return render_template('register.html')
-        
-        hashed_password = generate_password_hash(password)
-        
+        # Проверяем существование пользователя и выполняем операции с БД безопасно
         try:
+            existing_user = None
+            if app_type == 'mama':
+                with app.app_context():
+                    existing_user = db.session.query(UserMama).filter_by(login=login).first()
+                    if not existing_user:
+                        existing_user = db.session.query(UserMama).filter_by(email=email).first()
+            else:
+                with app.app_context():
+                    existing_user = db.session.query(UserPro).filter_by(login=login).first()
+                    if not existing_user:
+                        existing_user = db.session.query(UserPro).filter_by(email=email).first()
+            
+            if existing_user:
+                flash('Пользователь с таким логином или email уже существует!', 'error')
+                return render_template('register.html')
+            
+            hashed_password = generate_password_hash(password)
+
             # Generate email verification token
             email_token = generate_email_token()
             token_expires = datetime.utcnow() + timedelta(hours=EMAIL_VERIFICATION_TTL_HOURS)
