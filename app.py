@@ -79,10 +79,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Initialize Flask-Mail
+# Initialize Flask-Mail (configure after app.config is populated)
 from flask_mail import Mail
 mail = Mail()
-mail.init_app(app)
 
 # ======================
 # Email Configuration
@@ -97,6 +96,21 @@ MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'umay.med.gov@gmail.com')
 MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', '100'))
 MAIL_ASCII_ATTACHMENTS = False
 MAIL_SUPPRESS_SEND = os.getenv('MAIL_SUPPRESS_SEND', 'false').lower() == 'true'
+
+# Apply mail configuration to Flask app and initialize extension
+app.config.update({
+    'MAIL_SERVER': MAIL_SERVER,
+    'MAIL_PORT': MAIL_PORT,
+    'MAIL_USE_TLS': MAIL_USE_TLS,
+    'MAIL_USE_SSL': MAIL_USE_SSL,
+    'MAIL_USERNAME': MAIL_USERNAME,
+    'MAIL_PASSWORD': MAIL_PASSWORD,
+    'MAIL_DEFAULT_SENDER': MAIL_DEFAULT_SENDER,
+    'MAIL_MAX_EMAILS': MAIL_MAX_EMAILS,
+    'MAIL_ASCII_ATTACHMENTS': MAIL_ASCII_ATTACHMENTS,
+    'MAIL_SUPPRESS_SEND': MAIL_SUPPRESS_SEND
+})
+mail.init_app(app)
 
 # Email verification settings
 EMAIL_VERIFICATION_TTL_HOURS = int(os.getenv('EMAIL_VERIFICATION_TTL_HOURS', '24'))
