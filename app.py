@@ -841,11 +841,11 @@ def init_database():
                     add_column_if_missing('user_pro', 'email VARCHAR(120)')
                     add_column_if_missing('user_pro', 'is_email_verified BOOLEAN DEFAULT FALSE')
                     add_column_if_missing('user_pro', 'email_verification_token VARCHAR(100)')
-                    add_column_if_missing('user_pro', 'email_verification_expires DATETIME')
+                    add_column_if_missing('user_pro', 'email_verification_expires TIMESTAMP')
                     add_column_if_missing('user_mama', 'email VARCHAR(120)')
                     add_column_if_missing('user_mama', 'is_email_verified BOOLEAN DEFAULT FALSE')
                     add_column_if_missing('user_mama', 'email_verification_token VARCHAR(100)')
-                    add_column_if_missing('user_mama', 'email_verification_expires DATETIME')
+                    add_column_if_missing('user_mama', 'email_verification_expires TIMESTAMP')
             except Exception as e:
                 logger.warning(f"Could not ensure email columns: {e}")
             
