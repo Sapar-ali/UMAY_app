@@ -1202,9 +1202,17 @@ def load_user(user_id):
 # Маршруты
 @app.route('/')
 def index():
-    # Получаем последние 6 опубликованных новостей
-    latest_news = News.query.filter_by(is_published=True).order_by(News.published_at.desc()).limit(6).all()
+    # Безопасный рендер главной: при ошибке БД показываем страницу без новостей
+    try:
+        latest_news = News.query.filter_by(is_published=True).order_by(News.published_at.desc()).limit(6).all()
+    except Exception as e:
+        logger.warning(f"Index news query failed: {e}")
+        latest_news = []
     return render_template('index.html', news=latest_news)
+
+@app.route('/healthz')
+def healthz():
+    return 'ok', 200
 
 @app.route('/api/cities')
 def get_cities():
