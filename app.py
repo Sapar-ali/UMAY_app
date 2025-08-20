@@ -305,6 +305,72 @@ def verify_email(token):
     flash('Ошибка подтверждения email. Попробуйте зарегистрироваться снова.', 'error')
     return redirect(url_for('register'))
 
+@app.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend email verification link to user"""
+    try:
+        email = request.form.get('email', '').strip().lower()
+        app_type = request.form.get('app_type', '').strip()
+
+        if not email:
+            flash('Укажите email для повторной отправки письма.', 'error')
+            return redirect(url_for('login'))
+
+        # Find user by email in both tables
+        user = db.session.query(UserPro).filter_by(email=email).first()
+        if not user:
+            user = db.session.query(UserMama).filter_by(email=email).first()
+
+        if not user:
+            flash('Пользователь с таким email не найден.', 'error')
+            return redirect(url_for('login'))
+
+        if getattr(user, 'is_email_verified', False):
+            flash('Email уже подтвержден. Можете войти в систему.', 'success')
+            return redirect(url_for('login'))
+
+        # Throttle repeat sends (min interval 60 seconds)
+        last = (
+            db.session.query(EmailVerification)
+            .filter_by(email=email, purpose='register')
+            .order_by(EmailVerification.created_at.desc())
+            .first()
+        )
+        if last:
+            from datetime import datetime
+            delta_sec = (datetime.utcnow() - last.created_at).total_seconds()
+            if delta_sec < 60:
+                remaining = 60 - int(delta_sec)
+                flash(f'Пожалуйста, подождите {remaining} сек перед повторной отправкой.', 'error')
+                return redirect(url_for('login'))
+
+        # Generate new token and update user + create verification record
+        token = generate_email_token()
+        from datetime import datetime, timedelta
+        expires = datetime.utcnow() + timedelta(hours=EMAIL_VERIFICATION_TTL_HOURS)
+        user.email_verification_token = token
+        user.email_verification_expires = expires
+
+        verification = EmailVerification(
+            email=email,
+            token=token,
+            purpose='register',
+            expires_at=expires
+        )
+        db.session.add(verification)
+        db.session.commit()
+
+        ok, message = send_verification_email(email, token, user.user_type, user.app_type, purpose='register')
+        if not ok:
+            flash(message, 'error')
+        else:
+            flash('Письмо с подтверждением отправлено повторно.', 'success')
+        return redirect(url_for('login'))
+    except Exception as e:
+        logger.exception(f"Resend verification error: {e}")
+        flash('Ошибка при повторной отправке письма.', 'error')
+        return redirect(url_for('login'))
+
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     """Reset password with token"""
@@ -1262,7 +1328,7 @@ def login():
             # Check if email is verified
             if not user.is_email_verified:
                 flash('Ваш email не подтвержден. Проверьте почту и подтвердите email адрес.', 'error')
-                return render_template('login.html')
+                return render_template('login.html', unverified_email=user.email, unverified_app_type=app_type)
             
             login_user(user)
             
