@@ -1,5 +1,5 @@
 // UMAY Service Worker - PWA функциональность
-const CACHE_VERSION = 'v1.0.3';
+const CACHE_VERSION = 'v1.0.4';
 const CACHE_NAME = `umay-${CACHE_VERSION}`;
 const STATIC_CACHE = `umay-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `umay-dynamic-${CACHE_VERSION}`;

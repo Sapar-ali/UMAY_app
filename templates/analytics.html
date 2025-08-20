@@ -14,6 +14,23 @@
             <p class="text-xl text-gray-600">Детальная статистика и интерактивные графики</p>
         </div>
 
+        <!-- Kazakhstan Map Section -->
+        <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 mb-12 animate-scale-in">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-map-marked-alt text-indigo-600"></i>
+                    География — карта Казахстана
+                </h3>
+                <div class="text-sm text-gray-500">
+                    Ваш город: <span class="font-semibold text-gray-700">{{ current_user.city }}</span>
+                </div>
+            </div>
+
+            <div id="kz-map-wrapper" data-user-city="{{ current_user.city }}" class="kz-map relative">
+                <div id="kz-map-hc" class="w-full" style="height: 440px"></div>
+            </div>
+        </div>
+
         <!-- Key Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
@@ -498,8 +515,74 @@
 }
 </style>
 
+<!-- Highcharts Maps (CDN) -->
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<!-- Map data for Kazakhstan (provides 'countries/kz/kz-all') -->
+<script src="https://code.highcharts.com/mapdata/countries/kz/kz-all.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Highcharts map: Kazakhstan ---
+    try {
+        const userCity = (document.getElementById('kz-map-wrapper')?.dataset?.userCity || '').trim();
+        const mapKey = 'countries/kz/kz-all';
+
+        // Prepare base data: one point per region with value=1 so it renders uniformly
+        const mapOptions = {
+            chart: { map: mapKey, backgroundColor: 'transparent' },
+            title: { text: undefined },
+            legend: { enabled: false },
+            mapNavigation: { enabled: true, enableMouseWheelZoom: false },
+            colorAxis: { min: 0, max: 1, stops: [[0, '#e5e7eb'], [1, '#e5e7eb']] },
+            tooltip: { pointFormat: '{point.name}' },
+            series: [{
+                data: [],
+                name: 'Области',
+                nullColor: '#e5e7eb',
+                borderColor: '#9ca3af',
+                borderWidth: 0.8,
+                states: {
+                    hover: { color: '#c7d2fe' },
+                    select: { color: '#6366f1' }
+                },
+                dataLabels: { enabled: true, format: '{point.name}', style: { color: '#374151', textOutline: 'none', fontSize: '10px' } },
+                allowPointSelect: true,
+                cursor: 'pointer'
+            }]
+        };
+
+        const chart = Highcharts.mapChart('kz-map-hc', mapOptions);
+
+        // Fill data with all regions (points) present in loaded map
+        const points = chart.series[0].points;
+        chart.series[0].setData(points.map(p => ({ 'hc-key': p['hc-key'], value: 1 })), false);
+        chart.redraw();
+
+        // Select region by user's city
+        const synonyms = {
+            'шымкент': ['shymkent'],
+            'астана': ['astana', 'nur-sultan', 'nursultan', 'нур-султан'],
+            'нур-султан': ['astana', 'nur-sultan', 'nursultan'],
+            'юко': ['turkistan', 'south kazakhstan', 'туркестан']
+        };
+        const key = userCity.toLowerCase();
+        const targets = synonyms[key] || [key];
+        const candidate = chart.series[0].points.find(pt => {
+            const name = (pt.name || '').toLowerCase();
+            return targets.some(t => name.includes(t));
+        });
+        if (candidate) candidate.select(true, false);
+
+        // Click to select
+        Highcharts.addEvent(chart, 'load', () => {
+            chart.series[0].points.forEach(pt => {
+                Highcharts.addEvent(pt.graphic?.element, 'click', () => {
+                    pt.select(true, false);
+                });
+            });
+        });
+    } catch (e) {}
+
     // Animate progress bars
     const progressBars = document.querySelectorAll('.bg-gradient-to-r');
     
