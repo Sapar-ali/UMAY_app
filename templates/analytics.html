@@ -15,19 +15,19 @@
         </div>
 
         <!-- Kazakhstan Map Section -->
-        <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 mb-12 animate-scale-in">
+        <div class="bg-white/80 backdrop-blur-lg rounded-2xl p-4 shadow-lg border border-white/30 mb-8 animate-scale-in">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
                     <i class="fas fa-map-marked-alt text-indigo-600"></i>
                     География — карта Казахстана
                 </h3>
-                <div class="text-sm text-gray-500">
+                <div class="text-sm text-gray-500 hidden sm:block">
                     Ваш город: <span class="font-semibold text-gray-700">{{ current_user.city }}</span>
                 </div>
             </div>
 
             <div id="kz-map-wrapper" data-user-city="{{ current_user.city }}" class="kz-map relative">
-                <div id="kz-map-hc" class="w-full" style="height: 440px"></div>
+                <div id="kz-map-hc" class="w-full h-64 sm:h-72 md:h-80 lg:h-80 xl:h-96"></div>
             </div>
         </div>
 
@@ -527,25 +527,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const userCity = (document.getElementById('kz-map-wrapper')?.dataset?.userCity || '').trim();
         const mapKey = 'countries/kz/kz-all';
 
-        // Prepare base data: one point per region with value=1 so it renders uniformly
         const mapOptions = {
-            chart: { map: mapKey, backgroundColor: 'transparent' },
+            chart: { map: mapKey, backgroundColor: 'transparent', spacing: [0, 0, 0, 0] },
             title: { text: undefined },
             legend: { enabled: false },
-            mapNavigation: { enabled: true, enableMouseWheelZoom: false },
-            colorAxis: { min: 0, max: 1, stops: [[0, '#e5e7eb'], [1, '#e5e7eb']] },
+            credits: { enabled: false },
+            mapNavigation: {
+                enabled: true,
+                enableMouseWheelZoom: false,
+                buttonOptions: { verticalAlign: 'top', align: 'left', theme: { style: { fontSize: '12px' } } }
+            },
+            colorAxis: { min: 0, max: 1, stops: [[0, '#eef2ff'], [1, '#e5e7eb']] },
             tooltip: { pointFormat: '{point.name}' },
             series: [{
                 data: [],
                 name: 'Области',
-                nullColor: '#e5e7eb',
-                borderColor: '#9ca3af',
-                borderWidth: 0.8,
+                nullColor: '#eef2ff',
+                borderColor: '#d1d5db',
+                borderWidth: 0.6,
                 states: {
                     hover: { color: '#c7d2fe' },
                     select: { color: '#6366f1' }
                 },
-                dataLabels: { enabled: true, format: '{point.name}', style: { color: '#374151', textOutline: 'none', fontSize: '10px' } },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}',
+                    style: { color: '#6b7280', textOutline: 'none', fontSize: '9px' },
+                    allowOverlap: true
+                },
                 allowPointSelect: true,
                 cursor: 'pointer'
             }]
