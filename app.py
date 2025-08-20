@@ -79,18 +79,122 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Initialize Flask-Mail
+from flask_mail import Mail
+mail = Mail()
+mail.init_app(app)
+
 # ======================
-# SMS/OTP Configuration
+# Email Configuration
 # ======================
-SMS_PROVIDER = os.getenv('SMS_PROVIDER', 'infobip')
-SMS_BASE_URL = os.getenv('SMS_BASE_URL', '')
-SMS_API_KEY = os.getenv('SMS_API_KEY', '')
-SMS_SENDER = os.getenv('SMS_SENDER', 'UMAY')
-OTP_TTL_SEC = int(os.getenv('OTP_TTL_SEC', '300'))
-OTP_RESEND_COOLDOWN_SEC = int(os.getenv('OTP_RESEND_COOLDOWN_SEC', '60'))
-OTP_MAX_PER_DAY = int(os.getenv('OTP_MAX_PER_DAY', '5'))
-OTP_MAX_ATTEMPTS = int(os.getenv('OTP_MAX_ATTEMPTS', '3'))
-ONLY_KZ_NUMBERS = os.getenv('ONLY_KZ_NUMBERS', 'true').lower() == 'true'
+MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.getenv('MAIL_PORT', '587'))
+MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'true').lower() == 'true'
+MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'false').lower() == 'true'
+MAIL_USERNAME = os.getenv('MAIL_USERNAME', 'umay.med.gov@gmail.com')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '87019090077Umay')
+MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'umay.med.gov@gmail.com')
+MAIL_MAX_EMAILS = int(os.getenv('MAIL_MAX_EMAILS', '100'))
+MAIL_ASCII_ATTACHMENTS = False
+MAIL_SUPPRESS_SEND = os.getenv('MAIL_SUPPRESS_SEND', 'false').lower() == 'true'
+
+# Email verification settings
+EMAIL_VERIFICATION_TTL_HOURS = int(os.getenv('EMAIL_VERIFICATION_TTL_HOURS', '24'))
+
+# Email verification functions
+def generate_email_token():
+    """Generate secure token for email verification"""
+    from itsdangerous import URLSafeTimedSerializer
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps('email_verification', salt='email-verification')
+
+def verify_email_token(token, expiration=EMAIL_VERIFICATION_TTL_HOURS * 3600):
+    """Verify email verification token"""
+    from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        data = serializer.loads(token, salt='email-verification', max_age=expiration)
+        return True, data
+    except SignatureExpired:
+        return False, "Срок действия ссылки истек"
+    except BadSignature:
+        return False, "Неверная ссылка подтверждения"
+
+def send_verification_email(email, token, user_type, app_type, purpose='register'):
+    """Send email verification email"""
+    try:
+        if purpose == 'reset':
+            verification_url = url_for('reset_password', token=token, _external=True)
+            subject = "Восстановление пароля - UMAY"
+            header_text = "🔐 Восстановление пароля"
+            content_text = f"Для восстановления пароля в системе UMAY {app_type.upper()} нажмите на кнопку ниже:"
+            button_text = "🔄 Сбросить пароль"
+            footer_text = "Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо."
+            ttl_text = "Ссылка действительна в течение 1 часа."
+        else:
+            verification_url = url_for('verify_email', token=token, _external=True)
+            subject = "Подтвердите ваш email - UMAY"
+            header_text = "🎉 Добро пожаловать в UMAY!"
+            content_text = f"Спасибо за регистрацию в системе UMAY {app_type.upper()}! Для завершения регистрации нажмите на кнопку ниже:"
+            button_text = "✅ Подтвердить Email"
+            footer_text = "Если вы не регистрировались в UMAY, просто проигнорируйте это письмо."
+            ttl_text = f"Ссылка действительна в течение {EMAIL_VERIFICATION_TTL_HOURS} часов."
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{subject}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .button {{ display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 20px 0; }}
+                .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 14px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>{header_text}</h1>
+                    <p>{'Подтвердите ваш email для завершения регистрации' if purpose == 'register' else 'Восстановите доступ к вашему аккаунту'}</p>
+                </div>
+                <div class="content">
+                    <h2>Здравствуйте!</h2>
+                    <p>{content_text}</p>
+                    
+                    <div style="text-align: center;">
+                        <a href="{verification_url}" class="button">{button_text}</a>
+                    </div>
+                    
+                    <p><strong>Или скопируйте эту ссылку в браузер:</strong></p>
+                    <p style="word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px;">
+                        {verification_url}
+                    </p>
+                    
+                    <p><em>{ttl_text}</em></p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 UMAY. Все права защищены.</p>
+                    <p>{footer_text}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        from flask_mail import Message
+        msg = Message(subject, recipients=[email])
+        msg.html = html_body
+        
+        mail.send(msg)
+        return True, "Email отправлен успешно"
+    except Exception as e:
+        logger.error(f"Error sending verification email: {e}")
+        return False, f"Ошибка отправки email: {str(e)}"
 
 # Markdown filter for templates
 @app.template_filter('markdown')
@@ -150,6 +254,88 @@ def mobile_register():
     except Exception as e:
         logger.error(f"❌ Error rendering mobile register: {e}")
         return f"Error: {e}", 500
+
+@app.route('/verify-email/<token>')
+def verify_email(token):
+    """Verify email address"""
+    logger.info(f"Email verification requested with token: {token[:10]}...")
+    
+    ok, data = verify_email_token(token)
+    if not ok:
+        flash(data, 'error')
+        return redirect(url_for('login'))
+    
+    # Find user by token
+    user = None
+    verification_record = db.session.query(EmailVerification).filter_by(token=token).first()
+    
+    if verification_record:
+        # Mark verification as completed
+        verification_record.verified = True
+        
+        # Find and update user
+        if verification_record.purpose == 'register':
+            user = db.session.query(UserPro).filter_by(email_verification_token=token).first()
+            if not user:
+                user = db.session.query(UserMama).filter_by(email_verification_token=token).first()
+            
+            if user:
+                user.is_email_verified = True
+                user.email_verification_token = None
+                user.email_verification_expires = None
+                db.session.commit()
+                
+                flash('Email успешно подтвержден! Теперь вы можете войти в систему.', 'success')
+                return redirect(url_for('login'))
+    
+    flash('Ошибка подтверждения email. Попробуйте зарегистрироваться снова.', 'error')
+    return redirect(url_for('register'))
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Reset password with token"""
+    logger.info(f"Password reset requested with token: {token[:10]}...")
+    
+    ok, data = verify_email_token(token, expiration=3600)  # 1 hour for reset
+    if not ok:
+        flash(data, 'error')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if len(new_password) < 6:
+            flash('Пароль должен содержать минимум 6 символов!', 'error')
+            return render_template('reset_password.html')
+        
+        if new_password != confirm_password:
+            flash('Пароли не совпадают!', 'error')
+            return render_template('reset_password.html')
+        
+        # Find verification record
+        verification_record = db.session.query(EmailVerification).filter_by(token=token).first()
+        if verification_record and verification_record.purpose == 'reset':
+            # Find user by email
+            user = db.session.query(UserPro).filter_by(email=verification_record.email).first()
+            if not user:
+                user = db.session.query(UserMama).filter_by(email=verification_record.email).first()
+            
+            if user:
+                # Update password
+                user.password = generate_password_hash(new_password)
+                
+                # Mark verification as completed and delete
+                db.session.delete(verification_record)
+                db.session.commit()
+                
+                flash('Пароль успешно обновлен! Теперь вы можете войти в систему.', 'success')
+                return redirect(url_for('login'))
+        
+        flash('Ошибка сброса пароля. Попробуйте снова.', 'error')
+        return redirect(url_for('recover'))
+    
+    return render_template('reset_password.html')
 
 @app.route('/mobile/dashboard')
 def mobile_dashboard():
@@ -319,7 +505,9 @@ def service_worker():
 # ======================
 # OTP helpers
 # ======================
-def normalize_phone(raw_phone: str) -> str:
+# Email verification helpers
+# ======================
+# (Functions moved to email verification section above)
     phone = ''.join(c for c in (raw_phone or '') if c.isdigit() or c == '+')
     
     if PHONENUMBERS_AVAILABLE:
@@ -614,7 +802,7 @@ def init_database():
         with app.app_context():
             db.create_all()
             logger.info("✅ UMAY database initialized")
-            # Ensure phone columns exist (best-effort)
+            # Ensure email columns exist (best-effort)
             try:
                 from sqlalchemy import inspect, text
                 inspector = inspect(db.engine)
@@ -627,17 +815,25 @@ def init_database():
                             conn.commit()
                             logger.info(f"Added column {col_name} to {table_name}")
                 if 'sqlite' in db.engine.url.drivername:
-                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
-                    add_column_if_missing('user_pro', 'is_phone_verified BOOLEAN DEFAULT 0')
-                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
-                    add_column_if_missing('user_mama', 'is_phone_verified BOOLEAN DEFAULT 0')
+                    add_column_if_missing('user_pro', 'email VARCHAR(120)')
+                    add_column_if_missing('user_pro', 'is_email_verified BOOLEAN DEFAULT 0')
+                    add_column_if_missing('user_pro', 'email_verification_token VARCHAR(100)')
+                    add_column_if_missing('user_pro', 'email_verification_expires DATETIME')
+                    add_column_if_missing('user_mama', 'email VARCHAR(120)')
+                    add_column_if_missing('user_mama', 'is_email_verified BOOLEAN DEFAULT 0')
+                    add_column_if_missing('user_mama', 'email_verification_token VARCHAR(100)')
+                    add_column_if_missing('user_mama', 'email_verification_expires DATETIME')
                 else:
-                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
-                    add_column_if_missing('user_pro', 'is_phone_verified BOOLEAN DEFAULT FALSE')
-                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
-                    add_column_if_missing('user_mama', 'is_phone_verified BOOLEAN DEFAULT FALSE')
+                    add_column_if_missing('user_pro', 'email VARCHAR(120)')
+                    add_column_if_missing('user_pro', 'is_email_verified BOOLEAN DEFAULT FALSE')
+                    add_column_if_missing('user_pro', 'email_verification_token VARCHAR(100)')
+                    add_column_if_missing('user_pro', 'email_verification_expires DATETIME')
+                    add_column_if_missing('user_mama', 'email VARCHAR(120)')
+                    add_column_if_missing('user_mama', 'is_email_verified BOOLEAN DEFAULT FALSE')
+                    add_column_if_missing('user_mama', 'email_verification_token VARCHAR(100)')
+                    add_column_if_missing('user_mama', 'email_verification_expires DATETIME')
             except Exception as e:
-                logger.warning(f"Could not ensure phone columns: {e}")
+                logger.warning(f"Could not ensure email columns: {e}")
             
             # Create admin user if not exists
             admin_user = db.session.query(UserPro).filter_by(login='Joker').first()
@@ -652,7 +848,9 @@ def init_database():
                     city='Шымкент',
                     medical_institution='UMAY System',
                     department='Administration',
-                    app_type='pro'
+                    app_type='pro',
+                    email='admin@umay.kz',
+                    is_email_verified=True
                 )
                 db.session.add(admin_user)
                 db.session.commit()
@@ -855,9 +1053,11 @@ class UserPro(UserMixin, db.Model):
     department = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='pro')
-    # Phone auth
-    phone = db.Column(db.String(20))
-    is_phone_verified = db.Column(db.Boolean, default=False)
+    # Email auth
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_email_verified = db.Column(db.Boolean, default=False)
+    email_verification_token = db.Column(db.String(100), unique=True)
+    email_verification_expires = db.Column(db.DateTime)
 
 class UserMama(UserMixin, db.Model):
     __tablename__ = 'user_mama'
@@ -872,19 +1072,19 @@ class UserMama(UserMixin, db.Model):
     department = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     app_type = db.Column(db.String(10), default='mama')
-    # Phone auth
-    phone = db.Column(db.String(20))
-    is_phone_verified = db.Column(db.Boolean, default=False)
+    # Email auth
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_email_verified = db.Column(db.Boolean, default=False)
+    email_verification_token = db.Column(db.String(100), unique=True)
+    email_verification_expires = db.Column(db.DateTime)
 
-class OTPCode(db.Model):
-    __tablename__ = 'otp_code'
+class EmailVerification(db.Model):
+    __tablename__ = 'email_verification'
     id = db.Column(db.Integer, primary_key=True)
-    phone = db.Column(db.String(20), index=True, nullable=False)
-    code = db.Column(db.String(10), nullable=False)
+    email = db.Column(db.String(120), index=True, nullable=False)
+    token = db.Column(db.String(100), unique=True, nullable=False)
     purpose = db.Column(db.String(20), default='register')  # register, reset
     expires_at = db.Column(db.DateTime, nullable=False)
-    attempts = db.Column(db.Integer, default=0)
-    last_sent_at = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     verified = db.Column(db.Boolean, default=False)
 
@@ -1036,6 +1236,11 @@ def login():
                     app_type = 'mama'
         
         if user and check_password_hash(user.password, password):
+            # Check if email is verified
+            if not user.is_email_verified:
+                flash('Ваш email не подтвержден. Проверьте почту и подтвердите email адрес.', 'error')
+                return render_template('login.html')
+            
             login_user(user)
             
             # Store app type in session
@@ -1069,11 +1274,10 @@ def register():
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
         login = request.form.get('login', '').strip()
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         user_type = request.form.get('user_type', 'user')
         app_type = request.form.get('app_type', 'pro')  # 'pro' or 'mama'
-        phone = request.form.get('phone', '').strip()
-        otp_code = request.form.get('otp_code', '').strip()
         
         # Validation
         if not full_name:
@@ -1082,6 +1286,15 @@ def register():
         
         if not login:
             flash('Логин обязателен для заполнения!', 'error')
+            return render_template('register.html')
+        
+        if not email:
+            flash('Email обязателен для заполнения!', 'error')
+            return render_template('register.html')
+        
+        # Basic email validation
+        if '@' not in email or '.' not in email:
+            flash('Введите корректный email адрес!', 'error')
             return render_template('register.html')
         
         if len(password) < 6:
@@ -1102,15 +1315,8 @@ def register():
             flash('Логин слишком длинный! Максимум 50 символов.', 'error')
             return render_template('register.html')
         
-        # Phone validation and OTP check
-        normalized_phone = normalize_phone(phone)
-        if not normalized_phone:
-            flash('Введите корректный номер телефона!', 'error')
-            return render_template('register.html')
-
-        ok, res = verify_otp(normalized_phone, otp_code, 'register')
-        if not ok:
-            flash(res, 'error')
+        if len(email) > 120:
+            flash('Email слишком длинный! Максимум 120 символов.', 'error')
             return render_template('register.html')
 
         # Check if user already exists in the appropriate database
@@ -1119,20 +1325,24 @@ def register():
             with app.app_context():
                 existing_user = db.session.query(UserMama).filter_by(login=login).first()
                 if not existing_user:
-                    existing_user = db.session.query(UserMama).filter_by(phone=normalized_phone).first()
+                    existing_user = db.session.query(UserMama).filter_by(email=email).first()
         else:
             with app.app_context():
                 existing_user = db.session.query(UserPro).filter_by(login=login).first()
                 if not existing_user:
-                    existing_user = db.session.query(UserPro).filter_by(phone=normalized_phone).first()
+                    existing_user = db.session.query(UserPro).filter_by(email=email).first()
         
         if existing_user:
-            flash('Пользователь с таким логином уже существует!', 'error')
+            flash('Пользователь с таким логином или email уже существует!', 'error')
             return render_template('register.html')
         
         hashed_password = generate_password_hash(password)
         
         try:
+            # Generate email verification token
+            email_token = generate_email_token()
+            token_expires = datetime.utcnow() + timedelta(hours=EMAIL_VERIFICATION_TTL_HOURS)
+            
             if user_type == 'user' and app_type == 'mama':
                 # UMAY Mama user registration
                 with app.app_context():
@@ -1146,10 +1356,21 @@ def register():
                         medical_institution='Не указано',
                         department='Не указано',
                         app_type='mama',
-                        phone=normalized_phone,
-                        is_phone_verified=True
+                        email=email,
+                        is_email_verified=False,
+                        email_verification_token=email_token,
+                        email_verification_expires=token_expires
                     )
                     db.session.add(new_user)
+                    
+                    # Create email verification record
+                    verification = EmailVerification(
+                        email=email,
+                        token=email_token,
+                        purpose='register',
+                        expires_at=token_expires
+                    )
+                    db.session.add(verification)
                     db.session.commit()
                 
             elif user_type in ('midwife', 'manager') and app_type == 'pro':
@@ -1159,39 +1380,87 @@ def register():
                 medical_institution = request.form.get('medical_institution', '').strip()
                 department = request.form.get('department', '').strip()
                 
+                # Validate required fields for professionals
+                if not position:
+                    flash('Должность обязательна для заполнения!', 'error')
+                    return render_template('register.html')
+                
+                if not city:
+                    flash('Город обязателен для заполнения!', 'error')
+                    return render_template('register.html')
+                
+                if not medical_institution:
+                    flash('Медицинское учреждение обязательно для заполнения!', 'error')
+                    return render_template('register.html')
+                
+                if not department:
+                    flash('Отделение обязательно для заполнения!', 'error')
+                    return render_template('register.html')
+                
+                # Ограничиваем длину полей
+                if len(position) > 100:
+                    flash('Должность слишком длинная! Максимум 100 символов.', 'error')
+                    return render_template('register.html')
+                
+                if len(city) > 100:
+                    flash('Город слишком длинный! Максимум 100 символов.', 'error')
+                    return render_template('register.html')
+                
+                if len(medical_institution) > 200:
+                    flash('Название медицинского учреждения слишком длинное! Максимум 200 символов.', 'error')
+                    return render_template('register.html')
+                
+                if len(department) > 200:
+                    flash('Название отделения слишком длинное! Максимум 200 символов.', 'error')
+                    return render_template('register.html')
+                
                 with app.app_context():
                     new_user = UserPro(
                         full_name=full_name[:100],
                         login=login[:50],
                         password=hashed_password,
-                        user_type=('manager' if user_type == 'manager' else 'midwife'),
-                        position=(('Управленец') if user_type == 'manager' else position[:100]),
+                        user_type=user_type,
+                        position=position[:100],
                         city=city[:100],
                         medical_institution=medical_institution[:200],
-                        department=(' ' if user_type == 'manager' else department[:200]),
+                        department=department[:200],
                         app_type='pro',
-                        phone=normalized_phone,
-                        is_phone_verified=True
+                        email=email,
+                        is_email_verified=False,
+                        email_verification_token=email_token,
+                        email_verification_expires=token_expires
                     )
                     db.session.add(new_user)
+                    
+                    # Create email verification record
+                    verification = EmailVerification(
+                        email=email,
+                        token=email_token,
+                        purpose='register',
+                        expires_at=token_expires
+                    )
+                    db.session.add(verification)
                     db.session.commit()
-                
             else:
-                flash('Неверный тип регистрации!', 'error')
+                flash('Неверный тип пользователя или приложения!', 'error')
                 return render_template('register.html')
             
-            flash('Регистрация прошла успешно! Теперь вы можете войти.', 'success')
+            # Send verification email
+            ok, message = send_verification_email(email, email_token, user_type, app_type)
+            if not ok:
+                # If email fails, delete user and show error
+                db.session.delete(new_user)
+                db.session.delete(verification)
+                db.session.commit()
+                flash(f'Ошибка отправки email: {message}', 'error')
+                return render_template('register.html')
+            
+            flash('Регистрация успешна! Проверьте ваш email для подтверждения адреса.', 'success')
             return redirect(url_for('login'))
             
         except Exception as e:
-            if app_type == 'mama':
-                with app.app_context():
-                    db.session.rollback()
-            else:
-                with app.app_context():
-                    db.session.rollback()
-            logger.error(f"Ошибка при регистрации пользователя {login}: {e}")
-            flash(f'Ошибка при регистрации: {str(e)}. Попробуйте еще раз.', 'error')
+            logger.error(f"Registration error: {e}")
+            flash('Ошибка при регистрации. Попробуйте позже.', 'error')
             return render_template('register.html')
     
     try:
@@ -1203,91 +1472,52 @@ def register():
         logger.error(f"Register GET render failed: {e}")
         return f"Register render error: {e}", 500
 
-@app.route('/api/otp/send', methods=['POST'])
-def api_send_otp():
-    try:
-        data = request.get_json() or {}
-        phone = data.get('phone', '')
-        purpose = data.get('purpose', 'register')
-        
-        if not phone:
-            logger.warning("⚠️ API OTP: пустой номер телефона")
-            return jsonify({'status': 'error', 'message': 'Номер телефона обязателен'}), 400
-        
-        logger.info(f"📱 API запрос на отправку OTP: phone={phone}, purpose={purpose}, provider={SMS_PROVIDER}")
-        
-        ok, msg = send_otp(phone, purpose)
-        
-        if ok:
-            logger.info(f"✅ OTP API успешно: {phone}")
-            return jsonify({'status': 'success', 'message': msg})
-        else:
-            logger.warning(f"⚠️ OTP API ошибка: {phone} - {msg}")
-            return jsonify({'status': 'error', 'message': msg}), 400
-            
-    except Exception as e:
-        logger.error(f"❌ Критическая ошибка в API OTP: {e}")
-        return jsonify({'status': 'error', 'message': 'Внутренняя ошибка сервера'}), 500
 
-@app.route('/api/otp/verify', methods=['POST'])
-def api_verify_otp():
-    try:
-        data = request.get_json() or {}
-        phone = data.get('phone', '')
-        code = data.get('code', '')
-        purpose = data.get('purpose', 'register')
-        
-        if not phone or not code:
-            logger.warning("⚠️ API OTP verify: пустые данные")
-            return jsonify({'status': 'error', 'message': 'Номер телефона и код обязательны'}), 400
-        
-        logger.info(f"🔐 API запрос на проверку OTP: phone={phone}, purpose={purpose}")
-        
-        ok, msg = verify_otp(phone, code, purpose)
-        
-        if ok:
-            logger.info(f"✅ OTP verify API успешно: {phone}")
-            return jsonify({'status': 'success', 'message': 'OK'})
-        else:
-            logger.warning(f"⚠️ OTP verify API ошибка: {phone} - {msg}")
-            return jsonify({'status': 'error', 'message': msg}), 400
-            
-    except Exception as e:
-        logger.error(f"❌ Критическая ошибка в API OTP verify: {e}")
-        return jsonify({'status': 'error', 'message': 'Внутренняя ошибка сервера'}), 500
 
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
     if request.method == 'POST':
-        phone = request.form.get('phone', '').strip()
-        otp_code = request.form.get('otp_code', '').strip()
+        email = request.form.get('email', '').strip().lower()
         new_password = request.form.get('new_password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-        normalized_phone = normalize_phone(phone)
-        if not normalized_phone:
-            flash('Введите корректный номер телефона!', 'error')
+        if not email:
+            flash('Введите корректный email адрес!', 'error')
             return render_template('recover.html')
 
         if new_password and (len(new_password) < 6 or new_password != confirm_password):
             flash('Пароль некорректен или не совпадает', 'error')
             return render_template('recover.html')
 
-        ok, res = verify_otp(normalized_phone, otp_code, 'reset')
-        if not ok:
-            flash(res, 'error')
+        # Find user by email
+        user = db.session.query(UserPro).filter_by(email=email).first()
+        if not user:
+            user = db.session.query(UserMama).filter_by(email=email).first()
+        if not user:
+            flash('Пользователь с таким email не найден', 'error')
             return render_template('recover.html')
 
-        user = db.session.query(UserPro).filter_by(phone=normalized_phone).first()
-        if not user:
-            user = db.session.query(UserMama).filter_by(phone=normalized_phone).first()
-        if not user:
-            flash('Пользователь с таким телефоном не найден', 'error')
-            return render_template('recover.html')
-
-        user.password = generate_password_hash(new_password)
+        # Generate reset token and send email
+        reset_token = generate_email_token()
+        token_expires = datetime.utcnow() + timedelta(hours=1)
+        
+        # Create reset verification record
+        verification = EmailVerification(
+            email=email,
+            token=reset_token,
+            purpose='reset',
+            expires_at=token_expires
+        )
+        db.session.add(verification)
         db.session.commit()
-        flash('Пароль успешно обновлен. Войдите с новым паролем.', 'success')
+        
+        # Send reset email
+        ok, message = send_verification_email(email, reset_token, user.user_type, user.app_type, purpose='reset')
+        if not ok:
+            flash(f'Ошибка отправки email: {message}', 'error')
+            return render_template('recover.html')
+        
+        flash('Инструкции по восстановлению пароля отправлены на ваш email.', 'success')
         return redirect(url_for('login'))
 
     return render_template('recover.html')
