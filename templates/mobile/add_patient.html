@@ -28,6 +28,26 @@
 
     <!-- Main Form -->
     <form method="POST" class="mobile-form">
+        <!-- Голосовой ввод пациента -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h2>Голосовой ввод пациента</h2>
+            </div>
+            <div class="mobile-form-group">
+                <voice-wizard
+                    data-lang-primary="ru-KZ"
+                    data-lang-fallback="ru-RU"
+                    data-form-selector="form"
+                    data-sys-selector='input[name="blood_pressure_sys"]'
+                    data-dia-selector='input[name="blood_pressure_dia"]'
+                    data-complications-selector='textarea[name="complications"]'
+                    data-notes-selector='textarea[name="notes"]'>
+                </voice-wizard>
+            </div>
+        </div>
         <!-- Basic Information Section -->
         <div class="mobile-form-section">
             <div class="mobile-section-header">
@@ -76,6 +96,31 @@
                            required 
                            class="mobile-input"
                            placeholder="38">
+                </div>
+            </div>
+
+            <div class="mobile-form-row">
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-heart-pulse"></i>
+                        Давление (сист.)
+                    </label>
+                    <input type="number"
+                           name="blood_pressure_sys"
+                           min="50" max="300"
+                           class="mobile-input"
+                           placeholder="120">
+                </div>
+                <div class="mobile-form-group">
+                    <label class="mobile-label">
+                        <i class="fas fa-heart-pulse"></i>
+                        Давление (диаст.)
+                    </label>
+                    <input type="number"
+                           name="blood_pressure_dia"
+                           min="30" max="200"
+                           class="mobile-input"
+                           placeholder="80">
                 </div>
             </div>
         </div>
@@ -240,6 +285,23 @@
                         <option value="Акушерские щипцы">🟠 Акушерские щипцы</option>
                     </select>
                 </div>
+            </div>
+        </div>
+
+        <!-- Complaints Section -->
+        <div class="mobile-form-section">
+            <div class="mobile-section-header">
+                <div class="mobile-section-icon">
+                    <i class="fas fa-comment-medical"></i>
+                </div>
+                <h2>Жалобы</h2>
+            </div>
+            <div class="mobile-form-group">
+                <label class="mobile-label">
+                    <i class="fas fa-comment-medical"></i>
+                    Жалобы
+                </label>
+                <textarea name="complaints" class="mobile-input" rows="4" placeholder="Опишите жалобы пациентки"></textarea>
             </div>
         </div>
 
@@ -550,6 +612,8 @@
 }
 </style>
 
+<script defer src="{{ url_for('static', filename='js/voice_input.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/voice_wizard.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Set current date as default

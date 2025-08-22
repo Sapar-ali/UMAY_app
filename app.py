@@ -1325,20 +1325,30 @@ def login():
                     app_type = 'mama'
         
         if user and check_password_hash(user.password, password):
-            # Check if email is verified
-            if not user.is_email_verified:
+            # Skip email verification for admin users and Joker account in non-production
+            env = app.config.get('ENV', 'production').lower()
+            is_dev_like = env != 'production' or app.config.get('DEBUG', False)
+            require_email_verification = True
+            try:
+                if is_dev_like and (getattr(user, 'login', '') == 'Joker' or getattr(user, 'user_type', '') == 'admin'):
+                    require_email_verification = False
+            except Exception:
+                require_email_verification = True
+
+            # Check if email is verified (unless bypassed)
+            if require_email_verification and not getattr(user, 'is_email_verified', False):
                 flash('Ваш email не подтвержден. Проверьте почту и подтвердите email адрес.', 'error')
-                return render_template('login.html', unverified_email=user.email, unverified_app_type=app_type)
+                return render_template('login.html', unverified_email=getattr(user, 'email', ''), unverified_app_type=app_type)
             
             login_user(user)
             
             # Store app type in session
             session['app_type'] = app_type
             
-            if user.login == 'Joker':
+            if getattr(user, 'login', '') == 'Joker':
                 flash('Добро пожаловать, Супер Администратор!', 'success')
                 return redirect(url_for('admin_panel'))
-            elif user.user_type == 'admin':
+            elif getattr(user, 'user_type', '') == 'admin':
                 flash('Добро пожаловать в админ панель!', 'success')
                 return redirect(url_for('admin_panel'))
             elif app_type == 'mama':

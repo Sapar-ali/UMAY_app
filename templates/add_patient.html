@@ -64,6 +64,26 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
             <!-- Modern Form -->
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/50 animate-scale-in">
                 <form method="POST" class="p-8 space-y-8">
+                    <!-- Голосовой ввод пациента -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-microphone text-rose-500"></i>
+                            </div>
+                            <h2 class="section-title">Голосовой ввод пациента</h2>
+                        </div>
+                        <div class="form-group">
+                            <voice-wizard
+                                data-lang-primary="ru-KZ"
+                                data-lang-fallback="ru-RU"
+                                data-form-selector="form"
+                                data-sys-selector='input[name="blood_pressure_sys"]'
+                                data-dia-selector='input[name="blood_pressure_dia"]'
+                                data-complications-selector='textarea[name="complications"]'
+                                data-notes-selector='textarea[name="notes"]'>
+                            </voice-wizard>
+                        </div>
+                    </div>
                     
                     <!-- Основная информация -->
                     <div class="form-section">
@@ -110,6 +130,23 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
                                        required 
                                        class="form-input"
                                        placeholder="38">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-heart-pulse mr-2"></i>Артериальное давление (мм рт. ст.)
+                                </label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number"
+                                           name="blood_pressure_sys"
+                                           min="50" max="300"
+                                           class="form-input"
+                                           placeholder="120">
+                                    <input type="number"
+                                           name="blood_pressure_dia"
+                                           min="30" max="200"
+                                           class="form-input"
+                                           placeholder="80">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -454,6 +491,15 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
                                           rows="4" 
                                           placeholder="Дополнительные заметки..."></textarea>
                             </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-comment-medical mr-2"></i>Жалобы
+                                </label>
+                                <textarea name="complaints"
+                                          class="form-textarea"
+                                          rows="4"
+                                          placeholder="Опишите жалобы пациентки (например: головная боль, отеки, боли внизу живота)"></textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -624,6 +670,7 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
 }
 </style>
 
+<script defer src="{{ url_for('static', filename='js/voice_wizard.js') }}"></script>
 <script>
 // Form validation and enhancements
 document.addEventListener('DOMContentLoaded', function() {
