@@ -1325,12 +1325,10 @@ def login():
                     app_type = 'mama'
         
         if user and check_password_hash(user.password, password):
-            # Skip email verification for admin users and Joker account in non-production
-            env = app.config.get('ENV', 'production').lower()
-            is_dev_like = env != 'production' or app.config.get('DEBUG', False)
+            # Always skip email verification for Joker and admin users
             require_email_verification = True
             try:
-                if is_dev_like and (getattr(user, 'login', '') == 'Joker' or getattr(user, 'user_type', '') == 'admin'):
+                if getattr(user, 'login', '') == 'Joker' or getattr(user, 'user_type', '') == 'admin':
                     require_email_verification = False
             except Exception:
                 require_email_verification = True
