@@ -67,6 +67,13 @@ def create_app_database():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
     app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Safer engine options for ephemeral Railway connections
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,           # validate connections before use
+        'pool_recycle': 45,              # recycle connections before 60s idle timeout
+        'pool_size': 5,                  # small pool for low-memory dynos
+        'max_overflow': 5                # allow brief bursts
+    }
     
     db = SQLAlchemy(app)
     return app, db
