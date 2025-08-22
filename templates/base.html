@@ -112,11 +112,11 @@
         
         /* Dark theme background */
         [data-theme="dark"] .umay-bg {
-            background-color: #1a1a1a;
+            background-color: #0f172a; /* slate-900 */
         }
         
         [data-theme="dark"] .umay-bg::before {
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.35);
         }
         
         /* Soft overlay to keep content readable over busy wallpapers */
@@ -125,7 +125,8 @@
             position: fixed;
             inset: 0;
             pointer-events: none;
-            background: rgba(255, 255, 255, 0.75);
+            z-index: -1; /* keep under content */
+            background: rgba(255, 255, 255, 0.28);
             transition: all 0.3s ease;
         }
         .glass-effect {
@@ -184,6 +185,20 @@
         [data-theme="dark"] .dark\:text-gray-300 {
             color: #ffffff;
         }
+        /* Dark theme form readability */
+        [data-theme="dark"] .form-label { color: #e5e7eb; }
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background-color: #111827; /* gray-900 */
+            color: #e5e7eb;
+            border-color: #374151; /* gray-700 */
+        }
+        [data-theme="dark"] .form-input::placeholder,
+        [data-theme="dark"] .form-textarea::placeholder { color: #9ca3af; }
+        [data-theme="dark"] .checkbox-group { background: #111827; border-color: #374151; }
+        [data-theme="dark"] .checkbox-label { color: #e5e7eb; }
+        [data-theme="dark"] .shadow-2xl.rounded-3xl.border { background: rgba(17,24,39,0.9); border-color: rgba(255,255,255,0.06); }
         
         .mobile-nav {
             display: none;
@@ -202,6 +217,29 @@
         .bmw-gradient-light {
             background: linear-gradient(135deg, #e6f3ff 0%, #ffffff 100%);
         }
+        
+        /* Extra dark theme polish for WOW readability */
+        [data-theme="dark"] .desktop-nav { background-color: #0b1220; border-color: #1f2937; }
+        [data-theme="dark"] footer { background-color: #0b1220; border-color: #1f2937; }
+        [data-theme="dark"] a { color: #93c5fd; }
+        [data-theme="dark"] a:hover { color: #bfdbfe; }
+        
+        /* Remove bright wallpaper in dark theme for calm background */
+        [data-theme="dark"] .umay-bg { background-image: none !important; }
+        
+        /* Buttons */
+        [data-theme="dark"] .btn-primary { background: linear-gradient(90deg,#2563eb,#7c3aed) !important; color: #fff !important; border: none !important; }
+        [data-theme="dark"] .btn-secondary { background: #111827 !important; color: #e5e7eb !important; border: 1px solid #374151 !important; }
+        
+        /* Sections and titles */
+        [data-theme="dark"] .form-section { background: rgba(17,24,39,0.6); border-color: rgba(255,255,255,0.06); }
+        [data-theme="dark"] .section-title { color: #e5e7eb; }
+        [data-theme="dark"] .section-icon { background: linear-gradient(90deg,#2563eb,#6366f1); }
+        
+        /* Focus states */
+        [data-theme="dark"] .form-input:focus,
+        [data-theme="dark"] .form-select:focus,
+        [data-theme="dark"] .form-textarea:focus { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.25); border-color: #3b82f6; }
     </style>
 </head>
 <body class="bg-bmw-gray min-h-screen font-inter umay-bg">
