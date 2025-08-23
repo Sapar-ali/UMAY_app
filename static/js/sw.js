@@ -10,9 +10,7 @@ const DYNAMIC_CACHE = `umay-dynamic-${CACHE_VERSION}`;
 const STATIC_FILES = [
   '/',
   // Кэшируем только существующие статические файлы
-  '/static/css/style.css',
   '/static/css/mobile.css',
-  '/static/js/main.js',
   '/static/js/mobile.js',
   '/static/assets/new-logo.png',
   '/static/assets/umay-pattern.svg',
