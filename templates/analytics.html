@@ -36,13 +36,14 @@
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600 font-medium">Всего пациентов</p>
-                        <p class="text-3xl font-bold text-blue-600">{{ total_patients }}</p>
+                        <p class="text-sm text-gray-600 font-medium">Пациенты в этом году</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ this_year_count }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
                         <i class="fas fa-users text-blue-600 text-xl"></i>
                     </div>
                 </div>
+                <p class="text-gray-500 text-sm mt-2">Прошлый год: {{ last_year_count }}</p>
             </div>
 
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/50 animate-scale-in">
@@ -82,7 +83,25 @@
             </div>
         </div>
 
-        <!-- Interactive Charts Section -->
+        <!-- BI-style Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Pie: Delivery Methods (current year) -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-3"></i>
+                    Способ родоразрешения (этот год)
+                </h3>
+                <canvas id="chartDeliveryPie" height="220"></canvas>
+            </div>
+
+            <!-- Bar + Line: Monthly counts & variance -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Динамика по месяцам и % изменения</h3>
+                <canvas id="chartMonthlyCombo" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Interactive Charts Section (existing) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <!-- Delivery Methods Chart -->
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
@@ -135,7 +154,7 @@
             </div>
         </div>
 
-        <!-- Blood Loss Statistics -->
+        <!-- Blood Loss Statistics + Bubble chart -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <!-- Blood Loss Chart -->
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
@@ -162,7 +181,15 @@
                 </div>
             </div>
 
-            <!-- Critical Complications -->
+            <!-- Bubble: duration vs blood loss -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Связь: длительность родов и кровопотеря</h3>
+                <canvas id="chartBubble" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Critical Complications -->
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-12">
             <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/50 animate-slide-in">
                 <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                     <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
@@ -519,6 +546,8 @@
 <script src="https://code.highcharts.com/maps/highmaps.js"></script>
 <!-- Map data for Kazakhstan (provides 'countries/kz/kz-all') -->
 <script src="https://code.highcharts.com/mapdata/countries/kz/kz-all.js"></script>
+<!-- Chart.js for BI-like charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -646,6 +675,76 @@ document.addEventListener('DOMContentLoaded', function() {
         
         updateCounter();
     });
+
+    // ------------------------------
+    // Chart.js charts (BI-style)
+    // ------------------------------
+    try {
+        // Pie: Delivery methods (current year)
+        const deliveryLabels = Object.keys({{ delivery_methods_year|tojson }});
+        const deliveryData = Object.values({{ delivery_methods_year|tojson }});
+        const ctxPie = document.getElementById('chartDeliveryPie');
+        if (ctxPie) {
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: deliveryLabels,
+                    datasets: [{
+                        data: deliveryData,
+                        backgroundColor: ['#06b6d4','#3b82f6','#22c55e','#f59e0b','#ef4444','#a78bfa']
+                    }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // Combo: bar (counts) + line (variance %)
+        const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+        const monthlyCounts = {{ monthly_counts|tojson }};
+        const variancePct = {{ monthly_variance_pct|tojson }};
+        const ctxCombo = document.getElementById('chartMonthlyCombo');
+        if (ctxCombo) {
+            new Chart(ctxCombo, {
+                data: {
+                    labels: months,
+                    datasets: [
+                        { type: 'bar', label: 'Роды (шт)', data: monthlyCounts, backgroundColor: '#10b981' },
+                        { type: 'line', label: 'Δ % к пред. месяцу', data: variancePct, yAxisID: 'y1', borderColor: '#111827', backgroundColor: '#111827' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Количество' } },
+                        y1: { beginAtZero: true, position: 'right', title: { display: true, text: '%'} }
+                    },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // Bubble: labor duration vs blood loss
+        const bubblePoints = {{ bubble_points|tojson }};
+        const ctxBubble = document.getElementById('chartBubble');
+        if (ctxBubble) {
+            new Chart(ctxBubble, {
+                type: 'bubble',
+                data: { datasets: [{
+                    label: 'Пациенты',
+                    data: bubblePoints,
+                    backgroundColor: 'rgba(59,130,246,0.35)',
+                    borderColor: '#3b82f6'
+                }] },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Длительность родов (ч)'} },
+                        y: { title: { display: true, text: 'Кровопотеря (мл)'}, beginAtZero: true }
+                    },
+                    plugins: { tooltip: { callbacks: { label: (ctx) => `Время: ${ctx.raw.x} ч, Кровь: ${ctx.raw.y} мл, Вес: ${Math.round(ctx.raw.r*250)} г` } } }
+                }
+            });
+        }
+    } catch (e) { console.warn(e); }
 });
 
 // Export Modal Functions

@@ -3535,7 +3535,76 @@ def analytics():
                 monthly_trends[month_key] = monthly_trends.get(month_key, 0) + 1
             except:
                 continue
-        
+
+        # ------------------------------
+        # Данные для визуализаций в стиле BI
+        # ------------------------------
+        from datetime import date
+        current_year = date.today().year
+        current_month = date.today().month
+
+        def parsed_date(p):
+            try:
+                return datetime.strptime(p.birth_date, '%Y-%m-%d')
+            except Exception:
+                return None
+
+        year_patients = [p for p in patients if (parsed_date(p) and parsed_date(p).year == current_year)]
+        last_year_patients = [p for p in patients if (parsed_date(p) and parsed_date(p).year == current_year - 1)]
+
+        this_year_count = len(year_patients)
+        last_year_count = len(last_year_patients)
+        new_this_month = sum(1 for p in patients if (getattr(p, 'created_at', None) and p.created_at.year == current_year and p.created_at.month == current_month))
+
+        # Способы родоразрешения (только текущий год)
+        delivery_methods_year = {}
+        for p in year_patients:
+            key = (p.delivery_method or 'Не указан')
+            delivery_methods_year[key] = delivery_methods_year.get(key, 0) + 1
+
+        # Помесячные значения по текущему году
+        monthly_counts = [0] * 12
+        monthly_blood_loss_sum = [0] * 12
+        monthly_blood_loss_cnt = [0] * 12
+        for p in year_patients:
+            d = parsed_date(p)
+            if not d:
+                continue
+            idx = d.month - 1
+            monthly_counts[idx] += 1
+            try:
+                monthly_blood_loss_sum[idx] += int(p.blood_loss or 0)
+                monthly_blood_loss_cnt[idx] += 1
+            except Exception:
+                pass
+        avg_blood_loss_by_month = [
+            (monthly_blood_loss_sum[i] / monthly_blood_loss_cnt[i]) if monthly_blood_loss_cnt[i] > 0 else 0
+            for i in range(12)
+        ]
+        # Вариация к предыдущему месяцу (%)
+        monthly_variance_pct = []
+        for i in range(12):
+            if i == 0 or monthly_counts[i - 1] == 0:
+                monthly_variance_pct.append(0)
+            else:
+                prev = monthly_counts[i - 1]
+                cur = monthly_counts[i]
+                monthly_variance_pct.append(round((cur - prev) / prev * 100, 1))
+
+        # Точки для bubble chart: длительность родов (часы) vs кровопотеря (мл), размер = вес ребенка
+        bubble_points = []
+        for p in year_patients[-60:]:  # ограничим количеством точек
+            try:
+                size = max(6.0, min(22.0, (p.child_weight or 0) / 250.0))
+                bubble_points.append({
+                    'x': float(p.labor_duration or 0),
+                    'y': int(p.blood_loss or 0),
+                    'r': float(size),
+                    'label': (p.midwife or '—')
+                })
+            except Exception:
+                continue
+
         return render_template('analytics.html',
                             total_patients=total_patients,
                             male_count=male_count, female_count=female_count, avg_age=round(avg_age, 1),
@@ -3546,7 +3615,16 @@ def analytics():
                             avg_blood_loss=round(avg_blood_loss, 0),
                             avg_labor_duration=round(avg_labor_duration, 1),
                             blood_loss_stats=blood_loss_stats,
-                            monthly_trends=monthly_trends)
+                            monthly_trends=monthly_trends,
+                            # Новые данные для панелей/графиков
+                            this_year_count=this_year_count,
+                            last_year_count=last_year_count,
+                            new_this_month=new_this_month,
+                            delivery_methods_year=delivery_methods_year,
+                            monthly_counts=monthly_counts,
+                            monthly_variance_pct=monthly_variance_pct,
+                            avg_blood_loss_by_month=avg_blood_loss_by_month,
+                            bubble_points=bubble_points)
     
     except Exception as e:
         logger.error(f"Ошибка при загрузке аналитики: {e}")
