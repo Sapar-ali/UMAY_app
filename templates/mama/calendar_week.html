@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Неделя {{ data.week }} — UMAY Mama{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% import 'components/macros.html' as c %}
+    {{ c.InfoBox('Неделя ' ~ data.week ~ ': выбранная информация взята из JSON и может быть заменена на реальные данные.', 'infobox-week-' ~ data.week) }}
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div class="h-48 w-full bg-cover bg-center" style="background-image:url('{{ extras.hero_img }}')"></div>
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-bold text-gray-800">Неделя {{ data.week }}</h1>
+          <a href="{{ url_for('mama_calendar') }}" class="text-pink-600 hover:text-pink-700"><i class="fas fa-arrow-left mr-2"></i>К календарю</a>
+        </div>
+        <div class="w-full bg-gray-100 h-2 rounded-full mb-6 overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-pink-500 to-purple-600" style="width: {{ extras.progress }}%"></div>
+        </div>
+        <div class="space-y-8">
+          <section>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Развитие ребёнка</h2>
+            <p class="text-gray-700 leading-relaxed">{{ data.baby }}</p>
+          </section>
+          <section>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Изменения у мамы</h2>
+            <p class="text-gray-700 leading-relaxed">{{ data.mom }}</p>
+          </section>
+          <section>
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">Советы недели</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                <div class="font-semibold text-blue-800 mb-1"><i class="fas fa-apple-alt mr-2"></i>Питание</div>
+                <p class="text-sm text-blue-900">{{ data.tips.nutrition }}</p>
+              </div>
+              <div class="bg-green-50 border border-green-200 rounded-2xl p-4">
+                <div class="font-semibold text-green-800 mb-1"><i class="fas fa-dumbbell mr-2"></i>Активность</div>
+                <p class="text-sm text-green-900">{{ data.tips.activity }}</p>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                <div class="font-semibold text-amber-800 mb-1"><i class="fas fa-user-md mr-2"></i>Визит к врачу</div>
+                <p class="text-sm text-amber-900">{{ data.tips.doctor }}</p>
+              </div>
+            </div>
+          </section>
+
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            {% if extras.prev_week %}
+            <a href="{{ url_for('mama_calendar_week', week=extras.prev_week) }}" class="text-gray-600 hover:text-gray-800"><i class="fas fa-arrow-left mr-2"></i>Неделя {{ extras.prev_week }}</a>
+            {% else %}<span></span>{% endif %}
+            {% if extras.next_week %}
+            <a href="{{ url_for('mama_calendar_week', week=extras.next_week) }}" class="text-pink-600 hover:text-pink-700">Неделя {{ extras.next_week }}<i class="fas fa-arrow-right ml-2"></i></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

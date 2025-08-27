@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}UMAY Mama — Сообщество мам{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% import 'components/macros.html' as c %}
+    {{ c.InfoBox("Задавай вопросы и делись опытом с другими мамами. Поддержка и общение помогают чувствовать себя увереннее.", 'infobox-mama-community') }}
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Сообщество мам</h1>
+        <a href="{{ url_for('mama_knowledge') }}" class="text-pink-600 hover:text-pink-700">Назад к базе знаний</a>
+      </div>
+      <p class="text-gray-600">Задавайте вопросы, делитесь опытом, поддерживайте друг друга.</p>
+      <form id="comment-form" class="mt-6 grid grid-cols-1 gap-3">
+        <input id="name" class="rounded-xl border-gray-300 focus:ring-pink-500 focus:border-pink-500" placeholder="Ваше имя" />
+        <textarea id="text" rows="3" class="rounded-xl border-gray-300 focus:ring-pink-500 focus:border-pink-500" placeholder="Ваш комментарий..."></textarea>
+        <button class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow hover:shadow-lg transition" type="submit">Опубликовать</button>
+      </form>
+      <div id="list" class="mt-8 space-y-4"></div>
+    </div>
+  </div>
+</div>
+<script>
+const comments = [];
+const list = document.getElementById('list');
+document.getElementById('comment-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = (document.getElementById('name').value || 'Мама').trim();
+  const text = (document.getElementById('text').value || '').trim();
+  if (!text) return;
+  const when = new Date().toLocaleString('ru-RU');
+  comments.unshift({ name, text, when });
+  render();
+  this.reset();
+});
+function render(){
+  list.innerHTML = comments.map(c => `
+    <div class="p-4 bg-gray-50 rounded-2xl">
+      <div class="flex items-center justify-between mb-1">
+        <div class="font-semibold text-gray-800"><i class="fas fa-user mr-2 text-pink-500"></i>${c.name}</div>
+        <div class="text-xs text-gray-500">${c.when}</div>
+      </div>
+      <div class="text-gray-700">${c.text}</div>
+    </div>
+  `).join('');
+}
+render();
+</script>
+{% endblock %}
+
+
