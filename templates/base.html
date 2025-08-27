@@ -129,6 +129,51 @@
             background: rgba(255, 255, 255, 0.28);
             transition: all 0.3s ease;
         }
+        /* Premium gradient mesh overlay */
+        .mesh-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(60% 80% at 20% 20%, rgba(255, 214, 165, 0.45) 0%, rgba(255, 214, 165, 0) 60%),
+                        radial-gradient(50% 70% at 80% 30%, rgba(255, 230, 200, 0.45) 0%, rgba(255, 230, 200, 0) 60%),
+                        radial-gradient(55% 65% at 30% 80%, rgba(230, 240, 255, 0.55) 0%, rgba(230, 240, 255, 0) 60%),
+                        radial-gradient(45% 60% at 75% 75%, rgba(255, 240, 220, 0.55) 0%, rgba(255, 240, 220, 0) 60%);
+            filter: blur(30px) saturate(105%);
+            opacity: 0.75;
+            animation: meshDrift 16s ease-in-out infinite alternate;
+        }
+        @keyframes meshDrift {
+            0% { transform: translate3d(0,0,0) scale(1); }
+            100% { transform: translate3d(0,-10px,0) scale(1.02); }
+        }
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        [data-theme="dark"] .glass-card {
+            background: rgba(17, 24, 39, 0.65);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        /* Subtle pulse ring around logo */
+        .pulse-ring {
+            position: absolute;
+            inset: -10px;
+            border-radius: 9999px;
+            background: radial-gradient(circle, rgba(0,102,204,0.20) 0%, rgba(0,102,204,0.05) 60%, rgba(0,102,204,0) 70%);
+            animation: softPulse 6s ease-in-out infinite;
+            z-index: 0;
+        }
+        @keyframes softPulse {
+            0%, 100% { transform: scale(1); opacity: 0.55; }
+            50% { transform: scale(1.08); opacity: 0.25; }
+        }
+        /* Dark mode adjustments for mesh */
+        [data-theme="dark"] .mesh-overlay {
+            opacity: 0.35;
+            filter: blur(24px) saturate(120%);
+        }
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);

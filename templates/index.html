@@ -4,39 +4,42 @@
 
 {% block content %}
 <!-- SECTION START: Full Screen Hero -->
-<div class="relative min-h-screen umay-bg flex items-center justify-center overflow-hidden">
-    <!-- Animated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div class="absolute top-40 left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+<div class="relative min-h-[75vh] umay-bg flex items-center justify-center overflow-hidden">
+    <!-- Gradient Mesh Overlay (replaces old bright blobs) -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="mesh-overlay"></div>
     </div>
     
-    <!-- Hero Content -->
-    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto animate-fade-in">
-        <!-- Logo in center -->
-        <div class="flex justify-center mb-8">
-            <div class="w-24 h-24 bg-white rounded-full shadow-2xl flex items-center justify-center border border-gray-200">
-                <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="w-16 h-16 object-contain">
+    <!-- Hero Content in Glassmorphism Card -->
+    <div class="relative z-10 px-6 w-full">
+        <div class="glass-card text-center max-w-3xl mx-auto p-8 md:p-12 rounded-3xl animate-fade-in shadow-2xl border">
+            <!-- Logo with subtle pulse ring -->
+            <div class="flex justify-center mb-8">
+                <div class="relative">
+                    <span class="pulse-ring"></span>
+                    <div class="w-24 h-24 bg-white rounded-full shadow-2xl flex items-center justify-center border border-gray-200 relative z-10">
+                        <img src="{{ url_for('static', filename='assets/new-logo.png') }}" alt="UMAY" class="w-16 h-16 object-contain">
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <h1 class="text-5xl md:text-7xl font-bold text-gray-700 mb-6 animate-slide-up">
-            UMAY
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-600 mb-12 font-light animate-slide-up">
-            Забота, знание, технология
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up">
-            <a href="{{ url_for('login') }}" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Войти в систему</span>
-            </a>
-            <a href="{{ url_for('register') }}" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
-                <i class="fas fa-user-plus"></i>
-                <span>Регистрация</span>
-            </a>
+            
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-700 mb-6 animate-slide-up">
+                UMAY
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-12 font-light animate-slide-up">
+                Забота, знание, технология
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up">
+                <a href="{{ url_for('login') }}" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Войти в систему</span>
+                </a>
+                <a href="{{ url_for('register') }}" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center space-x-3">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Регистрация</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>
