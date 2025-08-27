@@ -720,7 +720,13 @@ def mama_required(f):
             return redirect(url_for('login'))
         
         # Проверяем, что пользователь из UMAY Mama
-        if hasattr(current_user, 'app_type') and current_user.app_type != 'mama':
+        # Разрешаем доступ супер-админу (Joker) и администраторам для просмотра
+        if (
+            hasattr(current_user, 'app_type')
+            and current_user.app_type != 'mama'
+            and getattr(current_user, 'login', '') != 'Joker'
+            and getattr(current_user, 'user_type', '') != 'admin'
+        ):
             flash('Доступ запрещен. Эта функция доступна только для пользователей UMAY Mama.', 'error')
             return redirect(url_for('index'))
         
@@ -3298,8 +3304,31 @@ def news_detail(news_id):
     return render_template('news/detail.html', news=news)
 
 @app.route('/mama')
+def mama_knowledge():
+    """Единая страница UMAY Mama — База знаний"""
+    categories = {
+        'sport': 'Спорт',
+        'nutrition': 'Питание', 
+        'vitamins': 'Витамины',
+        'body_care': 'Уход за телом',
+        'baby_care': 'Уход за новорождённым',
+        'doctor_advice': 'Советы врачей'
+    }
+
+    # Последние материалы и новости для превью на хабе
+    recent_content = MamaContent.query.order_by(MamaContent.created_at.desc()).limit(6).all()
+    news_preview = News.query.filter_by(is_published=True).order_by(News.published_at.desc()).limit(10).all()
+
+    return render_template(
+        'mama/knowledge.html',
+        categories=categories,
+        recent_content=recent_content,
+        news_preview=news_preview
+    )
+
+@app.route('/mama/content')
 def mama_content():
-    """Контент для беременных"""
+    """Список контента UMAY Mama по категориям"""
     categories = {
         'sport': 'Спорт',
         'nutrition': 'Питание', 
@@ -3318,6 +3347,59 @@ def mama_content():
                          content=content, 
                          categories=categories,
                          selected_category=selected_category)
+
+@app.route('/mama/calendar')
+def mama_calendar():
+    """Простой календарь беременности (страница-заглушка)"""
+    return render_template('mama/calendar.html')
+
+@app.route('/mama/calendar/<int:week>')
+def mama_calendar_week(week: int):
+    """Страница недели беременности из JSON"""
+    try:
+        import json, os
+        json_path = os.path.join('static', 'data', 'pregnancy_weeks.json')
+        with open(json_path, 'r', encoding='utf-8') as f:
+            weeks = json.load(f)
+        week_data = next((w for w in weeks if int(w.get('week')) == int(week)), None)
+        if not week_data:
+            flash('Данные по указанной неделе не найдены', 'error')
+            return redirect(url_for('mama_calendar'))
+        # Доп. данные для современного представления
+        total_weeks = 40
+        progress = int((int(week_data.get('week', week)) / total_weeks) * 100)
+        prev_week = int(week) - 1 if int(week) > 1 else None
+        next_week = int(week) + 1 if int(week) < total_weeks else None
+        hero_sources = [
+            'photo-1519681393784-d120267933ba',
+            'photo-1517260911027-4a2ef31fbb43',
+            'photo-1522335789203-aabd1fc54bc9',
+            'photo-1505751172876-fa1923c5c528',
+            'photo-1511671782779-c97d3d27a1d4'
+        ]
+        hs = hero_sources[(int(week)-1) % len(hero_sources)]
+        hero_img = f"https://images.unsplash.com/{hs}?w=1400&q=80&auto=format&fit=crop"
+        extras = {
+            'progress': progress,
+            'prev_week': prev_week,
+            'next_week': next_week,
+            'hero_img': hero_img
+        }
+        return render_template('mama/calendar_week.html', data=week_data, extras=extras)
+    except Exception as e:
+        logger.error(f"Failed to load week data: {e}")
+        flash('Ошибка загрузки данных недели', 'error')
+        return redirect(url_for('mama_calendar'))
+
+@app.route('/mama/tracker')
+def mama_tracker():
+    """Трекер здоровья (страница-заглушка)"""
+    return render_template('mama/tracker.html')
+
+@app.route('/mama/community')
+def mama_community():
+    """Сообщество мам (простая форма комментариев на стороне клиента)"""
+    return render_template('mama/community.html')
 
 @app.route('/mama/article/<int:content_id>')
 def mama_article_detail(content_id):

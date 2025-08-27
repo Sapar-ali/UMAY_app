@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}UMAY Mama — База знаний{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <!-- Header / Nav -->
+    <div class="bg-white/80 backdrop-blur-lg border-b border-pink-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between py-4">
+                <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-heart text-white text-lg"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                        UMAY Mama
+                    </h1>
+                </a>
+
+                <!-- Local nav -->
+                <div class="flex items-center space-x-6 text-gray-700">
+                    <a href="{{ url_for('mama_knowledge') }}" class="font-semibold text-pink-600 border-b-2 border-pink-500 pb-1">База знаний</a>
+                    <a href="{{ url_for('mama_calendar') }}" class="hover:text-pink-600 transition-colors">Календарь</a>
+                    <a href="{{ url_for('news_list') }}" class="hover:text-pink-600 transition-colors">Сообщество</a>
+                    <a href="{{ url_for('mama_tracker') }}" class="hover:text-pink-600 transition-colors">Трекер</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single column layout -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            {% import 'components/macros.html' as c %}
+            {{ c.InfoBox("Здесь собраны статьи и советы врачей по питанию, спорту, уходу за собой и малышом. Просто выбирай интересующую категорию и читай проверенную информацию.", 'infobox-mama-knowledge') }}
+            <!-- Knowledge base section -->
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="p-6 flex items-start space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-pink-400 to-purple-500 text-white flex items-center justify-center">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">База знаний</h2>
+                            <p class="text-gray-600">Подборки статей и советов для беременных</p>
+                        </div>
+                    </div>
+                    <div class="px-6 pb-6">
+                        <!-- category chips -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            {% for key, name in categories.items() %}
+                            <a href="{{ url_for('mama_content', category=key) }}" class="px-3 py-1 text-sm rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 transition-colors">
+                                {{ name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+
+                        <!-- recent articles -->
+                        {% if recent_content and recent_content|length > 0 %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for item in recent_content %}
+                            <div class="group bg-white rounded-2xl border border-gray-200 hover:border-pink-300 hover:shadow-lg transition-all overflow-hidden">
+                                {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="{{ item.title }}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500">
+                                {% endif %}
+                                <div class="p-4">
+                                    <h3 class="font-semibold text-gray-800 group-hover:text-pink-600 mb-2">{{ item.title }}</h3>
+                                    <p class="text-sm text-gray-600 line-clamp-3">{{ item.content[:150] }}{% if item.content|length > 150 %}...{% endif %}</p>
+                                    <div class="mt-4 flex justify-between items-center">
+                                        <div class="text-xs text-gray-500 flex items-center space-x-2">
+                                            {% if item.trimester %}
+                                            <span class="px-2 py-0.5 bg-pink-100 text-pink-700 rounded-full"><i class="fas fa-calendar mr-1"></i>{{ item.trimester }} триместр</span>
+                                            {% endif %}
+                                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"><i class="fas fa-eye mr-1"></i>{{ item.views or 0 }}</span>
+                                        </div>
+                                        <a href="{{ url_for('mama_article_detail', content_id=item.id) }}" class="text-pink-600 font-medium hover:text-pink-700">Читать</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <!-- JSON fallback demo -->
+                        <script>
+                        const demoArticles = [
+                          {title:'Правильное питание', content:'Ключевые принципы питания...', trimester:1},
+                          {title:'Упражнения дома', content:'Простые и безопасные упражнения...', trimester:2},
+                          {title:'Витамины', content:'Что важно знать про витамины...', trimester:3},
+                          {title:'Уход за телом', content:'Косметические процедуры во время беременности...', trimester:2}
+                        ];
+                        document.write(`
+                          <div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\">
+                            ${demoArticles.map(a => `
+                              <div class=\"group bg-white rounded-2xl border border-gray-200 hover:border-pink-300 p-5\">
+                                <h4 class=\"font-semibold text-gray-800 mb-2\">${a.title}</h4>
+                                <p class=\"text-gray-600 text-sm\">${a.content}</p>
+                                <div class=\"mt-3 text-xs text-gray-500\"><i class=\"fas fa-calendar mr-1\"></i>${a.trimester} триместр</div>
+                              </div>
+                            `).join('')}
+                          </div>
+                        `);
+                        </script>
+                        {% endif %}
+
+                        <div class="mt-6 text-right">
+                            <a href="{{ url_for('mama_content') }}" class="inline-flex items-center bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all">
+                                Открыть каталог
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- Calendar card -->
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-start space-x-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-yellow-100 text-yellow-600 flex items-center justify-center">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Календарь беременности</h3>
+                                <p class="text-gray-600 text-sm">Неделя за неделей — что важно знать</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-2 mb-4">
+                            <li>1 неделя</li>
+                            <li>2 неделя</li>
+                            <li>3 неделя</li>
+                            <li>4 неделя</li>
+                        </ul>
+                        <a href="{{ url_for('mama_calendar') }}" class="w-full inline-flex justify-center items-center bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-5 py-2 rounded-full hover:shadow-lg transition-all">Открыть</a>
+                    </div>
+            </div>
+
+            <!-- Community/news card -->
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-start space-x-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Сообщество мам</h3>
+                                <p class="text-gray-600 text-sm">Обсуждения, советы и новости</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-4">
+                            {% for n in news_preview %}
+                            <a href="{{ url_for('news_detail', news_id=n.id) }}" class="block p-4 rounded-2xl bg-gray-50 hover:bg-pink-50 transition-colors">
+                                <div class="text-base font-semibold text-gray-800">{{ n.title }}</div>
+                                <div class="text-sm text-gray-600 mt-1">{{ n.short_description }}</div>
+                                <div class="text-xs text-gray-500 mt-2">{{ n.published_at.strftime('%d.%m.%Y') if n.published_at else '' }}</div>
+                            </a>
+                            {% endfor %}
+                            {% if not news_preview %}
+                            <div class="text-sm text-gray-600">Пока нет публикаций</div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('mama_community') }}" class="w-full inline-flex justify-center items-center bg-gradient-to-r from-pink-500 to-purple-600 text-white px-5 py-2 rounded-full hover:shadow-lg transition-all">Открыть</a>
+                    </div>
+            </div>
+
+            <!-- Tracker card -->
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-start space-x-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Трекер здоровья</h3>
+                                <p class="text-gray-600 text-sm">Вес, движение, настроение</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 text-center mb-4">
+                            <div class="bg-gray-50 rounded-2xl p-3">
+                                <div class="text-xs text-gray-500">Вес</div>
+                                <div class="text-lg font-semibold text-gray-800">72 кг</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-2xl p-3">
+                                <div class="text-xs text-gray-500">Движение</div>
+                                <div class="text-lg font-semibold text-gray-800">120</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-2xl p-3">
+                                <div class="text-xs text-gray-500">Настроение</div>
+                                <div class="text-lg">😊</div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('mama_tracker') }}" class="w-full inline-flex justify-center items-center bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-5 py-2 rounded-full hover:shadow-lg transition-all">Открыть</a>
+                    </div>
+            </div>
+    </div>
+</div>
+
+<style>
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+{% endblock %}
+
+

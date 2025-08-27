@@ -1,0 +1,16 @@
+{% macro InfoBox(text, key='infobox') %}
+  <div class="mb-6" id="{{ key }}-wrap">
+    <div class="flex items-start justify-between bg-blue-50 border border-blue-200 text-blue-800 rounded-2xl p-4">
+      <div class="flex items-start space-x-3 pr-3">
+        <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-blue-600 border border-blue-200">💡</div>
+        <div class="leading-relaxed">{{ text }}</div>
+      </div>
+      <button type="button" class="text-blue-700 bg-white/70 hover:bg-white border border-blue-200 rounded-xl px-3 py-1 text-sm" onclick="(function(){ localStorage.setItem('{{ key }}:hidden','1'); const w=document.getElementById('{{ key }}-wrap'); if(w) w.style.display='none'; })()">Скрыть</button>
+    </div>
+  </div>
+  <script>
+    (function(){ try { if(localStorage.getItem('{{ key }}:hidden')==='1'){ var w=document.getElementById('{{ key }}-wrap'); if(w) w.style.display='none'; } } catch(e){} })();
+  </script>
+{% endmacro %}
+
+
