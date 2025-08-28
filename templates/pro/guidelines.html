@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Методички — UMAY Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-bmw-dark">Методички</h1>
+        <p class="text-gray-600">Клинические методические материалы</p>
+    </div>
+
+    {% if guidelines %}
+        <div class="space-y-4">
+            {% for g in guidelines %}
+            <a href="{{ url_for('pro_guideline_detail', guideline_id=g.id) }}" class="block bg-white rounded-xl p-5 shadow hover:shadow-md transition">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold text-bmw-dark">{{ g.title }}</h3>
+                        {% if g.category %}
+                            <p class="text-sm text-gray-500 mt-1">Категория: {{ g.category }}</p>
+                        {% endif %}
+                    </div>
+                    <span class="text-xs text-gray-400">{{ g.updated_at.strftime('%d.%m.%Y') if g.updated_at else '' }}</span>
+                </div>
+                {% if g.tags %}
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        {% for tag in g.tags.split(',') %}
+                            <span class="text-xs bg-bmw-light-blue text-bmw-blue px-2 py-1 rounded">{{ tag.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-xl p-6 text-gray-600">Пока нет опубликованных методичек.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+

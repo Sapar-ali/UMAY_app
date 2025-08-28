@@ -86,7 +86,7 @@
         <!-- Content -->
         <div class="flex-1 p-6 overflow-y-auto">
             <div class="grid grid-cols-1 gap-4">
-                <a href="{{ url_for('dashboard') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                <a href="{{ url_for('analytics') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
                     <div class="flex items-center space-x-3">
                         <i class="fas fa-file-medical text-2xl"></i>
                         <div>
@@ -106,7 +106,7 @@
                     </div>
                 </a>
                 
-                <a href="{{ url_for('dashboard') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                <a href="{{ url_for('pro_documents') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
                     <div class="flex items-center space-x-3">
                         <i class="fas fa-folder text-2xl"></i>
                         <div>
@@ -116,7 +116,7 @@
                     </div>
                 </a>
                 
-                <a href="{{ url_for('dashboard') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
+                <a href="{{ url_for('pro_guidelines') if current_user.is_authenticated and session.get('app_type') == 'pro' else url_for('login') }}" class="bg-bmw-light-blue rounded-xl p-4 hover:bg-bmw-blue hover:text-white transition-all duration-300 cursor-pointer">
                     <div class="flex items-center space-x-3">
                         <i class="fas fa-book text-2xl"></i>
                         <div>

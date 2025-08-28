@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Документы — UMAY Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-bmw-dark">Документы</h1>
+        <p class="text-gray-600">Приказы, регламенты и другие файлы для скачивания</p>
+    </div>
+
+    {% if documents %}
+        <div class="bg-white rounded-xl shadow divide-y">
+            {% for d in documents %}
+            <div class="p-5 flex items-center justify-between">
+                <div>
+                    <p class="font-medium text-bmw-dark">{{ d.original_filename }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Загружено: {{ d.uploaded_at.strftime('%d.%m.%Y %H:%M') }} • Размер: {{ '%.1f' % (d.file_size / 1024) }} КБ</p>
+                </div>
+                <a class="text-bmw-blue hover:text-bmw-accent" href="{{ url_for('static', filename='uploads/' + d.filename) }}" download>
+                    <i class="fas fa-download mr-2"></i>Скачать
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-xl p-6 text-gray-600">Документов пока нет.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+

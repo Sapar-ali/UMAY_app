@@ -1089,6 +1089,17 @@ class MamaContent(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Guideline(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(100))
+    tags = db.Column(db.String(255))  # запятая-разделённый список тегов
+    author = db.Column(db.String(100))
+    is_published = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class MediaFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(200), nullable=False)
@@ -3712,6 +3723,149 @@ def analytics():
         logger.error(f"Ошибка при загрузке аналитики: {e}")
         flash('Ошибка при загрузке аналитики', 'error')
         return redirect(url_for('dashboard'))
+
+
+# ============================================================================
+# UMAY Pro: Документы и Методички
+# ============================================================================
+
+@app.route('/pro/documents')
+@login_required
+@pro_required
+def pro_documents():
+    """Список документов для скачивания (загруженных админом)."""
+    try:
+        documents = MediaFile.query.filter_by(file_type='document').order_by(MediaFile.uploaded_at.desc()).all()
+        return render_template('pro/documents.html', documents=documents)
+    except Exception as e:
+        logger.error(f"Error loading documents: {e}")
+        flash('Ошибка при загрузке документов', 'error')
+        return redirect(url_for('index'))
+
+
+@app.route('/pro/guidelines')
+@login_required
+@pro_required
+def pro_guidelines():
+    """Список методичек (для чтения)."""
+    try:
+        guidelines = Guideline.query.filter_by(is_published=True).order_by(Guideline.updated_at.desc()).all()
+        return render_template('pro/guidelines.html', guidelines=guidelines)
+    except Exception as e:
+        logger.error(f"Error loading guidelines: {e}")
+        flash('Ошибка при загрузке методичек', 'error')
+        return redirect(url_for('index'))
+
+
+@app.route('/pro/guidelines/<int:guideline_id>')
+@login_required
+@pro_required
+def pro_guideline_detail(guideline_id: int):
+    """Детальная страница методички."""
+    try:
+        guideline = Guideline.query.get_or_404(guideline_id)
+        if not guideline.is_published and getattr(current_user, 'user_type', '') != 'admin' and getattr(current_user, 'login', '') != 'Joker':
+            flash('Методичка недоступна', 'error')
+            return redirect(url_for('pro_guidelines'))
+        return render_template('pro/guideline_detail.html', guideline=guideline)
+    except Exception as e:
+        logger.error(f"Error in guideline detail: {e}")
+        flash('Ошибка при загрузке методички', 'error')
+        return redirect(url_for('pro_guidelines'))
+
+
+# ============================================================================
+# Admin: Управление методичками и документами
+# ============================================================================
+
+@app.route('/admin/guidelines')
+@login_required
+@admin_required
+def admin_guidelines():
+    guidelines = Guideline.query.order_by(Guideline.updated_at.desc()).all()
+    return render_template('admin/guidelines_list.html', guidelines=guidelines)
+
+
+@app.route('/admin/guidelines/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_guideline_add():
+    if request.method == 'POST':
+        try:
+            title = request.form.get('title', '').strip()
+            content = request.form.get('content', '').strip()
+            category = request.form.get('category', '').strip() or None
+            tags = request.form.get('tags', '').strip() or None
+            is_published = True if request.form.get('is_published') == 'on' else False
+
+            if not title or not content:
+                flash('Заполните заголовок и содержание', 'error')
+                return render_template('admin/guideline_form.html')
+
+            g = Guideline(
+                title=title,
+                content=content,
+                category=category,
+                tags=tags,
+                author=getattr(current_user, 'full_name', 'Admin'),
+                is_published=is_published
+            )
+            db.session.add(g)
+            db.session.commit()
+            flash('Методичка добавлена', 'success')
+            return redirect(url_for('admin_guidelines'))
+        except Exception as e:
+            logger.error(f"Error adding guideline: {e}")
+            db.session.rollback()
+            flash('Ошибка при добавлении методички', 'error')
+    return render_template('admin/guideline_form.html')
+
+
+@app.route('/admin/guidelines/edit/<int:guideline_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_guideline_edit(guideline_id: int):
+    g = Guideline.query.get_or_404(guideline_id)
+    if request.method == 'POST':
+        try:
+            g.title = request.form.get('title', g.title).strip()
+            g.content = request.form.get('content', g.content).strip()
+            g.category = request.form.get('category', g.category) or None
+            g.tags = request.form.get('tags', g.tags) or None
+            g.is_published = True if request.form.get('is_published') == 'on' else False
+            db.session.commit()
+            flash('Методичка обновлена', 'success')
+            return redirect(url_for('admin_guidelines'))
+        except Exception as e:
+            logger.error(f"Error editing guideline: {e}")
+            db.session.rollback()
+            flash('Ошибка при обновлении методички', 'error')
+    return render_template('admin/guideline_form.html', guideline=g)
+
+
+@app.route('/admin/guidelines/delete/<int:guideline_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_guideline_delete(guideline_id: int):
+    try:
+        g = Guideline.query.get_or_404(guideline_id)
+        db.session.delete(g)
+        db.session.commit()
+        flash('Методичка удалена', 'success')
+    except Exception as e:
+        logger.error(f"Error deleting guideline: {e}")
+        db.session.rollback()
+        flash('Ошибка при удалении методички', 'error')
+    return redirect(url_for('admin_guidelines'))
+
+
+@app.route('/admin/documents')
+@login_required
+@admin_required
+def admin_documents():
+    """Простая страница для управления документами (только документы)."""
+    documents = MediaFile.query.filter_by(file_type='document').order_by(MediaFile.uploaded_at.desc()).all()
+    return render_template('admin/documents.html', documents=documents)
 
 @app.route('/export_pdf')
 @login_required

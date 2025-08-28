@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Документы{% endblock %}
+{% block page_description %}Управление документами для скачивания{% endblock %}
+{% block action_button %}—{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">Документы</h2>
+        <form id="upload-form" action="{{ url_for('admin_media_upload') }}" method="post" enctype="multipart/form-data" class="flex items-center space-x-3">
+            <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf" class="border rounded-lg px-3 py-2">
+            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" type="submit">Загрузить</button>
+        </form>
+    </div>
+
+    {% if documents %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="text-left text-sm text-gray-500">
+                        <th class="py-2 pr-4">Имя файла</th>
+                        <th class="py-2 pr-4">Размер</th>
+                        <th class="py-2 pr-4">Загружен</th>
+                        <th class="py-2 pr-4">Ссылка</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for d in documents %}
+                    <tr class="border-t">
+                        <td class="py-2 pr-4">{{ d.original_filename }}</td>
+                        <td class="py-2 pr-4">{{ '%.1f' % (d.file_size / 1024) }} КБ</td>
+                        <td class="py-2 pr-4">{{ d.uploaded_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td class="py-2 pr-4"><a class="text-bmw-blue" href="{{ url_for('static', filename='uploads/' + d.filename) }}" target="_blank">Открыть</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-gray-600">Документов пока нет.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
