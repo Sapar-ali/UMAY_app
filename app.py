@@ -3767,7 +3767,19 @@ def pro_guideline_detail(guideline_id: int):
         if not guideline.is_published and getattr(current_user, 'user_type', '') != 'admin' and getattr(current_user, 'login', '') != 'Joker':
             flash('Методичка недоступна', 'error')
             return redirect(url_for('pro_guidelines'))
-        return render_template('pro/guideline_detail.html', guideline=guideline)
+        # Рендер разметки: поддержка Markdown и аккуратные списки
+        try:
+            import re
+            from markdown import markdown as md
+            raw_text = guideline.content or ''
+            # Конвертируем строки, начинающиеся с типографских маркеров (•, —, –), в маркдаун‑списки
+            normalized = re.sub(r'^[\u2022•—–]\s+', '- ', raw_text, flags=re.MULTILINE)
+            # Убираем лишние пробелы в начале строк
+            normalized = re.sub(r'^[\t ]+', '', normalized, flags=re.MULTILINE)
+            html_content = md(normalized, extensions=['extra', 'sane_lists', 'nl2br'])
+        except Exception:
+            html_content = (guideline.content or '').replace('\n', '<br>')
+        return render_template('pro/guideline_detail.html', guideline=guideline, html_content=html_content)
     except Exception as e:
         logger.error(f"Error in guideline detail: {e}")
         flash('Ошибка при загрузке методички', 'error')

@@ -17,7 +17,9 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div class="prose max-w-none mt-6">{{ guideline.content | safe }}</div>
+        <div class="prose max-w-none mt-6 break-words">
+            {{ html_content | safe }}
+        </div>
     </div>
 </div>
 {% endblock %}
