@@ -5,31 +5,38 @@
 
 {% block content %}
 <div class="bg-white p-6 rounded-lg shadow">
-    <form method="post">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form method="post" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Заголовок</label>
-                <input type="text" name="title" value="{{ guideline.title if guideline else '' }}" class="mt-1 w-full border rounded-lg px-3 py-2" required>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Заголовок</label>
+                <input type="text" name="title" value="{{ guideline.title if guideline else '' }}" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Категория</label>
-                <input type="text" name="category" value="{{ guideline.category if guideline else '' }}" class="mt-1 w-full border rounded-lg px-3 py-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Категория</label>
+                <input type="text" name="category" value="{{ guideline.category if guideline else '' }}" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Теги (через запятую)</label>
-                <input type="text" name="tags" value="{{ guideline.tags if guideline else '' }}" class="mt-1 w-full border rounded-lg px-3 py-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Теги (через запятую)</label>
+                <input type="text" name="tags" value="{{ guideline.tags if guideline else '' }}" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="например: протокол, приказ, роды">
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Содержание</label>
-                <textarea name="content" rows="12" class="mt-1 w-full border rounded-lg px-3 py-2">{{ guideline.content if guideline else '' }}</textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Содержание</label>
+                <textarea name="content" rows="14" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Текст методички...">{{ guideline.content if guideline else '' }}</textarea>
             </div>
-            <div class="md:col-span-2 flex items-center space-x-2">
-                <input type="checkbox" id="is_published" name="is_published" {% if guideline and guideline.is_published %}checked{% endif %}>
-                <label for="is_published" class="text-sm text-gray-700">Опубликовано</label>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Статус публикации</label>
+                <label class="inline-flex items-center cursor-pointer select-none">
+                    <span class="mr-3 text-sm text-gray-600">Черновик</span>
+                    <input type="checkbox" id="is_published" name="is_published" class="sr-only" {% if guideline and guideline.is_published %}checked{% endif %}>
+                    <span class="relative inline-block w-12 h-6 bg-gray-300 rounded-full transition peer-checked:bg-green-500">
+                        <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform transform {% if guideline and guideline.is_published %}translate-x-6{% endif %}"></span>
+                    </span>
+                    <span class="ml-3 text-sm text-gray-700">Опубликовано</span>
+                </label>
             </div>
         </div>
-        <div class="mt-6 flex items-center space-x-3">
-            <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Сохранить</button>
+        <div class="flex items-center space-x-3">
+            <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><i class="fas fa-save mr-2"></i>Сохранить</button>
             <a href="{{ url_for('admin_guidelines') }}" class="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Отмена</a>
         </div>
     </form>
