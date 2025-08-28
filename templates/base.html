@@ -112,11 +112,13 @@
         
         /* Dark theme background */
         [data-theme="dark"] .umay-bg {
-            background-color: #0f172a; /* slate-900 */
+            /* Softer, Apple-like graphite instead of harsh black */
+            background-color: #0b1220; /* deep navy */
         }
         
         [data-theme="dark"] .umay-bg::before {
-            background: rgba(0, 0, 0, 0.35);
+            /* Lighter overlay for calmer contrast */
+            background: rgba(0, 0, 0, 0.20);
         }
         
         /* Soft overlay to keep content readable over busy wallpapers */
@@ -153,8 +155,9 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
         [data-theme="dark"] .glass-card {
-            background: rgba(17, 24, 39, 0.65);
-            border-color: rgba(255, 255, 255, 0.08);
+            /* Elevated surface similar to iOS panels */
+            background: rgba(15, 23, 42, 0.75); /* slate-900 with translucency */
+            border-color: rgba(148, 163, 184, 0.12); /* slate-400 at low opacity */
         }
         /* Subtle pulse ring around logo */
         .pulse-ring {
@@ -187,12 +190,12 @@
         }
         
         [data-theme="dark"] body {
-            background-color: #1a1a1a;
-            color: #ffffff;
+            background-color: #0b1220; /* page base */
+            color: #e5e7eb; /* slate-200 */
         }
         
         [data-theme="dark"] .bg-bmw-white {
-            background-color: #2d2d2d;
+            background-color: #0f172a; /* unify surfaces */
         }
         
         [data-theme="dark"] .text-gray-800 {
@@ -458,11 +461,14 @@
             const themeToggleMobile = document.getElementById('theme-toggle-mobile');
             const themeIcon = document.getElementById('theme-icon');
             const themeIconMobile = document.getElementById('theme-icon-mobile');
+            const themeMeta = document.querySelector('meta[name="theme-color"]');
+            const appleStatusMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
             
-            // Get saved theme from localStorage
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            // Get saved theme from localStorage or respect OS preference
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
+            updateThemeMeta(savedTheme);
             
             // Toggle theme function
             function toggleTheme() {
@@ -472,6 +478,7 @@
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
+                updateThemeMeta(newTheme);
             }
             
             // Update icon function
@@ -479,6 +486,16 @@
                 const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
                 if (themeIcon) themeIcon.className = `fas ${icon} text-gray-600 dark:text-gray-300`;
                 if (themeIconMobile) themeIconMobile.className = `fas ${icon} text-xl mb-1`;
+            }
+
+            // Update browser UI colors to match theme
+            function updateThemeMeta(theme) {
+                try {
+                    if (themeMeta) themeMeta.setAttribute('content', theme === 'dark' ? '#0b1220' : '#0066cc');
+                    if (appleStatusMeta) appleStatusMeta.setAttribute('content', theme === 'dark' ? 'black-translucent' : 'default');
+                } catch (e) {
+                    // no-op
+                }
             }
             
             // Add event listeners

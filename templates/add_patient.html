@@ -19,7 +19,7 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
 
 <!-- Desktop Version -->
 <!-- Modern Apple/BMW Style Form -->
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+<div class="apple-page-bg min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
     <!-- Animated Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -62,7 +62,7 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
             {% endwith %}
 
             <!-- Modern Form -->
-            <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/50 animate-scale-in">
+            <div class="apple-form-card bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/50 animate-scale-in">
                 <form method="POST" class="p-8 space-y-8">
                     <!-- Голосовой ввод пациента -->
                     <div class="form-section">
@@ -565,6 +565,20 @@ if (isMobile() && !window.location.search.includes('mobile=1')) {
 @keyframes slideIn {
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
+}
+
+/* Apple-like dark theme for this page */
+[data-theme="dark"] .apple-page-bg {
+    background: radial-gradient(60% 70% at 50% 0%, rgba(30, 41, 59, 0.65) 0%, rgba(11, 18, 32, 0.65) 45%, rgba(10, 15, 26, 0.8) 100%),
+                linear-gradient(180deg, #0b1220 0%, #0a0f1a 100%);
+}
+[data-theme="dark"] .apple-page-bg .animate-blob {
+    opacity: 0.22;
+    filter: blur(36px) saturate(110%);
+}
+[data-theme="dark"] .apple-form-card {
+    background: rgba(12, 17, 27, 0.72);
+    border-color: rgba(148, 163, 184, 0.12);
 }
 
 /* Form Sections */
