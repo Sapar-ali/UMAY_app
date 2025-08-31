@@ -18,6 +18,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from functools import wraps
+import re
 try:
     import phonenumbers
     PHONENUMBERS_AVAILABLE = True
