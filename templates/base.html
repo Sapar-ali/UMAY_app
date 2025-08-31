@@ -288,6 +288,52 @@
         [data-theme="dark"] .form-input:focus,
         [data-theme="dark"] .form-select:focus,
         [data-theme="dark"] .form-textarea:focus { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.25); border-color: #3b82f6; }
+        
+        /* Intro overlay (motivation splash) */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .intro-container {
+            position: relative;
+            width: min(92vw, 680px);
+        }
+        .intro-image {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+        }
+        .intro-text {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 88%;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        .intro-text-top {
+            top: 6%;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            font-size: clamp(18px, 3.6vw, 28px);
+        }
+        .intro-text-bottom {
+            bottom: 6%;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            font-size: clamp(16px, 3.2vw, 24px);
+        }
+        .intro-fade-in { animation: introFadeIn 400ms ease-out forwards; }
+        .intro-fade-out { animation: introFadeOut 500ms ease-in forwards; }
+        @keyframes introFadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes introFadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
 <body class="bg-bmw-gray min-h-screen font-inter umay-bg">
@@ -517,6 +563,51 @@
         window.assistantIconUrl = "{{ url_for('static', filename='assets/AI_assistant.png') }}";
     </script>
     <script src="{{ url_for('static', filename='js/assistant.js') }}?v=2" defer></script>
+    
+    <!-- Intro overlay markup -->
+    <div id="intro-overlay" class="intro-overlay" role="dialog" aria-label="UMAY құттықтау хабарламасы">
+        <div class="intro-container">
+            <img class="intro-image" src="{{ url_for('static', filename='assets/intro_1.jpg') }}" alt="UMAY intro">
+            <div class="intro-text intro-text-top">ЕҢБЕГІҢІЗГЕ РАХМЕТ!</div>
+            <div class="intro-text intro-text-bottom">СПАСИБО ЗА ВАШ ТРУД!</div>
+        </div>
+    </div>
+    
+    <!-- Intro overlay logic -->
+    <script>
+        (function() {
+            function hideOverlay(overlay, delayMs) {
+                setTimeout(function() {
+                    overlay.classList.remove('intro-fade-in');
+                    overlay.classList.add('intro-fade-out');
+                    setTimeout(function() { try { overlay.remove(); } catch(e) {} }, 520);
+                }, delayMs);
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    if (sessionStorage.getItem('umay_intro_shown') === '1') return;
+                    var overlay = document.getElementById('intro-overlay');
+                    if (!overlay) return;
+                    overlay.style.display = 'flex';
+                    overlay.classList.add('intro-fade-in');
+                    hideOverlay(overlay, 4000);
+                    sessionStorage.setItem('umay_intro_shown', '1');
+                    overlay.addEventListener('click', function() {
+                        overlay.classList.remove('intro-fade-in');
+                        overlay.classList.add('intro-fade-out');
+                        setTimeout(function() { try { overlay.remove(); } catch(e) {} }, 320);
+                    });
+                    document.addEventListener('keydown', function(ev) {
+                        if (ev.key === 'Escape') {
+                            overlay.classList.remove('intro-fade-in');
+                            overlay.classList.add('intro-fade-out');
+                            setTimeout(function() { try { overlay.remove(); } catch(e) {} }, 320);
+                        }
+                    }, { once: true });
+                } catch (e) { /* no-op */ }
+            });
+        })();
+    </script>
     
     <!-- PWA Install Prompt -->
     <div id="install-pwa-btn" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:bg-blue-700 hover:scale-105 z-50 hidden">
