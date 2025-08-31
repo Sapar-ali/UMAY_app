@@ -16,9 +16,9 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-3xl shadow-xl p-8 animate-slide-up">
                     <div class="text-center mb-6">
-                        <!-- IMAGE PLACEHOLDER 11 -->
-                        <div class="w-24 h-24 bg-yellow-400 rounded-full mx-auto mb-4 flex items-center justify-center text-gray-800 font-bold text-lg shadow-lg">
-                            Image 11
+                        {% set avatar_url = current_user.avatar_filename and url_for('static', filename='uploads/avatars/' + current_user.avatar_filename) %}
+                        <div class="relative w-28 h-28 mx-auto mb-4">
+                            <img src="{{ avatar_url or url_for('static', filename='assets/new-logo.png') }}" alt="Avatar" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg">
                         </div>
                         <h2 class="text-2xl font-bold text-gray-800">{{ current_user.full_name }}</h2>
                         <p class="text-blue-600 font-semibold">{{ current_user.position }}</p>
@@ -76,17 +76,66 @@
                         </div>
                     </div>
                     
-                    <div class="mt-6 pt-6 border-t border-gray-200">
-                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
-                            <i class="fas fa-edit"></i>
-                            <span>Редактировать профиль</span>
-                        </button>
+                    <div class="mt-6 pt-6 border-t border-gray-200 text-sm text-gray-500">
+                        <p>Логин: <span class="font-semibold text-gray-700">{{ current_user.login }}</span></p>
+                        <p>Email: <span class="font-semibold text-gray-700">{{ current_user.email }}</span></p>
+                        <p>Телефон: <span class="font-semibold text-gray-700">{{ current_user.phone or '—' }}</span></p>
                     </div>
                 </div>
             </div>
 
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
+                <!-- Editable Profile Form -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Данные аккаунта</h3>
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ФИО</label>
+                                <input name="full_name" type="text" value="{{ current_user.full_name }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Занимаемая должность</label>
+                                <input name="position" type="text" value="{{ current_user.position }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Место работы</label>
+                                <input name="medical_institution" type="text" value="{{ current_user.medical_institution }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Отделение</label>
+                                <input name="department" type="text" value="{{ current_user.department }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Город</label>
+                                <input name="city" type="text" value="{{ current_user.city }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                                <input name="phone" type="tel" value="{{ current_user.phone or '' }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="+7 707 000 00 00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Дата рождения</label>
+                                <input name="date_of_birth" type="date" value="{{ current_user.date_of_birth and current_user.date_of_birth.strftime('%Y-%m-%d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Трудовой стаж (лет)</label>
+                                <input name="work_experience_years" type="number" min="0" value="{{ current_user.work_experience_years or '' }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Фото профиля</label>
+                                <input name="avatar" type="file" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                <p class="text-xs text-gray-500 mt-2">Разрешенные форматы: PNG, JPG, JPEG, GIF, WEBP.</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                                Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
                 <!-- Statistics -->
                 <div class="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
                     <h3 class="text-xl font-bold text-gray-800 mb-6">Моя статистика</h3>

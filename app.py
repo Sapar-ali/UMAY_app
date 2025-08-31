@@ -789,19 +789,39 @@ def init_database():
                     add_column_if_missing('user_pro', 'is_email_verified BOOLEAN DEFAULT 0')
                     add_column_if_missing('user_pro', 'email_verification_token VARCHAR(100)')
                     add_column_if_missing('user_pro', 'email_verification_expires DATETIME')
+                    # Profile columns (sqlite)
+                    add_column_if_missing('user_pro', 'date_of_birth DATE')
+                    add_column_if_missing('user_pro', 'work_experience_years INTEGER')
+                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_pro', 'avatar_filename VARCHAR(255)')
                     add_column_if_missing('user_mama', 'email VARCHAR(120)')
                     add_column_if_missing('user_mama', 'is_email_verified BOOLEAN DEFAULT 0')
                     add_column_if_missing('user_mama', 'email_verification_token VARCHAR(100)')
                     add_column_if_missing('user_mama', 'email_verification_expires DATETIME')
+                    # Profile columns (sqlite)
+                    add_column_if_missing('user_mama', 'date_of_birth DATE')
+                    add_column_if_missing('user_mama', 'work_experience_years INTEGER')
+                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_mama', 'avatar_filename VARCHAR(255)')
                 else:
                     add_column_if_missing('user_pro', 'email VARCHAR(120)')
                     add_column_if_missing('user_pro', 'is_email_verified BOOLEAN DEFAULT FALSE')
                     add_column_if_missing('user_pro', 'email_verification_token VARCHAR(100)')
                     add_column_if_missing('user_pro', 'email_verification_expires TIMESTAMP')
+                    # Profile columns (postgres)
+                    add_column_if_missing('user_pro', 'date_of_birth DATE')
+                    add_column_if_missing('user_pro', 'work_experience_years INTEGER')
+                    add_column_if_missing('user_pro', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_pro', 'avatar_filename VARCHAR(255)')
                     add_column_if_missing('user_mama', 'email VARCHAR(120)')
                     add_column_if_missing('user_mama', 'is_email_verified BOOLEAN DEFAULT FALSE')
                     add_column_if_missing('user_mama', 'email_verification_token VARCHAR(100)')
                     add_column_if_missing('user_mama', 'email_verification_expires TIMESTAMP')
+                    # Profile columns (postgres)
+                    add_column_if_missing('user_mama', 'date_of_birth DATE')
+                    add_column_if_missing('user_mama', 'work_experience_years INTEGER')
+                    add_column_if_missing('user_mama', 'phone VARCHAR(20)')
+                    add_column_if_missing('user_mama', 'avatar_filename VARCHAR(255)')
             except Exception as e:
                 logger.warning(f"Could not ensure email columns: {e}")
             
@@ -1028,6 +1048,11 @@ class UserPro(UserMixin, db.Model):
     is_email_verified = db.Column(db.Boolean, default=False)
     email_verification_token = db.Column(db.String(100), unique=True)
     email_verification_expires = db.Column(db.DateTime)
+    # Profile extras
+    date_of_birth = db.Column(db.Date)
+    work_experience_years = db.Column(db.Integer)
+    phone = db.Column(db.String(20))
+    avatar_filename = db.Column(db.String(255))
 
 class UserMama(UserMixin, db.Model):
     __tablename__ = 'user_mama'
@@ -1047,6 +1072,11 @@ class UserMama(UserMixin, db.Model):
     is_email_verified = db.Column(db.Boolean, default=False)
     email_verification_token = db.Column(db.String(100), unique=True)
     email_verification_expires = db.Column(db.DateTime)
+    # Profile extras
+    date_of_birth = db.Column(db.Date)
+    work_experience_years = db.Column(db.Integer)
+    phone = db.Column(db.String(20))
+    avatar_filename = db.Column(db.String(255))
 
 class EmailVerification(db.Model):
     __tablename__ = 'email_verification'
@@ -1904,28 +1934,106 @@ def search():
                          delivery_methods=[d[0] for d in delivery_methods],
                          genders=[g[0] for g in genders])
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
-@pro_required
 def profile():
-    # Получаем статистику для текущего пользователя
-    total_patients = Patient.query.filter_by(midwife=current_user.full_name).count()
-    
-    # Дополнительная статистика
-    if total_patients > 0:
-        avg_age = db.session.query(db.func.avg(Patient.age)).filter_by(midwife=current_user.full_name).scalar() or 0
-        avg_weight = db.session.query(db.func.avg(Patient.child_weight)).filter_by(midwife=current_user.full_name).scalar() or 0
+    # Обновление профиля (общедоступно для всех аутентифицированных пользователей)
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        position = request.form.get('position')
+        city = request.form.get('city')
+        medical_institution = request.form.get('medical_institution')
+        department = request.form.get('department')
+        phone = request.form.get('phone')
+        dob_str = request.form.get('date_of_birth')
+        work_exp_str = request.form.get('work_experience_years')
+
+        # Присваиваем поля, если они переданы
+        if full_name:
+            current_user.full_name = full_name.strip()
+        if position is not None:
+            current_user.position = position.strip()
+        if city is not None:
+            current_user.city = city.strip()
+        if medical_institution is not None:
+            current_user.medical_institution = medical_institution.strip()
+        if department is not None:
+            current_user.department = department.strip()
+        if phone is not None:
+            current_user.phone = phone.strip()
+
+        # Дата рождения
+        if dob_str:
+            try:
+                current_user.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+            except Exception:
+                flash('Некорректная дата рождения', 'error')
+
+        # Трудовой стаж
+        if work_exp_str:
+            try:
+                current_user.work_experience_years = int(work_exp_str)
+            except Exception:
+                flash('Некорректный трудовой стаж', 'error')
+
+        # Загрузка аватара
+        avatar = request.files.get('avatar')
+        if avatar and getattr(avatar, 'filename', ''):
+            filename = avatar.filename
+            if '.' in filename:
+                ext = filename.rsplit('.', 1)[1].lower()
+            else:
+                ext = ''
+            if ext in ('png', 'jpg', 'jpeg', 'gif', 'webp'):
+                import uuid
+                os.makedirs(os.path.join('static', 'uploads', 'avatars'), exist_ok=True)
+                new_name = f"{uuid.uuid4().hex}.{ext}"
+                file_path = os.path.join('static', 'uploads', 'avatars', new_name)
+                try:
+                    avatar.save(file_path)
+                    # Удаляем старый файл, если был
+                    try:
+                        if getattr(current_user, 'avatar_filename', None):
+                            old_path = os.path.join('static', 'uploads', 'avatars', current_user.avatar_filename)
+                            if os.path.isfile(old_path):
+                                os.remove(old_path)
+                    except Exception:
+                        pass
+                    current_user.avatar_filename = new_name
+                except Exception:
+                    flash('Не удалось загрузить фото', 'error')
+            else:
+                flash('Разрешены только изображения: png, jpg, jpeg, gif, webp', 'error')
+
+        try:
+            db.session.commit()
+            flash('Профиль обновлен', 'success')
+        except Exception as e:
+            db.session.rollback()
+            logger.warning(f"Profile update failed: {e}")
+            flash('Ошибка при сохранении профиля', 'error')
+        return redirect(url_for('profile'))
+
+    # Статистика и активность - только для UMAY Pro
+    if getattr(current_user, 'app_type', '') == 'pro':
+        total_patients = Patient.query.filter_by(midwife=current_user.full_name).count()
+        if total_patients > 0:
+            avg_age = db.session.query(db.func.avg(Patient.age)).filter_by(midwife=current_user.full_name).scalar() or 0
+            avg_weight = db.session.query(db.func.avg(Patient.child_weight)).filter_by(midwife=current_user.full_name).scalar() or 0
+        else:
+            avg_age = avg_weight = 0
+        recent_patients = Patient.query.filter_by(midwife=current_user.full_name).order_by(Patient.created_at.desc()).limit(5).all()
     else:
-        avg_age = avg_weight = 0
-    
-    # Получаем последние пациентов текущего пользователя
-    recent_patients = Patient.query.filter_by(midwife=current_user.full_name).order_by(Patient.created_at.desc()).limit(5).all()
-    
-    return render_template('profile.html', 
-                         total_patients=total_patients,
-                         avg_age=round(avg_age, 1),
-                         avg_child_weight=round(avg_weight, 1),
-                         recent_patients=recent_patients)
+        total_patients = 0
+        avg_age = 0
+        avg_weight = 0
+        recent_patients = []
+
+    return render_template('profile.html',
+                           total_patients=total_patients,
+                           avg_age=round(avg_age, 1),
+                           avg_child_weight=round(avg_weight, 1),
+                           recent_patients=recent_patients)
 
 # ============================================================================
 # CMS АДМИН-ПАНЕЛЬ МАРШРУТЫ
